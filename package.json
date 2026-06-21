@@ -1,0 +1,12 @@
+{
+  "name": "brilliant-healthcare",
+  "version": "1.0.0",
+  "description": "Brilliant Healthcare - Dialysis & Diagnostic Center",
+  "scripts": {
+    "start": "npx serve .",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}

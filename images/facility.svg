@@ -1,0 +1,19 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='500' height='375' viewBox='0 0 500 375'>
+  <defs>
+    <linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
+      <stop offset='0%25' style='stop-color:%23e8f5e9'/>
+      <stop offset='100%25' style='stop-color:%23c8e6c9'/>
+    </linearGradient>
+  </defs>
+  <rect width='500' height='375' fill='url(%23bg)' rx='24'/>
+  <rect x='150' y='120' width='200' height='180' rx='8' fill='%23fff' stroke='%2381c784' stroke-width='2'/>
+  <rect x='170' y='140' width='50' height='60' rx='4' fill='%23dcfce7' stroke='%2381c784' stroke-width='1.5'/>
+  <rect x='240' y='140' width='50' height='60' rx='4' fill='%23dcfce7' stroke='%2381c784' stroke-width='1.5'/>
+  <rect x='170' y='220' width='50' height='60' rx='4' fill='%23dcfce7' stroke='%2381c784' stroke-width='1.5'/>
+  <rect x='240' y='220' width='50' height='60' rx='4' fill='%23dcfce7' stroke='%2381c784' stroke-width='1.5'/>
+  <rect x='210' y='250' width='40' height='50' rx='4' fill='%232e7d32' opacity='0.3'/>
+  <rect x='240' y='80' width='8' height='40' rx='2' fill='%232e7d32'/>
+  <rect x='225' y='95' width='38' height='8' rx='2' fill='%232e7d32'/>
+  <text x='250' y='340' text-anchor='middle' font-family='Arial' font-size='18' font-weight='bold' fill='%232e7d32'>Brilliant Healthcare</text>
+  <text x='250' y='362' text-anchor='middle' font-family='Arial' font-size='13' fill='%23558b2f'>Replace with your facility photo</text>
+</svg>

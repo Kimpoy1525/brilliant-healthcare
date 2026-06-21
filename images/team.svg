@@ -1,0 +1,18 @@
+﻿<svg xmlns='http://www.w3.org/2000/svg' width='500' height='500' viewBox='0 0 500 500'>
+  <defs>
+    <linearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'>
+      <stop offset='0%25' style='stop-color:%23e8f5e9'/>
+      <stop offset='100%25' style='stop-color:%23c8e6c9'/>
+    </linearGradient>
+  </defs>
+  <rect width='500' height='500' fill='url(%23bg)' rx='24'/>
+  <circle cx='250' cy='180' r='60' fill='%23fff' stroke='%2381c784' stroke-width='2'/>
+  <circle cx='250' cy='180' r='20' fill='%23a5d6a7'/>
+  <ellipse cx='250' cy='320' rx='100' ry='80' fill='%23fff' stroke='%2381c784' stroke-width='2'/>
+  <circle cx='180' cy='180' r='40' fill='%23fff' stroke='%2381c784' stroke-width='1.5'/>
+  <circle cx='180' cy='180' r='14' fill='%23a5d6a7'/>
+  <circle cx='320' cy='180' r='40' fill='%23fff' stroke='%2381c784' stroke-width='1.5'/>
+  <circle cx='320' cy='180' r='14' fill='%23a5d6a7'/>
+  <text x='250' y='440' text-anchor='middle' font-family='Arial' font-size='18' font-weight='bold' fill='%232e7d32'>Our Medical Team</text>
+  <text x='250' y='465' text-anchor='middle' font-family='Arial' font-size='13' fill='%23558b2f'>Replace with your team photo</text>
+</svg>
