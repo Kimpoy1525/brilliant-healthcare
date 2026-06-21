@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Brilliant Healthcare - Dialysis & Diagnostic Center",
   "scripts": {
-    "start": "npx serve .",
+    "start": "serve -s . -l $PORT",
     "build": "echo 'Static site - no build needed'"
   },
   "dependencies": {
