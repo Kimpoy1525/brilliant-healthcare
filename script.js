@@ -1,269 +1,169 @@
-// ===== Mobile Hamburger Menu =====
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('navLinks');
+"use strict";
 
-hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    navLinks.classList.toggle('active');
+const siteHeader = document.getElementById("siteHeader");
+const menuToggle = document.getElementById("menuToggle");
+const primaryNav = document.getElementById("primaryNav");
+const navLinks = [...document.querySelectorAll(".nav-links a")];
+
+function setMenu(open) {
+    menuToggle.setAttribute("aria-expanded", String(open));
+    primaryNav.classList.toggle("is-open", open);
+    document.body.classList.toggle("menu-open", open);
+    menuToggle.querySelector(".sr-only").textContent = open ? "Close navigation menu" : "Open navigation menu";
+}
+
+menuToggle.addEventListener("click", () => {
+    setMenu(menuToggle.getAttribute("aria-expanded") !== "true");
 });
 
-// Close mobile menu when a link is clicked
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('active');
-    });
-});
+navLinks.forEach((link) => link.addEventListener("click", () => setMenu(false)));
 
-// ===== Close mobile menu on scroll =====
-let lastScrollTop = 0;
-window.addEventListener('scroll', () => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    if (scrollTop > lastScrollTop && navLinks.classList.contains('active')) {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('active');
-    }
-    lastScrollTop = scrollTop;
-});
-
-// ===== Navbar shadow on scroll =====
-const navbar = document.querySelector('.navbar');
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        navbar.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
-    } else {
-        navbar.style.boxShadow = 'none';
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
+        setMenu(false);
+        menuToggle.focus();
     }
 });
 
-// ===== Contact Form Handling =====
-const contactForm = document.getElementById('contactForm');
+window.addEventListener("resize", () => {
+    if (window.innerWidth > 820) setMenu(false);
+});
 
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+function updateHeader() {
+    siteHeader.classList.toggle("is-scrolled", window.scrollY > 8);
+}
 
-    // Get form data
-    const formData = new FormData(contactForm);
-    const data = Object.fromEntries(formData);
+updateHeader();
+window.addEventListener("scroll", updateHeader, { passive: true });
 
-    // Simple validation
-    let isValid = true;
-    const requiredFields = contactForm.querySelectorAll('[required]');
-    
-    requiredFields.forEach(field => {
+const observedSections = [...document.querySelectorAll("main section[id]")];
+if ("IntersectionObserver" in window) {
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            navLinks.forEach((link) => {
+                const isCurrent = link.getAttribute("href") === `#${entry.target.id}`;
+                if (isCurrent) link.setAttribute("aria-current", "location");
+                else link.removeAttribute("aria-current");
+            });
+        });
+    }, { rootMargin: "-35% 0px -55%", threshold: 0 });
+    observedSections.forEach((section) => sectionObserver.observe(section));
+}
+
+const revealItems = document.querySelectorAll(".reveal");
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+    revealItems.forEach((item) => item.classList.add("is-visible"));
+} else {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.12, rootMargin: "0px 0px -35px" });
+    revealItems.forEach((item) => revealObserver.observe(item));
+}
+
+const appointmentForm = document.getElementById("contactForm");
+const formStatus = document.getElementById("formStatus");
+const submitButton = appointmentForm.querySelector('button[type="submit"]');
+
+function clearFieldError(field) {
+    field.removeAttribute("aria-invalid");
+    const error = document.getElementById(`${field.id}-error`);
+    if (error) error.remove();
+    field.removeAttribute("aria-describedby");
+}
+
+function showFieldError(field, message) {
+    clearFieldError(field);
+    field.setAttribute("aria-invalid", "true");
+    const error = document.createElement("span");
+    error.id = `${field.id}-error`;
+    error.className = "field-error";
+    error.textContent = message;
+    field.setAttribute("aria-describedby", error.id);
+    field.insertAdjacentElement("afterend", error);
+}
+
+function validateAppointmentForm() {
+    let firstInvalid = null;
+    const required = [...appointmentForm.querySelectorAll("[required]")];
+
+    required.forEach((field) => {
+        clearFieldError(field);
         if (!field.value.trim()) {
-            field.style.borderColor = '#ef4444';
-            isValid = false;
-        } else {
-            field.style.borderColor = '#e5e7eb';
+            showFieldError(field, "This field is required.");
+            if (!firstInvalid) firstInvalid = field;
         }
     });
 
-    if (!isValid) {
-        showNotification('Please fill in all required fields.', 'error');
+    const email = appointmentForm.elements.email;
+    if (email.value && !email.validity.valid) {
+        showFieldError(email, "Enter a valid email address.");
+        if (!firstInvalid) firstInvalid = email;
+    }
+
+    const phone = appointmentForm.elements.phone;
+    if (phone.value && phone.value.replace(/\D/g, "").length < 7) {
+        showFieldError(phone, "Enter a valid phone number.");
+        if (!firstInvalid) firstInvalid = phone;
+    }
+
+    if (firstInvalid) firstInvalid.focus();
+    return !firstInvalid;
+}
+
+appointmentForm.querySelectorAll("input, select, textarea").forEach((field) => {
+    field.addEventListener("input", () => clearFieldError(field));
+    field.addEventListener("change", () => clearFieldError(field));
+});
+
+appointmentForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    formStatus.className = "form-status";
+    formStatus.textContent = "";
+
+    if (!validateAppointmentForm()) {
+        formStatus.classList.add("error");
+        formStatus.textContent = "Please review the highlighted fields and try again.";
         return;
     }
 
-    // Email validation
-    const emailField = contactForm.querySelector('input[type="email"]');
-    if (emailField && emailField.value) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(emailField.value)) {
-            emailField.style.borderColor = '#ef4444';
-            showNotification('Please enter a valid email address.', 'error');
-            return;
-        }
-    }
+    submitButton.disabled = true;
+    submitButton.classList.add("is-loading");
+    submitButton.querySelector(".button__label").textContent = "Sending request…";
 
-    // Success simulation
-    showNotification('Your appointment request has been submitted successfully! We will contact you shortly.', 'success');
-    contactForm.reset();
+    window.setTimeout(() => {
+        appointmentForm.reset();
+        submitButton.disabled = false;
+        submitButton.classList.remove("is-loading");
+        submitButton.querySelector(".button__label").textContent = "Send appointment request";
+        formStatus.classList.add("success");
+        formStatus.textContent = "Thank you. Your request has been received. Our team will contact you to confirm availability.";
+        formStatus.focus?.();
+    }, 700);
 });
 
-// ===== Notification System =====
-function showNotification(message, type = 'success') {
-    // Remove existing notification if any
-    const existingNotif = document.querySelector('.notification');
-    if (existingNotif) {
-        existingNotif.remove();
+const dateInput = document.getElementById("preferredDate");
+const today = new Date();
+const localToday = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().split("T")[0];
+dateInput.min = localToday;
+
+const newsletterForm = document.getElementById("newsletterForm");
+const newsletterStatus = document.getElementById("newsletterStatus");
+newsletterForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const email = newsletterForm.elements.newsletterEmail;
+    if (!email.value || !email.validity.valid) {
+        newsletterStatus.textContent = "Please enter a valid email address.";
+        email.setAttribute("aria-invalid", "true");
+        email.focus();
+        return;
     }
-
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <span class="notification-icon">${type === 'success' ? '✓' : '⚠'}</span>
-        <span class="notification-message">${message}</span>
-        <button class="notification-close">&times;</button>
-    `;
-
-    document.body.appendChild(notification);
-
-    // Animate in
-    requestAnimationFrame(() => {
-        notification.classList.add('notification-show');
-    });
-
-    // Auto dismiss after 5 seconds
-    const timeout = setTimeout(() => {
-        dismissNotification(notification);
-    }, 5000);
-
-    // Close button
-    notification.querySelector('.notification-close').addEventListener('click', () => {
-        clearTimeout(timeout);
-        dismissNotification(notification);
-    });
-}
-
-function dismissNotification(notification) {
-    notification.classList.remove('notification-show');
-    notification.classList.add('notification-hide');
-    setTimeout(() => {
-        notification.remove();
-    }, 300);
-}
-
-// ===== Smooth Scroll for Anchor Links =====
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        const href = this.getAttribute('href');
-        if (href === '#') return;
-        
-        const target = document.querySelector(href);
-        if (target) {
-            e.preventDefault();
-            const offsetTop = target.offsetTop - 80; // Account for fixed navbar
-            window.scrollTo({
-                top: offsetTop,
-                behavior: 'smooth'
-            });
-        }
-    });
+    email.removeAttribute("aria-invalid");
+    newsletterForm.reset();
+    newsletterStatus.textContent = "Thanks — you’re subscribed.";
 });
-
-// ===== Newsletter Form =====
-const newsletterForm = document.querySelector('.newsletter-form');
-if (newsletterForm) {
-    newsletterForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const emailInput = newsletterForm.querySelector('input[type="email"]');
-        
-        if (emailInput && emailInput.value.trim()) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (emailRegex.test(emailInput.value.trim())) {
-                showNotification('Thank you for subscribing to our newsletter!', 'success');
-                newsletterForm.reset();
-            } else {
-                showNotification('Please enter a valid email address.', 'error');
-            }
-        } else {
-            showNotification('Please enter your email address.', 'error');
-        }
-    });
-}
-
-// ===== Intersection Observer for Animations =====
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-            observer.unobserve(entry.target);
-        }
-    });
-}, observerOptions);
-
-// Observe all service cards, why-us cards, and testimonial cards
-document.querySelectorAll('.service-card, .why-us-card, .testimonial-card, .about-card').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(30px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(el);
-});
-
-// Add fade-in class styling
-const style = document.createElement('style');
-style.textContent = `
-    .fade-in {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-    }
-
-    .notification {
-        position: fixed;
-        top: 100px;
-        right: 24px;
-        padding: 16px 24px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.95rem;
-        font-weight: 500;
-        z-index: 10000;
-        transform: translateX(120%);
-        transition: transform 0.3s ease;
-        max-width: 420px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    }
-
-    .notification-show {
-        transform: translateX(0);
-    }
-
-    .notification-hide {
-        transform: translateX(120%);
-    }
-
-    .notification-success {
-        background: #f0fdf4;
-        border: 1px solid #86efac;
-        color: #166534;
-    }
-
-    .notification-error {
-        background: #fef2f2;
-        border: 1px solid #fca5a5;
-        color: #991b1b;
-    }
-
-    .notification-icon {
-        font-size: 1.2rem;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-
-    .notification-message {
-        flex: 1;
-    }
-
-    .notification-close {
-        background: none;
-        border: none;
-        font-size: 1.4rem;
-        cursor: pointer;
-        color: inherit;
-        opacity: 0.6;
-        padding: 0 4px;
-        transition: opacity 0.2s ease;
-    }
-
-    .notification-close:hover {
-        opacity: 1;
-    }
-
-    @media (max-width: 768px) {
-        .notification {
-            right: 16px;
-            left: 16px;
-            max-width: none;
-            top: 90px;
-        }
-    }
-`;
-document.head.appendChild(style);
