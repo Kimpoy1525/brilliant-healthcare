@@ -60,6 +60,18 @@ function ensureTrialDoctor() {
   save();
 }
 ensureTrialDoctor();
+function syncAdminCredentials() {
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) return;
+  let admin = store.users.find(user => user.role === 'admin');
+  if (!admin) {
+    admin = { id: id(), role: 'admin', name: 'Clinic Administrator' };
+    store.users.push(admin);
+  }
+  admin.email = process.env.ADMIN_EMAIL.trim().toLowerCase();
+  admin.passwordHash = hashPassword(process.env.ADMIN_PASSWORD);
+  save();
+}
+syncAdminCredentials();
 function publicDoctor(d) { return { id: d.id, name: d.name, specialty: d.specialty, availability: d.availability || [], unavailableDates: d.unavailableDates || [] }; }
 function auth(req, res, next) {
   const token = (req.headers.authorization || '').replace(/^Bearer /, '');
