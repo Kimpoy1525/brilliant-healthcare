@@ -131,13 +131,25 @@ app.post('/api/appointments', (req, res) => {
 
 app.get('/api/admin/doctors', auth, role('admin'), (req, res) => res.json(store.doctors));
 app.post('/api/admin/doctors', auth, role('admin'), (req, res) => {
-  const { name, specialty, email, password } = req.body; const normalized = String(email || '').trim().toLowerCase();
-  if (!name || !specialty || !normalized || String(password || '').length < 10 || store.users.some(u => u.email === normalized)) return res.status(400).json({ error: 'Complete all fields, use a unique email, and a password of at least 10 characters.' });
-  const user = { id: id(), name: String(name).trim(), email: normalized, role: 'doctor', passwordHash: hashPassword(password) };
-  const doctor = { id: id(), userId: user.id, name: user.name, specialty: String(specialty).trim(), active: true, availability: [], unavailableDates: [] };
-  store.users.push(user); store.doctors.push(doctor); save(); res.status(201).json(doctor);
+  const { name, specialty } = req.body; const availability = Array.isArray(req.body.availability) ? req.body.availability : [];
+  if (!name || !specialty) return res.status(400).json({ error: 'Doctor name and specialty are required.' });
+  if (availability.some(a => !Number.isInteger(a.day) || a.day < 0 || a.day > 6 || !validTime(a.start) || !validTime(a.end) || minutes(a.start) >= minutes(a.end) || ![15,30,45,60].includes(Number(a.slotMinutes)))) return res.status(400).json({ error: 'Review the working hours. End time must be later than start time.' });
+  const doctor = { id: id(), name: String(name).trim(), specialty: String(specialty).trim(), active: true, availability: availability.map(a => ({ day: a.day, start: a.start, end: a.end, slotMinutes: Number(a.slotMinutes) })), unavailableDates: [...new Set((req.body.unavailableDates || []).filter(validDate))] };
+  store.doctors.push(doctor); save(); res.status(201).json(doctor);
 });
-app.patch('/api/admin/doctors/:id', auth, role('admin'), (req, res) => { const d = store.doctors.find(x => x.id === req.params.id); if (!d) return res.status(404).json({ error: 'Doctor not found.' }); d.active = req.body.active !== false; save(); res.json(d); });
+app.patch('/api/admin/doctors/:id', auth, role('admin'), (req, res) => {
+  const d = store.doctors.find(x => x.id === req.params.id); if (!d) return res.status(404).json({ error: 'Doctor not found.' });
+  const availability = req.body.availability === undefined ? d.availability : req.body.availability;
+  if (!Array.isArray(availability) || availability.some(a => !Number.isInteger(a.day) || a.day < 0 || a.day > 6 || !validTime(a.start) || !validTime(a.end) || minutes(a.start) >= minutes(a.end) || ![15,30,45,60].includes(Number(a.slotMinutes)))) return res.status(400).json({ error: 'Review the working hours. End time must be later than start time.' });
+  if (req.body.name !== undefined && !String(req.body.name).trim()) return res.status(400).json({ error: 'Doctor name is required.' });
+  if (req.body.specialty !== undefined && !String(req.body.specialty).trim()) return res.status(400).json({ error: 'Specialty is required.' });
+  if (req.body.name !== undefined) d.name = String(req.body.name).trim();
+  if (req.body.specialty !== undefined) d.specialty = String(req.body.specialty).trim();
+  if (req.body.active !== undefined) d.active = req.body.active !== false;
+  d.availability = availability.map(a => ({ day: a.day, start: a.start, end: a.end, slotMinutes: Number(a.slotMinutes) }));
+  if (req.body.unavailableDates !== undefined) d.unavailableDates = [...new Set((req.body.unavailableDates || []).filter(validDate))];
+  save(); res.json(d);
+});
 app.get('/api/appointments', auth, role('admin', 'doctor'), (req, res) => { const doctor = store.doctors.find(d => d.userId === req.user.id); res.json(store.appointments.filter(a => req.user.role === 'admin' || a.doctorId === doctor?.id).sort((a,b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`))); });
 app.patch('/api/appointments/:id', auth, role('admin', 'doctor'), (req, res) => { const a = store.appointments.find(x => x.id === req.params.id); const d = store.doctors.find(x => x.userId === req.user.id); if (!a || (req.user.role === 'doctor' && a.doctorId !== d?.id)) return res.status(404).json({ error: 'Appointment not found.' }); if (!['pending','confirmed','completed','cancelled','declined'].includes(req.body.status)) return res.status(400).json({ error: 'Invalid status.' }); a.status = req.body.status; save(); res.json(a); });
 app.get('/api/doctor/schedule', auth, role('doctor'), (req, res) => { const d = store.doctors.find(x => x.userId === req.user.id); res.json(d); });
