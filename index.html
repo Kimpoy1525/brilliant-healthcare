@@ -31,7 +31,8 @@
                 <li><a href="#about">About</a></li>
                 <li><a href="#services">Services</a></li>
                 <li><a href="#why-us">Why Us</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#contact">Appointments</a></li>
+                <li><a href="portal.html">Staff Portal</a></li>
             </ul>
             <a href="#contact" class="btn btn-primary nav-cta">Book Appointment</a>
             <button class="hamburger" id="hamburger" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="navLinks">
@@ -272,7 +273,7 @@
                 <form class="contact-form" id="contactForm">
                     <span class="form-kicker">Appointment request</span>
                     <h3>Plan your visit</h3>
-                    <p class="form-intro">Share your preferred service and our team will contact you to confirm availability.</p>
+                    <p class="form-intro">Choose a doctor, date, and an available time. Green times are available; red times are already reserved.</p>
                     <div class="form-row">
                         <label>Full name <span>*</span><input name="fullName" type="text" autocomplete="name" required></label>
                         <label>Phone number <span>*</span><input name="phone" type="tel" autocomplete="tel" required></label>
@@ -290,8 +291,19 @@
                             <option value="other">Other</option>
                         </select></label>
                     </div>
+                    <div class="form-row">
+                        <label>Doctor <span>*</span><select name="doctorId" id="doctorSelect" required><option value="">Choose a doctor</option></select></label>
+                        <label>Preferred date <span>*</span><input name="date" id="appointmentDate" type="date" required></label>
+                    </div>
+                    <fieldset class="time-picker" id="timePicker">
+                        <legend>Preferred time <span>*</span></legend>
+                        <p id="slotHelp">Choose a doctor and date to see available times.</p>
+                        <div class="time-slots" id="timeSlots" tabindex="-1"></div>
+                        <input type="hidden" name="time" id="appointmentTime" required>
+                    </fieldset>
                     <label class="message-label">Questions or scheduling needs<textarea name="message" placeholder="Please do not include sensitive medical information." rows="4"></textarea></label>
-                    <p class="privacy-note">Submitting this form does not confirm an appointment. Our team will contact you with next steps.</p>
+                    <label class="consent"><input name="consent" type="checkbox" required> I agree to be contacted about this appointment. <span>*</span></label>
+                    <p class="privacy-note">Your chosen time is reserved after submission, pending clinic confirmation. For emergencies, contact emergency services instead of using this form.</p>
                     <button type="submit" class="btn btn-primary btn-full">Send Appointment Request <span aria-hidden="true">→</span></button>
                 </form>
             </div>
