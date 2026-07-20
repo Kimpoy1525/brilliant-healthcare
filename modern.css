@@ -1,0 +1,37 @@
+:root{--ink:#123436;--muted:#607576;--teal:#078a91;--teal-dark:#07565c;--mint:#e7f6f4;--cream:#f7faf9;--line:#d9e7e5;--gold:#8ac43f;--shadow:0 24px 65px rgba(7,73,78,.12);--radius:16px}
+body{background:#fff;color:var(--ink)}
+.topbar{background:#064e54;letter-spacing:.01em}
+.site-header{box-shadow:0 5px 24px rgba(13,68,72,.06)}
+.navbar{border-bottom:0}
+.navbar .container{height:88px}
+.navbar .logo-mark{width:58px;height:58px;flex-basis:58px;border:1px solid #e1edeb;border-radius:14px;box-shadow:0 5px 16px rgba(7,86,92,.08)}
+.navbar .logo-img{width:100%;height:100%;object-fit:contain;transform:none!important}
+.logo-copy strong{font-family:Inter,Arial,sans-serif;font-size:1rem;font-weight:800;letter-spacing:-.02em;text-transform:uppercase}
+.logo-copy small{color:#5d7778;letter-spacing:.08em}
+.nav-links a{font-size:.82rem;font-weight:700}
+.btn{border-radius:10px}.btn-primary{background:linear-gradient(135deg,#078a91,#076d73)}
+.hero{min-height:680px;background:linear-gradient(112deg,#f3fbfa 0%,#fff 58%,#edf8f3 100%)}
+.hero:before{top:-330px;left:-330px;width:760px;height:760px;background:radial-gradient(circle,#d9f3ee 0%,rgba(217,243,238,0) 70%)}
+.hero .container{min-height:680px}
+.hero-content h1{font-family:Inter,Arial,sans-serif;font-weight:750;letter-spacing:-.055em;line-height:1.02}
+.hero-content>p{font-size:1.04rem;line-height:1.8}
+.hero-image-frame{border:8px solid #fff;border-radius:32px;box-shadow:0 30px 75px rgba(6,67,72,.18)}
+.hero-care-card{padding:17px;border:0;border-left:4px solid #8ac43f;border-radius:12px}
+.care-strip{position:relative;z-index:2;background:#07565c}
+.care-strip .container{display:grid;grid-template-columns:repeat(4,1fr);padding-block:25px}
+.care-strip div div{display:flex;min-width:0;flex-direction:column;padding:3px 24px;border-right:1px solid rgba(255,255,255,.14)}
+.care-strip div div:first-child{padding-left:0}.care-strip div div:last-child{border-right:0}
+.care-strip strong{color:#fff;font-size:.78rem}.care-strip span{margin-top:3px;color:rgba(255,255,255,.63);font-size:.67rem}
+.about,.services,.why-us,.contact{padding:110px 0}
+.badge{color:#078a91;font-size:.68rem;letter-spacing:.15em}
+.about-content h2,.section-header h2,.contact-info h2{font-family:Inter,Arial,sans-serif;font-weight:760;letter-spacing:-.035em}
+.about-img{border-radius:24px}.about-image:before{border-radius:24px}.about-image-note{right:-18px;border-radius:12px}
+.services{background:#f5f9f8}.services-grid{gap:18px;border:0}.service-card{min-height:300px;padding:32px;background:#fff;border:1px solid var(--line)!important;border-radius:14px}.service-card:hover{border-color:#9bcac6!important;box-shadow:0 20px 45px rgba(10,74,78,.1)}
+.service-icon{width:58px;height:58px;border:1px solid #cce7e3;background:#eff9f7}.service-card h3{font-family:Inter,Arial,sans-serif;font-size:1.08rem}.service-card p{font-size:.82rem}
+.why-us-grid{gap:18px}.why-us-card{padding:30px;background:#fff;border-radius:14px;box-shadow:0 8px 28px rgba(10,74,78,.045)}.why-us-number{display:grid;width:34px;height:34px;place-items:center;background:var(--mint);border-radius:9px;font-family:Inter,Arial,sans-serif;font-weight:800}
+.contact{background:linear-gradient(135deg,#eff8f6,#f9fbfa)}.contact-form{border:0;border-radius:18px;box-shadow:0 25px 65px rgba(7,73,78,.11)}.contact-form h3{font-family:Inter,Arial,sans-serif;font-weight:750}.info-item{padding:18px 0}.info-icon{border-radius:9px}
+.schedule-calendar,.time-picker{background:#f8fbfa;border-color:#d6e5e3}.calendar-day,.time-slot{transition:transform .15s,box-shadow .15s}.calendar-available:hover,.time-slot.available:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(8,113,79,.12)}
+.footer{background:#053f44}.footer .logo{width:230px;height:105px;padding:5px;background:#fff}.footer .logo-img{width:100%;height:100%;object-fit:contain;transform:none!important}
+@media(max-width:900px){.care-strip .container{grid-template-columns:1fr 1fr}.care-strip div div{border-bottom:1px solid rgba(255,255,255,.12)}.care-strip div div:nth-child(2){border-right:0}}
+@media(max-width:768px){.navbar .container{height:76px}.navbar .logo-mark{width:50px;height:50px;flex-basis:50px}.care-strip .container{padding-block:16px}.care-strip div div{padding:12px}.services-grid{gap:12px}}
+@media(max-width:520px){.care-strip .container{grid-template-columns:1fr}.care-strip div div{padding:12px 0;border-right:0}.hero-content h1{letter-spacing:-.04em}.about,.services,.why-us,.contact{padding:76px 0}}
