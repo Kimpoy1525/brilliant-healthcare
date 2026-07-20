@@ -7,4 +7,5 @@
 .doctor-meta small{color:var(--muted)}
 .doctor-buttons{display:flex;gap:12px}
 .admin-link{color:var(--teal-dark)!important}
+.delete-link{color:#a13f3f!important}
 @media(max-width:600px){.doctor-details,.doctor-row{grid-template-columns:1fr}.doctor-buttons{flex-wrap:wrap}}

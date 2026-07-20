@@ -3,4 +3,5 @@ node_modules/
 data/
 .test-data/
 .admin-test-data/
+.privacy-test-data/
 *.log
