@@ -293,8 +293,14 @@
                     </div>
                     <div class="form-row">
                         <label>Doctor <span>*</span><select name="doctorId" id="doctorSelect" required><option value="">Choose a doctor</option></select></label>
-                        <label>Preferred date <span>*</span><input name="date" id="appointmentDate" type="date" required></label>
+                        <label>Selected date <span>*</span><input name="date" id="appointmentDate" type="date" required readonly></label>
                     </div>
+                    <section class="schedule-calendar" id="scheduleCalendar" hidden aria-label="Doctor availability calendar">
+                        <div class="calendar-toolbar"><button type="button" id="previousMonth" aria-label="Previous month">‹</button><strong id="calendarMonth"></strong><button type="button" id="nextMonth" aria-label="Next month">›</button></div>
+                        <div class="calendar-legend"><span><i class="available-key"></i> Available</span><span><i class="unavailable-key"></i> Not available</span></div>
+                        <div class="calendar-grid calendar-weekdays" aria-hidden="true"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>
+                        <div class="calendar-grid" id="calendarDays"></div>
+                    </section>
                     <fieldset class="time-picker" id="timePicker">
                         <legend>Preferred time <span>*</span></legend>
                         <p id="slotHelp">Choose a doctor and date to see available times.</p>

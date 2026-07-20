@@ -23,9 +23,22 @@ function verifyPassword(password, stored = '') {
   return candidate.length === expected.length && crypto.timingSafeEqual(candidate, expected);
 }
 function seedStore() {
+  const adminId = id();
+  const doctorUserId = id();
+  const doctorId = id();
   return {
-    users: [{ id: id(), role: 'admin', name: 'Clinic Administrator', email: (process.env.ADMIN_EMAIL || 'admin@brillianthealthcare.com').toLowerCase(), passwordHash: hashPassword(process.env.ADMIN_PASSWORD || 'ChangeMe123!') }],
-    doctors: [], appointments: [], createdAt: new Date().toISOString()
+    users: [
+      { id: adminId, role: 'admin', name: 'Clinic Administrator', email: (process.env.ADMIN_EMAIL || 'admin@brillianthealthcare.com').toLowerCase(), passwordHash: hashPassword(process.env.ADMIN_PASSWORD || 'ChangeMe123!') },
+      { id: doctorUserId, role: 'doctor', name: 'Dr. James Raphael', email: (process.env.TRIAL_DOCTOR_EMAIL || 'james.raphael@brillianthealthcare.com').toLowerCase(), passwordHash: hashPassword(process.env.TRIAL_DOCTOR_PASSWORD || 'JamesTrial123!') }
+    ],
+    doctors: [{
+      id: doctorId, userId: doctorUserId, name: 'Dr. James Raphael', specialty: 'Nephrology & Internal Medicine', active: true,
+      availability: [
+        { day: 1, start: '09:00', end: '17:00', slotMinutes: 30 }, { day: 2, start: '09:00', end: '17:00', slotMinutes: 30 },
+        { day: 3, start: '09:00', end: '17:00', slotMinutes: 30 }, { day: 4, start: '09:00', end: '17:00', slotMinutes: 30 },
+        { day: 5, start: '09:00', end: '17:00', slotMinutes: 30 }, { day: 6, start: '09:00', end: '13:00', slotMinutes: 30 }
+      ], unavailableDates: []
+    }], appointments: [], createdAt: new Date().toISOString()
   };
 }
 function loadStore() {
@@ -39,6 +52,14 @@ function save() {
   fs.writeFileSync(temp, JSON.stringify(store, null, 2));
   fs.renameSync(temp, DATA_FILE);
 }
+function ensureTrialDoctor() {
+  if (store.doctors.some(d => d.name.toLowerCase().includes('james raphael'))) return;
+  const user = { id: id(), role: 'doctor', name: 'Dr. James Raphael', email: (process.env.TRIAL_DOCTOR_EMAIL || 'james.raphael@brillianthealthcare.com').toLowerCase(), passwordHash: hashPassword(process.env.TRIAL_DOCTOR_PASSWORD || 'JamesTrial123!') };
+  store.users.push(user);
+  store.doctors.push({ id: id(), userId: user.id, name: user.name, specialty: 'Nephrology & Internal Medicine', active: true, availability: [1, 2, 3, 4, 5].map(day => ({ day, start: '09:00', end: '17:00', slotMinutes: 30 })).concat([{ day: 6, start: '09:00', end: '13:00', slotMinutes: 30 }]), unavailableDates: [] });
+  save();
+}
+ensureTrialDoctor();
 function publicDoctor(d) { return { id: d.id, name: d.name, specialty: d.specialty, availability: d.availability || [], unavailableDates: d.unavailableDates || [] }; }
 function auth(req, res, next) {
   const token = (req.headers.authorization || '').replace(/^Bearer /, '');

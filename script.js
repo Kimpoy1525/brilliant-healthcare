@@ -22,9 +22,34 @@ const dateInput = document.getElementById("appointmentDate");
 const timeInput = document.getElementById("appointmentTime");
 const slotsElement = document.getElementById("timeSlots");
 const slotHelp = document.getElementById("slotHelp");
+const calendar = document.getElementById("scheduleCalendar");
+const calendarDays = document.getElementById("calendarDays");
+const calendarMonth = document.getElementById("calendarMonth");
+let doctors = [], calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 dateInput.min = new Date().toISOString().slice(0, 10); dateInput.max = new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
-fetch("/api/doctors").then(r => r.json()).then(doctors => { doctors.forEach(d => doctorSelect.add(new Option(`${d.name} — ${d.specialty}`, d.id))); if (!doctors.length) slotHelp.textContent = "Online scheduling is being configured. Please call the clinic."; }).catch(() => { slotHelp.textContent = "Schedules could not be loaded."; });
+fetch("/api/doctors").then(r => r.json()).then(data => { doctors = data; doctors.forEach(d => doctorSelect.add(new Option(`${d.name} — ${d.specialty}`, d.id))); if (!doctors.length) slotHelp.textContent = "Online scheduling is being configured. Please call the clinic."; }).catch(() => { slotHelp.textContent = "Schedules could not be loaded."; });
 function formatTime(value) { return new Date(`2000-01-01T${value}:00`).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+function localDateValue(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
+function renderCalendar() {
+    const doctor = doctors.find(d => d.id === doctorSelect.value); calendarDays.replaceChildren();
+    if (!doctor) { calendar.hidden = true; return; }
+    calendar.hidden = false; calendarMonth.textContent = calendarCursor.toLocaleDateString([], { month: "long", year: "numeric" });
+    const firstDay = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth(), 1).getDay();
+    const count = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 0).getDate();
+    for (let i = 0; i < firstDay; i++) { const blank = document.createElement("span"); blank.className = "calendar-blank"; calendarDays.append(blank); }
+    for (let day = 1; day <= count; day++) {
+        const value = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth(), day, 12); const date = localDateValue(value);
+        const withinRange = date >= dateInput.min && date <= dateInput.max;
+        const scheduled = doctor.availability.some(rule => rule.day === value.getDay()) && !doctor.unavailableDates.includes(date);
+        const button = document.createElement("button"); button.type = "button"; button.textContent = day;
+        button.className = `calendar-day ${withinRange && scheduled ? "calendar-available" : "calendar-unavailable"}${dateInput.value === date ? " calendar-selected" : ""}`;
+        button.disabled = !withinRange || !scheduled; button.setAttribute("aria-label", `${value.toLocaleDateString([], { month: "long", day: "numeric" })}, ${withinRange && scheduled ? "available" : "not available"}`);
+        if (withinRange && scheduled) button.addEventListener("click", async () => { dateInput.value = date; renderCalendar(); await loadSlots(); });
+        calendarDays.append(button);
+    }
+}
+document.getElementById("previousMonth").addEventListener("click", () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1); renderCalendar(); });
+document.getElementById("nextMonth").addEventListener("click", () => { calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1); renderCalendar(); });
 async function loadSlots() {
     timeInput.value = ""; slotsElement.replaceChildren();
     if (!doctorSelect.value || !dateInput.value) { slotHelp.textContent = "Choose a doctor and date to see available times."; return; }
@@ -35,7 +60,7 @@ async function loadSlots() {
         data.slots.forEach(slot => { const button = document.createElement("button"); button.type = "button"; button.className = `time-slot ${slot.available ? "available" : "unavailable"}`; button.textContent = formatTime(slot.time); button.disabled = !slot.available; button.setAttribute("aria-label", `${formatTime(slot.time)} — ${slot.available ? "available" : "unavailable"}`); button.addEventListener("click", () => { document.querySelectorAll(".time-slot.selected").forEach(x => x.classList.remove("selected")); button.classList.add("selected"); timeInput.value = slot.time; }); slotsElement.append(button); });
     } catch (error) { slotHelp.textContent = error.message || "Could not load this schedule."; }
 }
-doctorSelect.addEventListener("change", loadSlots); dateInput.addEventListener("change", loadSlots);
+doctorSelect.addEventListener("change", () => { dateInput.value = ""; slotsElement.replaceChildren(); slotHelp.textContent = "Choose a green date from the doctor's calendar."; calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1); renderCalendar(); });
 form.addEventListener("submit", async event => {
     event.preventDefault(); let invalid = form.querySelector(":invalid");
     if (invalid) { invalid.focus(); showNotification("Please complete the required fields.", "error"); return; }
