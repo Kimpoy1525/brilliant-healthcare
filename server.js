@@ -156,6 +156,11 @@ app.delete('/api/appointments/:id', auth, role('admin'), (req, res) => { const i
 app.get('/api/doctor/schedule', auth, role('doctor'), (req, res) => { const d = store.doctors.find(x => x.userId === req.user.id); res.json(d); });
 app.put('/api/doctor/schedule', auth, role('doctor'), (req, res) => { const d = store.doctors.find(x => x.userId === req.user.id); const availability = Array.isArray(req.body.availability) ? req.body.availability : []; if (availability.some(a => !Number.isInteger(a.day) || a.day < 0 || a.day > 6 || !validTime(a.start) || !validTime(a.end) || minutes(a.start) >= minutes(a.end) || ![15,30,45,60].includes(Number(a.slotMinutes)))) return res.status(400).json({ error: 'Invalid schedule.' }); d.availability = availability.map(a => ({ day: a.day, start: a.start, end: a.end, slotMinutes: Number(a.slotMinutes) })); d.unavailableDates = [...new Set((req.body.unavailableDates || []).filter(validDate))]; save(); res.json(d); });
 
-app.use(express.static(__dirname, { maxAge: '1h', index: 'index.html' }));
+app.use(express.static(__dirname, {
+  maxAge: '1d', index: 'index.html',
+  setHeaders: (res, filePath) => {
+    if (/\.(?:html|js|css)$/i.test(filePath)) res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  }
+}));
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.listen(PORT, '0.0.0.0', () => console.log(`Brilliant Healthcare listening on ${PORT}`));

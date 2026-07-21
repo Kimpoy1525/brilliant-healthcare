@@ -5,4 +5,5 @@ data/
 .admin-test-data/
 .privacy-test-data/
 .modal-test-data/
+.cache-test-data/
 *.log
