@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="modern.css">
     <link rel="stylesheet" href="privacy.css">
+    <link rel="stylesheet" href="services-modal.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
@@ -120,32 +121,32 @@
                 <p>From routine check-ups to specialized dialysis care, we offer a full range of medical services under one roof.</p>
             </div>
             <div class="services-grid">
-                <div class="service-card">
+                <div class="service-card" role="button" tabindex="0" data-service="hemodialysis" aria-haspopup="dialog">
                     <div class="service-icon">HD</div>
                     <h3>Hemodialysis</h3>
                     <p>Advanced hemodialysis treatments using state-of-the-art machines to effectively filter waste and toxins from your blood.</p>
                 </div>
-                <div class="service-card">
+                <div class="service-card" role="button" tabindex="0" data-service="peritoneal-dialysis" aria-haspopup="dialog">
                     <div class="service-icon">PD</div>
                     <h3>Peritoneal Dialysis</h3>
                     <p>Flexible peritoneal dialysis options with comprehensive training and support for home-based treatment.</p>
                 </div>
-                <div class="service-card">
+                <div class="service-card" role="button" tabindex="0" data-service="lab-diagnostics" aria-haspopup="dialog">
                     <div class="service-icon">LAB</div>
                     <h3>Lab Diagnostics</h3>
                     <p>Full-service diagnostic laboratory offering accurate blood tests, urine analysis, and specialized pathology services.</p>
                 </div>
-                <div class="service-card">
+                <div class="service-card" role="button" tabindex="0" data-service="cardiac" aria-haspopup="dialog">
                     <div class="service-icon">ECG</div>
                     <h3>Cardiac Diagnostics</h3>
                     <p>Comprehensive cardiac testing including ECG, echocardiograms, and stress tests for heart health assessment.</p>
                 </div>
-                <div class="service-card">
+                <div class="service-card" role="button" tabindex="0" data-service="radiology" aria-haspopup="dialog">
                     <div class="service-icon">IMG</div>
                     <h3>Radiology & Imaging</h3>
                     <p>Digital X-ray, ultrasound, and other imaging services to support accurate diagnosis and treatment planning.</p>
                 </div>
-                <div class="service-card">
+                <div class="service-card" role="button" tabindex="0" data-service="checkup" aria-haspopup="dialog">
                     <div class="service-icon">HC</div>
                     <h3>Health Checkups</h3>
                     <p>Comprehensive health screening packages designed to detect health issues early and promote wellness.</p>
@@ -153,6 +154,15 @@
             </div>
         </div>
     </section>
+
+    <div class="service-modal" id="serviceModal" hidden>
+        <div class="service-modal-backdrop" data-close-modal></div>
+        <section class="service-modal-panel" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle" tabindex="-1">
+            <button class="service-modal-close" type="button" data-close-modal aria-label="Close service details">×</button>
+            <div class="service-modal-visual"><img src="images/generic-doctor.png" alt="Generic temporary doctor portrait"><span>Temporary clinician photo</span></div>
+            <div class="service-modal-content"><p class="modal-kicker" id="serviceModalKicker"></p><h2 id="serviceModalTitle"></h2><p class="modal-summary" id="serviceModalSummary"></p><div class="modal-doctor"><small>Handling physician</small><strong>Dr. James Raphael</strong><span>Nephrology &amp; Internal Medicine</span></div><div class="modal-sections"><div><h3>About this service</h3><p id="serviceModalAbout"></p></div><div><h3>What to expect</h3><ul id="serviceModalExpect"></ul></div><div><h3>Before your visit</h3><p id="serviceModalPrepare"></p></div></div><p class="modal-disclaimer">General information only. Your clinician will determine whether this service is appropriate for you.</p><a href="#contact" class="btn btn-primary" id="serviceModalBook">View schedule &amp; book</a></div>
+        </section>
+    </div>
 
     <!-- Why Us Section -->
     <section class="why-us" id="why-us">
