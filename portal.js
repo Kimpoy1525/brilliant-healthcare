@@ -22,4 +22,62 @@ async function loadSchedule(){const d=await api("/api/doctor/schedule");buildWee
 document.getElementById("scheduleForm").addEventListener("submit",async event=>{event.preventDefault();const availability=[...document.querySelectorAll(".day-row")].filter(r=>r.querySelector(".enabled").checked).map(r=>({day:Number(r.dataset.day),start:r.querySelector(".start").value,end:r.querySelector(".end").value,slotMinutes:Number(r.querySelector(".duration").value)}));const unavailableDates=document.getElementById("unavailableDates").value.split(",").map(x=>x.trim()).filter(Boolean);try{await api("/api/doctor/schedule",{method:"PUT",body:JSON.stringify({availability,unavailableDates})});notify("Schedule published.")}catch(e){notify(e.message)}});
 async function loadAppointments(){appointments=await api("/api/appointments");renderAppointments()}
 function renderAppointments(){const filter=document.getElementById("statusFilter").value,root=document.getElementById("appointments"),items=appointments.filter(a=>!filter||a.status===filter);root.replaceChildren();if(!items.length){root.innerHTML='<p class="empty">No appointments found.</p>';return}items.forEach(a=>{const card=document.createElement("article");card.className="appointment-card";const when=document.createElement("div");when.className="appointment-time";when.innerHTML=`<strong>${a.date} · ${a.time}</strong><span class="status-pill">${a.status}</span>`;const detail=document.createElement("div");detail.className="appointment-detail";detail.textContent=`${a.fullName} · ${a.phone} · ${a.email||"No email"} · ${a.service} · Ref ${a.reference}${a.message?` · ${a.message}`:""}`;const actions=document.createElement("div");actions.className="appointment-actions";const select=document.createElement("select");["pending","confirmed","completed","cancelled","declined"].forEach(s=>select.add(new Option(s,s,s===a.status,s===a.status)));select.onchange=async()=>{try{await api(`/api/appointments/${a.id}`,{method:"PATCH",body:JSON.stringify({status:select.value})});notify("Appointment updated.");loadAppointments()}catch(e){notify(e.message)}};const remove=document.createElement("button");remove.type="button";remove.className="button-link delete-link";remove.textContent="Delete record";remove.onclick=async()=>{if(!confirm(`Permanently delete appointment ${a.reference}? This cannot be undone.`))return;try{await api(`/api/appointments/${a.id}`,{method:"DELETE"});notify("Appointment record deleted.");loadAppointments()}catch(e){notify(e.message)}};actions.append(select,remove);card.append(when,detail,actions);root.append(card)})}
-document.getElementById("statusFilter").addEventListener("change",renderAppointments);boot();
+function localDateValue(date=new Date()){return`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`}
+function appointmentDate(value){return String(value||"").slice(0,10)}
+function displayDate(value){const date=appointmentDate(value);return new Date(`${date}T12:00:00`).toLocaleDateString([],{weekday:"short",month:"short",day:"numeric",year:"numeric"})}
+function displayTime(value){return new Date(`2000-01-01T${value}:00`).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
+function serviceName(value){return({"hemodialysis":"Hemodialysis","peritoneal-dialysis":"Peritoneal Dialysis","lab-diagnostics":"Lab Diagnostics","cardiac":"Cardiac Diagnostics","radiology":"Radiology & Imaging","checkup":"Health Checkup","other":"Other"})[value]||value}
+function patientField(label,value,href){
+    const field=document.createElement("div");field.className="patient-field";
+    const name=document.createElement("small");name.textContent=label;
+    const content=document.createElement(href?"a":"span");content.textContent=value||"Not provided";
+    if(href&&value)content.href=href+encodeURIComponent(value);
+    field.append(name,content);return field;
+}
+function updateMetrics(){
+    const today=localDateValue();
+    document.getElementById("todayCount").textContent=appointments.filter(a=>appointmentDate(a.date)===today).length;
+    document.getElementById("pendingCount").textContent=appointments.filter(a=>a.status==="pending").length;
+    document.getElementById("confirmedCount").textContent=appointments.filter(a=>a.status==="confirmed").length;
+    document.getElementById("totalCount").textContent=appointments.length;
+}
+async function loadAppointments(){appointments=await api("/api/appointments");updateMetrics();renderAppointments()}
+function renderAppointments(){
+    const status=document.getElementById("statusFilter").value,date=document.getElementById("dateFilter").value,root=document.getElementById("appointments");
+    const items=appointments.filter(a=>(!status||a.status===status)&&(!date||appointmentDate(a.date)===date));
+    document.getElementById("appointmentResultCount").textContent=`${items.length} ${items.length===1?"record":"records"}`;
+    root.replaceChildren();
+    if(!items.length){const empty=document.createElement("p");empty.className="empty";empty.textContent=date||status?"No appointments match these filters.":"No appointment records yet.";root.append(empty);return}
+    items.forEach(a=>{
+        const card=document.createElement("article");card.className="appointment-card";
+        const when=document.createElement("div");when.className="appointment-time";
+        const dateLine=document.createElement("strong");dateLine.textContent=displayDate(a.date);
+        const timeLine=document.createElement("span");timeLine.textContent=displayTime(a.time);
+        const pill=document.createElement("span");pill.className=`status-pill status-${a.status}`;pill.textContent=a.status;
+        when.append(dateLine,timeLine,pill);
+        const detail=document.createElement("div");detail.className="appointment-detail";
+        const heading=document.createElement("div");
+        const name=document.createElement("strong");name.className="patient-name";name.textContent=a.fullName;
+        const reference=document.createElement("span");reference.className="appointment-reference";reference.textContent=`Ref ${a.reference}`;
+        heading.append(name,reference);
+        const grid=document.createElement("div");grid.className="patient-grid";
+        grid.append(patientField("Phone",a.phone,"tel:"),patientField("Email",a.email,a.email?"mailto:":null),patientField("Service",serviceName(a.service)),patientField("Assigned doctor",a.doctorName||"Doctor record unavailable"));
+        const question=document.createElement("div");question.className=`patient-question${a.message?"":" empty-question"}`;
+        const questionLabel=document.createElement("small");questionLabel.textContent="Patient question or scheduling need";
+        const questionText=document.createElement("p");questionText.textContent=a.message||"No question or additional note was provided.";
+        question.append(questionLabel,questionText);detail.append(heading,grid,question);
+        const actions=document.createElement("div");actions.className="appointment-actions";
+        const statusLabel=document.createElement("label");statusLabel.textContent="Update status";
+        const select=document.createElement("select");select.setAttribute("aria-label",`Update ${a.fullName}'s appointment status`);
+        ["pending","confirmed","completed","cancelled","declined"].forEach(s=>select.add(new Option(s[0].toUpperCase()+s.slice(1),s,s===a.status,s===a.status)));
+        select.onchange=async()=>{try{await api(`/api/appointments/${a.id}`,{method:"PATCH",body:JSON.stringify({status:select.value})});notify("Appointment updated.");loadAppointments()}catch(e){notify(e.message)}};
+        statusLabel.append(select);
+        const remove=document.createElement("button");remove.type="button";remove.className="button-link delete-link";remove.textContent="Delete record";
+        remove.onclick=async()=>{if(!confirm(`Permanently delete appointment ${a.reference}? This cannot be undone.`))return;try{await api(`/api/appointments/${a.id}`,{method:"DELETE"});notify("Appointment record deleted.");loadAppointments()}catch(e){notify(e.message)}};
+        actions.append(statusLabel,remove);card.append(when,detail,actions);root.append(card);
+    })
+}
+document.getElementById("statusFilter").addEventListener("change",renderAppointments);
+document.getElementById("dateFilter").addEventListener("change",renderAppointments);
+document.getElementById("clearFilters").addEventListener("click",()=>{document.getElementById("statusFilter").value="";document.getElementById("dateFilter").value="";renderAppointments()});
+boot();
