@@ -36,6 +36,11 @@ CREATE TABLE IF NOT EXISTS doctors (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE doctors ADD COLUMN IF NOT EXISTS credentials text NOT NULL DEFAULT '';
+ALTER TABLE doctors ADD COLUMN IF NOT EXISTS bio text NOT NULL DEFAULT '';
+ALTER TABLE doctors ADD COLUMN IF NOT EXISTS languages text NOT NULL DEFAULT '';
+ALTER TABLE doctors ADD COLUMN IF NOT EXISTS photo_url text NOT NULL DEFAULT '';
+ALTER TABLE doctors ADD COLUMN IF NOT EXISTS accepting_new_patients boolean NOT NULL DEFAULT true;
 CREATE TABLE IF NOT EXISTS doctor_schedules (
   doctor_id uuid NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
   day smallint NOT NULL CHECK (day BETWEEN 0 AND 6),
@@ -102,6 +107,9 @@ async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
     await pool.query('INSERT INTO doctors(id,name,specialty) VALUES($1,$2,$3)',
       [doctorId, 'Dr. James Raphael', 'Nephrology & Internal Medicine']);
   }
+  await pool.query(`UPDATE doctors SET credentials=CASE WHEN credentials='' THEN 'MD' ELSE credentials END,
+    bio=CASE WHEN bio='' THEN 'Provides kidney-care consultations and selected internal medicine appointments.' ELSE bio END,
+    languages=CASE WHEN languages='' THEN 'English, Filipino' ELSE languages END WHERE id=$1`, [doctorId]);
   const count = await pool.query('SELECT count(*)::int AS count FROM doctor_schedules WHERE doctor_id=$1', [doctorId]);
   if (!count.rows[0].count) {
     for (const day of [1,2,3,4,5]) await pool.query('INSERT INTO doctor_schedules VALUES($1,$2,$3,$4,$5)', [doctorId, day, '09:00', '17:00', 30]);
@@ -112,7 +120,7 @@ async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
 
 async function getDoctors(includeInactive = false) {
   const { rows } = await pool.query(`
-    SELECT d.id,d.name,d.specialty,d.active,
+    SELECT d.id,d.name,d.specialty,d.credentials,d.bio,d.languages,d.photo_url,d.accepting_new_patients,d.active,
       COALESCE(json_agg(DISTINCT jsonb_build_object('day',s.day,'start',to_char(s.start_time,'HH24:MI'),'end',to_char(s.end_time,'HH24:MI'),'slotMinutes',s.slot_minutes))
         FILTER (WHERE s.day IS NOT NULL),'[]') AS availability,
       COALESCE(array_agg(DISTINCT u.unavailable_date) FILTER (WHERE u.unavailable_date IS NOT NULL),'{}') AS unavailable_dates
@@ -121,7 +129,8 @@ async function getDoctors(includeInactive = false) {
     LEFT JOIN doctor_unavailable_dates u ON u.doctor_id=d.id
     ${includeInactive ? '' : 'WHERE d.active=true'}
     GROUP BY d.id ORDER BY d.name`);
-  return rows.map(row => ({ id: row.id, name: row.name, specialty: row.specialty, active: row.active,
+  return rows.map(row => ({ id: row.id, name: row.name, specialty: row.specialty, credentials: row.credentials,
+    bio: row.bio, languages: row.languages, photoUrl: row.photo_url, acceptingNewPatients: row.accepting_new_patients, active: row.active,
     availability: row.availability.sort((a,b) => a.day-b.day), unavailableDates: row.unavailable_dates }));
 }
 

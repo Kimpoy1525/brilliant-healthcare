@@ -165,17 +165,9 @@
                 <div><span class="badge">Medical team</span><h2 id="medicalTeamTitle">Meet your physician</h2></div>
                 <p>Review the handling physician and go directly to the live appointment calendar.</p>
             </div>
-            <article class="physician-profile">
-                <div class="physician-photo"><img src="images/generic-doctor.png" alt="Temporary physician profile placeholder" loading="lazy"></div>
-                <div class="physician-details">
-                    <span>Nephrology &amp; Internal Medicine</span>
-                    <h3>Dr. James Raphael</h3>
-                    <p>Handling physician for dialysis-related consultations and selected internal medicine appointments.</p>
-                    <dl><div><dt>Clinic schedule</dt><dd>View the live calendar for current availability</dd></div><div><dt>Appointment type</dt><dd>Clinic-administered request and confirmation</dd></div></dl>
-                    <a class="btn btn-primary" href="appointments.html?doctor=james-raphael">View schedule and book</a>
-                </div>
-            </article>
-            <p class="placeholder-note">Physician photograph is a temporary placeholder and will be replaced with an approved clinic photo.</p>
+            <div id="doctorDirectory" class="doctor-directory" aria-live="polite">
+                <p class="doctor-directory-loading">Loading physician profiles…</p>
+            </div>
         </div>
     </section>
 
@@ -422,5 +414,6 @@
     </footer>
 
     <script src="script.js?v=3"></script>
+    <script src="doctors-directory.js"></script>
 </body>
 </html>

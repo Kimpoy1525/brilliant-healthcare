@@ -36,10 +36,9 @@ fetch("/api/doctors").then(r => r.json()).then(data => {
         const requestedService = params.get("service");
         const serviceSelect = form.elements.service;
         if (requestedService && [...serviceSelect.options].some(option => option.value === requestedService)) serviceSelect.value = requestedService;
-        if (params.get("doctor") === "james-raphael") {
-            const james = doctors.find(d => d.name.includes("James Raphael"));
-            if (james) { doctorSelect.value = james.id; doctorSelect.dispatchEvent(new Event("change")); }
-        }
+        const requestedDoctor = params.get("doctor");
+        const selectedDoctor = doctors.find(d => d.id === requestedDoctor) || (requestedDoctor === "james-raphael" ? doctors.find(d => d.name.includes("James Raphael")) : null);
+        if (selectedDoctor) { doctorSelect.value = selectedDoctor.id; doctorSelect.dispatchEvent(new Event("change")); }
     }
 }).catch(() => { slotHelp.textContent = "Schedules could not be loaded."; });
 function formatTime(value) { return new Date(`2000-01-01T${value}:00`).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }

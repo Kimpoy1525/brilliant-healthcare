@@ -60,11 +60,18 @@
             <section id="adminTools" class="panel" hidden>
                 <div class="panel-title">
                     <div><p class="eyebrow">Physician management</p><h2 id="doctorFormTitle">Add a doctor and schedule</h2><p>Enter physician details and publish the times patients may request.</p></div>
-                    <button id="cancelDoctorEdit" class="button-link admin-link" type="button" hidden>Cancel editing</button>
+                    <div class="profile-form-actions"><button id="loadDoctorTemplate" class="btn btn-secondary" type="button">Use nephrologist example</button><button id="cancelDoctorEdit" class="button-link admin-link" type="button" hidden>Cancel editing</button></div>
                 </div>
                 <form id="doctorForm">
                     <input name="doctorId" type="hidden">
-                    <div class="doctor-details"><label>Doctor name<input name="name" placeholder="e.g. Dr. Maria Santos" required></label><label>Specialty<input name="specialty" placeholder="e.g. Nephrology" required></label></div>
+                    <p class="template-note">Create the public physician profile below. The example button fills a sample template only—verify every detail before publishing.</p>
+                    <div class="doctor-details"><label>Doctor name<input name="name" placeholder="e.g. Dr. James Estrada" required></label><label>Specialty<input name="specialty" placeholder="e.g. Nephrology" required></label><label>Credentials<input name="credentials" placeholder="e.g. MD, FPCP, FPSN"></label><label>Languages spoken<input name="languages" placeholder="e.g. English, Filipino"></label></div>
+                    <label class="profile-wide-field">Professional biography <small>Keep this factual and concise. Maximum 800 characters.</small><textarea name="bio" rows="4" maxlength="800" placeholder="Summarize the physician’s clinical focus, experience, and approach to patient care."></textarea></label>
+                    <div class="photo-profile-row">
+                        <label>Professional photo URL <small>Use an approved, securely hosted HTTPS portrait.</small><input name="photoUrl" type="url" placeholder="https://example.com/dr-estrada.jpg"></label>
+                        <div class="doctor-photo-preview"><img id="doctorPhotoPreview" src="images/generic-doctor.png" alt="Doctor profile photo preview" referrerpolicy="no-referrer"><span>Photo preview</span></div>
+                    </div>
+                    <label class="profile-checkbox"><input name="acceptingNewPatients" type="checkbox" checked> Accepting new patients</label>
                     <h3 class="form-section-title">Weekly working schedule</h3>
                     <p class="form-hint">Check each working day, then set its start time, end time, and appointment length.</p>
                     <div id="adminWeekSchedule" class="week-schedule"></div>
