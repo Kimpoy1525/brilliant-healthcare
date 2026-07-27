@@ -44,3 +44,30 @@ body{color:var(--ink);background:#fff}
 @media(max-width:980px){.patient-actions .container{grid-template-columns:1fr 1fr}.patient-actions a{border-bottom:1px solid var(--line)}}
 @media(max-width:768px){.about,.services,.medical-team,.why-us,.contact{padding:70px 0}.team-heading{display:block}.team-heading p{margin-top:12px}.physician-profile{grid-template-columns:1fr}.physician-photo{min-height:310px;max-height:420px}.physician-details{padding:30px 26px}}
 @media(max-width:520px){.patient-actions .container{grid-template-columns:1fr}.patient-actions a,.patient-actions a:first-child{min-height:88px;border-right:1px solid var(--line);border-left:1px solid var(--line)}.hero-content h1{font-size:clamp(2.35rem,11vw,3rem)}.physician-details dl{grid-template-columns:1fr}}
+
+/* Community medical-centre direction, adapted to Brilliant Healthcare */
+:root{--ink:#444;--muted:#646b70;--teal:#1cb651;--teal-dark:#128b3c;--mint:#eef9f1;--cream:#f7f7f7;--line:#e4e8ea;--clinic-blue:#066aab}
+body,button,input,select,textarea{font-family:Muli,Arial,sans-serif}
+.topbar{color:#4f5960;background:#f7f7f7;border-bottom:1px solid #e9ecee}.topbar p span{background:#1cb651}.topbar a{color:#066aab;font-weight:700}
+.site-header{background:#fff}.navbar .container{height:84px}.logo-copy strong,.logo-copy small{font-family:Poppins,Arial,sans-serif}
+.logo-copy strong{color:#066aab;text-transform:none}.nav-links a{color:#444;font-family:Poppins,Arial,sans-serif;font-weight:600}
+.nav-links a:after{bottom:18px;background:#1cb651}.nav-links a:hover{color:#066aab}
+.btn{border-radius:3px;font-family:Poppins,Arial,sans-serif;font-size:.82rem;font-weight:600}
+.btn-primary,.btn-primary:hover{background:#1cb651}.btn-secondary{color:#066aab;border-color:#066aab}
+.hero{background:#fff}.hero-content h1,.about-content h2,.section-header h2,.contact-info h2,.team-heading h2{color:#066aab;font-family:Poppins,Arial,sans-serif}
+.hero-content h1{font-size:clamp(2.65rem,4.2vw,4.1rem);font-weight:600;letter-spacing:-.035em}.hero-content>p{color:#575757}
+.badge{color:#1cb651;font-family:Poppins,Arial,sans-serif}.hero-image-frame{border-radius:0;box-shadow:0 12px 35px rgba(0,0,0,.12)}
+.hero-care-card{border-left-color:#1cb651}.hero-care-card>span{color:#1cb651;background:#edf9f1}
+.patient-actions{background:#066aab;border:0}.patient-actions .container{padding-block:0}
+.patient-actions a,.patient-actions a:first-child{color:#fff;border-color:rgba(255,255,255,.2)}.patient-actions a:hover{background:#075f98}
+.patient-actions a>span,.patient-actions small{color:rgba(255,255,255,.72)}.patient-actions b{color:#7ee49e}
+.about-image:before{background:#e5f2f9}.about-image-note{background:#066aab}
+.check-icon{color:#128b3c;background:#e9f8ee}
+.services,.why-us,.contact{background:#f7f7f7}.service-card{border-color:#e3e3e3!important}
+.service-card[role=button]:hover{border-color:#1cb651!important}.service-card h3,.why-us-card h3,.physician-details h3{color:#066aab;font-family:Poppins,Arial,sans-serif}
+.service-card[role=button]:after{color:#159b47}.medical-team{background:#fff}.physician-profile{border-top:5px solid #1cb651}
+.physician-details>span{color:#159b47}.why-us-number{color:#1cb651}.visit-steps article>span{background:#066aab}
+.contact-form{border-top:5px solid #1cb651}.form-kicker{color:#159b47}.contact-form h3{color:#066aab;font-family:Poppins,Arial,sans-serif}
+.contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{border-color:#1cb651;box-shadow:0 0 0 3px rgba(28,182,81,.12)}
+.footer{background:#075381}.footer-call{color:#8de4a8}
+@media(max-width:768px){.navbar .container{height:74px}.nav-links{top:74px}.patient-actions{background:#066aab}}
