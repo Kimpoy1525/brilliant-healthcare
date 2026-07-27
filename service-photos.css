@@ -1,0 +1,41 @@
+.service-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.service-photo {
+    height: 205px;
+    overflow: hidden;
+    background: #e8f4f3;
+}
+
+.service-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 350ms ease;
+}
+
+.service-card:hover .service-photo img,
+.service-card:focus-visible .service-photo img {
+    transform: scale(1.035);
+}
+
+.service-card-body {
+    padding: 24px 28px 56px;
+}
+
+.service-card-body h3 {
+    margin-top: 0;
+}
+
+@media (max-width: 600px) {
+    .service-photo {
+        height: 190px;
+    }
+
+    .service-card-body {
+        padding: 22px 22px 54px;
+    }
+}
