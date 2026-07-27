@@ -24,7 +24,12 @@
             <p>Sign in to manage physicians, schedules, and patient appointment requests.</p>
             <form id="loginForm">
                 <label>Email address<input name="email" type="email" autocomplete="username" required></label>
-                <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+                <label>Password
+                    <span class="password-control">
+                        <input id="adminPassword" name="password" type="password" autocomplete="current-password" required>
+                        <button id="togglePassword" type="button" aria-controls="adminPassword" aria-pressed="false">Show</button>
+                    </span>
+                </label>
                 <button id="loginSubmit" class="btn btn-primary" type="submit"><span>Sign in securely</span></button>
                 <p id="loginError" class="form-error" role="alert"></p>
             </form>
@@ -95,9 +100,10 @@
     </main>
     <div id="portalLoading" class="portal-loading" hidden role="status" aria-live="polite" aria-busy="true">
         <div class="portal-loading-card">
-            <span class="portal-spinner" aria-hidden="true"></span>
+            <span class="secure-loader-mark" aria-hidden="true">BH</span>
             <strong id="portalLoadingText">Loading secure portal…</strong>
-            <small>Please wait. Do not close this page.</small>
+            <small>Protecting your clinic information</small>
+            <span class="secure-loader-bar" aria-hidden="true"><i></i></span>
         </div>
     </div>
     <div id="portalNotice" class="portal-notice" role="status"></div>

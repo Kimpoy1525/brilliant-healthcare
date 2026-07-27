@@ -2,13 +2,16 @@
 const token=()=>true,headers=()=>({"Content-Type":"application/json"});
 const loginView=document.getElementById("loginView"),dashboard=document.getElementById("dashboard"),identity=document.getElementById("identity"),logout=document.getElementById("logout"),notice=document.getElementById("portalNotice");
 const loading=document.getElementById("portalLoading"),loadingText=document.getElementById("portalLoadingText"),loginSubmit=document.getElementById("loginSubmit");
+const adminPassword=document.getElementById("adminPassword"),togglePassword=document.getElementById("togglePassword");
 let currentUser,appointments=[],inactivityTimer;
 function showLoading(message){loadingText.textContent=message;loading.hidden=false}
 function hideLoading(){loading.hidden=true}
 function armSessionTimeout(){clearTimeout(inactivityTimer);if(currentUser)inactivityTimer=setTimeout(()=>secureLogout("You were signed out after 15 minutes of inactivity."),15*60_000)}
+function concealPassword(){adminPassword.type="password";togglePassword.textContent="Show";togglePassword.setAttribute("aria-pressed","false")}
+togglePassword.addEventListener("click",()=>{const visible=adminPassword.type==="text";adminPassword.type=visible?"password":"text";togglePassword.textContent=visible?"Show":"Hide";togglePassword.setAttribute("aria-pressed",String(!visible));adminPassword.focus()});
 function notify(message){notice.textContent=message;notice.classList.add("show");setTimeout(()=>notice.classList.remove("show"),3500)}
 async function api(url,options={}){const response=await fetch(url,{...options,headers:{...headers(),...(options.headers||{})}});if(response.status===401){showLogin();throw new Error("Please sign in again.")}const data=response.status===204?null:await response.json();if(!response.ok)throw new Error(data.error||"Request failed.");return data}
-function showLogin(){clearTimeout(inactivityTimer);currentUser=undefined;loginView.hidden=false;dashboard.hidden=true;logout.hidden=true;identity.textContent=""}
+function showLogin(){clearTimeout(inactivityTimer);currentUser=undefined;concealPassword();loginView.hidden=false;dashboard.hidden=true;logout.hidden=true;identity.textContent=""}
 async function boot(){
     showLoading("Loading your secure dashboard…");
     try{currentUser=await api("/api/me");loginView.hidden=true;dashboard.hidden=false;logout.hidden=false;identity.textContent=`${currentUser.name} · ${currentUser.role}`;document.getElementById("dashboardTitle").textContent=currentUser.role==="admin"?"Administrator dashboard":"Doctor dashboard";document.getElementById("adminTools").hidden=currentUser.role!=="admin";document.getElementById("scheduleTools").hidden=currentUser.role!=="doctor";if(currentUser.role==="admin")await loadDoctors();else await loadSchedule();await loadAppointments();armSessionTimeout()}catch(error){document.getElementById("loginError").textContent=error.message;showLogin()}finally{hideLoading()}
