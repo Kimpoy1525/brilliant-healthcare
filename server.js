@@ -1,166 +1,85 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const crypto = require('crypto');
 const helmet = require('helmet');
+const { pool, initDatabase, getDoctors, getDoctor, replaceSchedule } = require('./database');
+
+if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required. Configure the Supabase transaction-pooler URL.');
+const IS_PRODUCTION = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT);
+if (IS_PRODUCTION && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD.length < 16)) throw new Error('ADMIN_PASSWORD must contain at least 16 characters in production.');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
-const DATA_FILE = path.join(DATA_DIR, 'store.json');
-const sessions = new Map();
+const COOKIE = '__Host-bh_admin';
 const attempts = new Map();
+const bookingAttempts = new Map();
+const appointmentStatuses = ['pending','confirmed','completed','cancelled','declined'];
 
 function id() { return crypto.randomUUID(); }
-function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
-  return `${salt}:${crypto.scryptSync(password, salt, 64).toString('hex')}`;
-}
-function verifyPassword(password, stored = '') {
-  const [salt, key] = stored.split(':');
-  if (!salt || !key) return false;
-  const candidate = crypto.scryptSync(password, salt, 64);
-  const expected = Buffer.from(key, 'hex');
-  return candidate.length === expected.length && crypto.timingSafeEqual(candidate, expected);
-}
-function seedStore() {
-  const adminId = id();
-  const doctorUserId = id();
-  const doctorId = id();
-  return {
-    users: [
-      { id: adminId, role: 'admin', name: 'Clinic Administrator', email: (process.env.ADMIN_EMAIL || 'admin@brillianthealthcare.com').toLowerCase(), passwordHash: hashPassword(process.env.ADMIN_PASSWORD || 'ChangeMe123!') },
-      { id: doctorUserId, role: 'doctor', name: 'Dr. James Raphael', email: (process.env.TRIAL_DOCTOR_EMAIL || 'james.raphael@brillianthealthcare.com').toLowerCase(), passwordHash: hashPassword(process.env.TRIAL_DOCTOR_PASSWORD || 'JamesTrial123!') }
-    ],
-    doctors: [{
-      id: doctorId, userId: doctorUserId, name: 'Dr. James Raphael', specialty: 'Nephrology & Internal Medicine', active: true,
-      availability: [
-        { day: 1, start: '09:00', end: '17:00', slotMinutes: 30 }, { day: 2, start: '09:00', end: '17:00', slotMinutes: 30 },
-        { day: 3, start: '09:00', end: '17:00', slotMinutes: 30 }, { day: 4, start: '09:00', end: '17:00', slotMinutes: 30 },
-        { day: 5, start: '09:00', end: '17:00', slotMinutes: 30 }, { day: 6, start: '09:00', end: '13:00', slotMinutes: 30 }
-      ], unavailableDates: []
-    }], appointments: [], createdAt: new Date().toISOString()
-  };
-}
-function loadStore() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, JSON.stringify(seedStore(), null, 2));
-  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-}
-let store = loadStore();
-function save() {
-  const temp = `${DATA_FILE}.tmp`;
-  fs.writeFileSync(temp, JSON.stringify(store, null, 2));
-  fs.renameSync(temp, DATA_FILE);
-}
-function ensureTrialDoctor() {
-  if (store.doctors.some(d => d.name.toLowerCase().includes('james raphael'))) return;
-  const user = { id: id(), role: 'doctor', name: 'Dr. James Raphael', email: (process.env.TRIAL_DOCTOR_EMAIL || 'james.raphael@brillianthealthcare.com').toLowerCase(), passwordHash: hashPassword(process.env.TRIAL_DOCTOR_PASSWORD || 'JamesTrial123!') };
-  store.users.push(user);
-  store.doctors.push({ id: id(), userId: user.id, name: user.name, specialty: 'Nephrology & Internal Medicine', active: true, availability: [1, 2, 3, 4, 5].map(day => ({ day, start: '09:00', end: '17:00', slotMinutes: 30 })).concat([{ day: 6, start: '09:00', end: '13:00', slotMinutes: 30 }]), unavailableDates: [] });
-  save();
-}
-ensureTrialDoctor();
-function syncAdminCredentials() {
-  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) return;
-  let admin = store.users.find(user => user.role === 'admin');
-  if (!admin) {
-    admin = { id: id(), role: 'admin', name: 'Clinic Administrator' };
-    store.users.push(admin);
-  }
-  admin.email = process.env.ADMIN_EMAIL.trim().toLowerCase();
-  admin.passwordHash = hashPassword(process.env.ADMIN_PASSWORD);
-  save();
-}
-syncAdminCredentials();
-function publicDoctor(d) { return { id: d.id, name: d.name, specialty: d.specialty, availability: d.availability || [], unavailableDates: d.unavailableDates || [] }; }
-function auth(req, res, next) {
-  const token = (req.headers.authorization || '').replace(/^Bearer /, '');
-  const session = sessions.get(token);
-  if (!session || session.expires < Date.now()) return res.status(401).json({ error: 'Please sign in.' });
-  req.user = store.users.find(u => u.id === session.userId);
-  if (!req.user) return res.status(401).json({ error: 'Session expired.' });
-  next();
-}
-const role = (...roles) => (req, res, next) => roles.includes(req.user.role) ? next() : res.status(403).json({ error: 'Access denied.' });
+function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) { return `${salt}:${crypto.scryptSync(password, salt, 64).toString('hex')}`; }
+function verifyPassword(password, stored = '') { const [salt,key] = stored.split(':'); if (!salt || !key) return false; const actual=crypto.scryptSync(password,salt,64), expected=Buffer.from(key,'hex'); return actual.length===expected.length && crypto.timingSafeEqual(actual,expected); }
+function hashToken(token) { return crypto.createHash('sha256').update(token).digest('hex'); }
 function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(value || '') && !Number.isNaN(Date.parse(`${value}T00:00:00`)); }
 function validTime(value) { return /^([01]\d|2[0-3]):[0-5]\d$/.test(value || ''); }
-function minutes(value) { const [h, m] = value.split(':').map(Number); return h * 60 + m; }
-function slotAvailable(doctor, date, time) {
-  if (!doctor || !validDate(date) || !validTime(time) || date < new Date().toISOString().slice(0, 10)) return false;
-  if ((doctor.unavailableDates || []).includes(date)) return false;
-  const day = new Date(`${date}T12:00:00`).getDay();
-  const rule = (doctor.availability || []).find(a => a.day === day);
-  if (!rule) return false;
-  const value = minutes(time), start = minutes(rule.start), end = minutes(rule.end), duration = rule.slotMinutes || 30;
-  if (value < start || value + duration > end || (value - start) % duration !== 0) return false;
-  return !store.appointments.some(a => a.doctorId === doctor.id && a.date === date && a.time === time && !['cancelled', 'declined'].includes(a.status));
+function minutes(value) { const [h,m]=value.split(':').map(Number); return h*60+m; }
+function clean(value, max = 250) { return String(value || '').trim().slice(0,max); }
+function cookies(req) { return Object.fromEntries(String(req.headers.cookie || '').split(';').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf('=');return [decodeURIComponent(x.slice(0,i)),decodeURIComponent(x.slice(i+1))]})); }
+function rateLimited(map, key, limit, windowMs) { const now=Date.now(), recent=(map.get(key)||[]).filter(t=>now-t<windowMs); if(recent.length>=limit) return true; recent.push(now); map.set(key,recent); return false; }
+function validSchedule(availability) { return Array.isArray(availability) && !availability.some(a=>!Number.isInteger(a.day)||a.day<0||a.day>6||!validTime(a.start)||!validTime(a.end)||minutes(a.start)>=minutes(a.end)||![15,30,45,60].includes(Number(a.slotMinutes))); }
+
+async function auth(req,res,next) {
+  try {
+    const token=cookies(req)[COOKIE]; if(!token) return res.status(401).json({error:'Please sign in.'});
+    const {rows}=await pool.query(`SELECT a.id,a.name,a.email,'admin' AS role FROM admin_sessions s JOIN admins a ON a.id=s.admin_id WHERE s.token_hash=$1 AND s.expires_at>now()`,[hashToken(token)]);
+    if(!rows[0]) return res.status(401).json({error:'Session expired.'}); req.user=rows[0]; next();
+  } catch(error){next(error)}
+}
+async function available(doctor,date,time) {
+  if(!doctor||!validDate(date)||!validTime(time)||date<new Date().toISOString().slice(0,10)||doctor.unavailableDates.includes(date)) return false;
+  const day=new Date(`${date}T12:00:00`).getDay(), rule=doctor.availability.find(x=>x.day===day); if(!rule) return false;
+  const value=minutes(time),start=minutes(rule.start),end=minutes(rule.end); if(value<start||value+rule.slotMinutes>end||(value-start)%rule.slotMinutes!==0) return false;
+  const {rows}=await pool.query(`SELECT 1 FROM appointments WHERE doctor_id=$1 AND appointment_date=$2 AND appointment_time=$3 AND status NOT IN ('cancelled','declined')`,[doctor.id,date,time]);
+  return !rows.length;
 }
 
-app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'self'"], styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'], fontSrc: ["'self'", 'https://fonts.gstatic.com'], imgSrc: ["'self'", 'data:', 'https:'], scriptSrc: ["'self'"], connectSrc: ["'self'"] } }, crossOriginEmbedderPolicy: false }));
-app.use(express.json({ limit: '30kb' }));
-app.use((req, res, next) => { res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()'); next(); });
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.set('trust proxy',1);
+app.disable('x-powered-by');
+app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com'],imgSrc:["'self'",'data:','https:'],scriptSrc:["'self'"],connectSrc:["'self'"]}},crossOriginEmbedderPolicy:false}));
+app.use(express.json({limit:'20kb',type:'application/json'}));
+app.use((req,res,next)=>{res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');next()});
 
-app.post('/api/login', (req, res) => {
-  const key = req.ip; const recent = (attempts.get(key) || []).filter(t => Date.now() - t < 15 * 60_000);
-  if (recent.length >= 10) return res.status(429).json({ error: 'Too many attempts. Try again later.' });
-  const email = String(req.body.email || '').trim().toLowerCase();
-  const user = store.users.find(u => u.email === email);
-  if (!user || !verifyPassword(String(req.body.password || ''), user.passwordHash)) { recent.push(Date.now()); attempts.set(key, recent); return res.status(401).json({ error: 'Invalid email or password.' }); }
-  attempts.delete(key); const token = crypto.randomBytes(32).toString('hex'); sessions.set(token, { userId: user.id, expires: Date.now() + 8 * 60 * 60_000 });
-  res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
-});
-app.post('/api/logout', auth, (req, res) => { sessions.delete((req.headers.authorization || '').replace(/^Bearer /, '')); res.status(204).end(); });
-app.get('/api/me', auth, (req, res) => res.json({ name: req.user.name, email: req.user.email, role: req.user.role }));
-app.get('/api/doctors', (req, res) => res.json(store.doctors.filter(d => d.active !== false).map(publicDoctor)));
-app.get('/api/doctors/:id/slots', (req, res) => {
-  const doctor = store.doctors.find(d => d.id === req.params.id && d.active !== false);
-  const date = String(req.query.date || '');
-  if (!doctor || !validDate(date)) return res.status(400).json({ error: 'Choose a valid doctor and date.' });
-  const day = new Date(`${date}T12:00:00`).getDay(); const rule = (doctor.availability || []).find(a => a.day === day); const slots = [];
-  if (rule) for (let value = minutes(rule.start); value + rule.slotMinutes <= minutes(rule.end); value += rule.slotMinutes) { const time = `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`; slots.push({ time, available: slotAvailable(doctor, date, time) }); }
-  res.json({ doctor: publicDoctor(doctor), date, unavailable: (doctor.unavailableDates || []).includes(date), slots });
-});
-app.post('/api/appointments', (req, res) => {
-  const { doctorId, date, time, fullName, phone, email, service, message } = req.body;
-  const doctor = store.doctors.find(d => d.id === doctorId && d.active !== false);
-  if (!fullName || !phone || !service || !slotAvailable(doctor, date, time)) return res.status(400).json({ error: 'This time is unavailable or required details are missing. Please choose another slot.' });
-  const appointment = { id: id(), reference: `BH-${crypto.randomBytes(3).toString('hex').toUpperCase()}`, doctorId, date, time, fullName: String(fullName).trim(), phone: String(phone).trim(), email: String(email || '').trim(), service, message: String(message || '').trim(), status: 'pending', createdAt: new Date().toISOString() };
-  store.appointments.push(appointment); save(); res.status(201).json({ reference: appointment.reference, status: appointment.status, message: 'Your slot is reserved pending clinic confirmation.' });
-});
+app.get('/health',async(req,res,next)=>{try{await pool.query('SELECT 1');res.json({status:'ok',database:'connected'})}catch(e){next(e)}});
+app.post('/api/login',async(req,res,next)=>{try{
+  if(rateLimited(attempts,req.ip,8,15*60_000)) return res.status(429).json({error:'Too many attempts. Try again later.'});
+  const email=clean(req.body.email,200).toLowerCase(), {rows}=await pool.query('SELECT * FROM admins WHERE email=$1',[email]); const user=rows[0];
+  if(!user||!verifyPassword(String(req.body.password||''),user.password_hash)) return res.status(401).json({error:'Invalid email or password.'});
+  const token=crypto.randomBytes(32).toString('base64url'), expires=new Date(Date.now()+8*60*60_000); await pool.query('INSERT INTO admin_sessions(token_hash,admin_id,expires_at) VALUES($1,$2,$3)',[hashToken(token),user.id,expires]);
+  res.cookie(COOKIE,token,{httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict',path:'/',maxAge:8*60*60_000}); res.json({user:{name:user.name,email:user.email,role:'admin'}});
+}catch(e){next(e)}});
+app.post('/api/logout',auth,async(req,res,next)=>{try{const token=cookies(req)[COOKIE];await pool.query('DELETE FROM admin_sessions WHERE token_hash=$1',[hashToken(token)]);res.clearCookie(COOKIE,{path:'/'});res.status(204).end()}catch(e){next(e)}});
+app.get('/api/me',auth,(req,res)=>res.json(req.user));
+app.get('/api/doctors',async(req,res,next)=>{try{res.json(await getDoctors(false))}catch(e){next(e)}});
+app.get('/api/doctors/:id/slots',async(req,res,next)=>{try{const doctor=await getDoctor(req.params.id,false),date=clean(req.query.date,10);if(!doctor||!validDate(date))return res.status(400).json({error:'Choose a valid doctor and date.'});const day=new Date(`${date}T12:00:00`).getDay(),rule=doctor.availability.find(x=>x.day===day),slots=[];if(rule)for(let value=minutes(rule.start);value+rule.slotMinutes<=minutes(rule.end);value+=rule.slotMinutes){const time=`${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;slots.push({time,available:await available(doctor,date,time)})}res.json({doctor,date,unavailable:doctor.unavailableDates.includes(date),slots})}catch(e){next(e)}});
+app.post('/api/appointments',async(req,res,next)=>{try{
+  if(rateLimited(bookingAttempts,req.ip,6,10*60_000)) return res.status(429).json({error:'Too many booking requests. Please wait and try again.'});
+  const doctorId=clean(req.body.doctorId,40),date=clean(req.body.date,10),time=clean(req.body.time,5),doctor=await getDoctor(doctorId,false);
+  const fullName=clean(req.body.fullName,120),phone=clean(req.body.phone,40),email=clean(req.body.email,200),service=clean(req.body.service,80),message=clean(req.body.message,1000);
+  if(!fullName||!phone||!service||!(await available(doctor,date,time))) return res.status(400).json({error:'This time is unavailable or required details are missing. Please choose another slot.'});
+  const reference=`BH-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+  try{await pool.query(`INSERT INTO appointments(id,reference,doctor_id,appointment_date,appointment_time,full_name,phone,email,service,message) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,[id(),reference,doctorId,date,time,fullName,phone,email||null,service,message])}catch(error){if(error.code==='23505')return res.status(409).json({error:'That time was just reserved. Please choose another slot.'});throw error}
+  res.status(201).json({reference,status:'pending',message:'Your slot is reserved pending clinic confirmation.'});
+}catch(e){next(e)}});
 
-app.get('/api/admin/doctors', auth, role('admin'), (req, res) => res.json(store.doctors));
-app.post('/api/admin/doctors', auth, role('admin'), (req, res) => {
-  const { name, specialty } = req.body; const availability = Array.isArray(req.body.availability) ? req.body.availability : [];
-  if (!name || !specialty) return res.status(400).json({ error: 'Doctor name and specialty are required.' });
-  if (availability.some(a => !Number.isInteger(a.day) || a.day < 0 || a.day > 6 || !validTime(a.start) || !validTime(a.end) || minutes(a.start) >= minutes(a.end) || ![15,30,45,60].includes(Number(a.slotMinutes)))) return res.status(400).json({ error: 'Review the working hours. End time must be later than start time.' });
-  const doctor = { id: id(), name: String(name).trim(), specialty: String(specialty).trim(), active: true, availability: availability.map(a => ({ day: a.day, start: a.start, end: a.end, slotMinutes: Number(a.slotMinutes) })), unavailableDates: [...new Set((req.body.unavailableDates || []).filter(validDate))] };
-  store.doctors.push(doctor); save(); res.status(201).json(doctor);
-});
-app.patch('/api/admin/doctors/:id', auth, role('admin'), (req, res) => {
-  const d = store.doctors.find(x => x.id === req.params.id); if (!d) return res.status(404).json({ error: 'Doctor not found.' });
-  const availability = req.body.availability === undefined ? d.availability : req.body.availability;
-  if (!Array.isArray(availability) || availability.some(a => !Number.isInteger(a.day) || a.day < 0 || a.day > 6 || !validTime(a.start) || !validTime(a.end) || minutes(a.start) >= minutes(a.end) || ![15,30,45,60].includes(Number(a.slotMinutes)))) return res.status(400).json({ error: 'Review the working hours. End time must be later than start time.' });
-  if (req.body.name !== undefined && !String(req.body.name).trim()) return res.status(400).json({ error: 'Doctor name is required.' });
-  if (req.body.specialty !== undefined && !String(req.body.specialty).trim()) return res.status(400).json({ error: 'Specialty is required.' });
-  if (req.body.name !== undefined) d.name = String(req.body.name).trim();
-  if (req.body.specialty !== undefined) d.specialty = String(req.body.specialty).trim();
-  if (req.body.active !== undefined) d.active = req.body.active !== false;
-  d.availability = availability.map(a => ({ day: a.day, start: a.start, end: a.end, slotMinutes: Number(a.slotMinutes) }));
-  if (req.body.unavailableDates !== undefined) d.unavailableDates = [...new Set((req.body.unavailableDates || []).filter(validDate))];
-  save(); res.json(d);
-});
-app.get('/api/appointments', auth, role('admin', 'doctor'), (req, res) => { const doctor = store.doctors.find(d => d.userId === req.user.id); res.json(store.appointments.filter(a => req.user.role === 'admin' || a.doctorId === doctor?.id).sort((a,b) => `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`))); });
-app.patch('/api/appointments/:id', auth, role('admin', 'doctor'), (req, res) => { const a = store.appointments.find(x => x.id === req.params.id); const d = store.doctors.find(x => x.userId === req.user.id); if (!a || (req.user.role === 'doctor' && a.doctorId !== d?.id)) return res.status(404).json({ error: 'Appointment not found.' }); if (!['pending','confirmed','completed','cancelled','declined'].includes(req.body.status)) return res.status(400).json({ error: 'Invalid status.' }); a.status = req.body.status; save(); res.json(a); });
-app.delete('/api/appointments/:id', auth, role('admin'), (req, res) => { const index = store.appointments.findIndex(item => item.id === req.params.id); if (index < 0) return res.status(404).json({ error: 'Appointment not found.' }); store.appointments.splice(index, 1); save(); res.status(204).end(); });
-app.get('/api/doctor/schedule', auth, role('doctor'), (req, res) => { const d = store.doctors.find(x => x.userId === req.user.id); res.json(d); });
-app.put('/api/doctor/schedule', auth, role('doctor'), (req, res) => { const d = store.doctors.find(x => x.userId === req.user.id); const availability = Array.isArray(req.body.availability) ? req.body.availability : []; if (availability.some(a => !Number.isInteger(a.day) || a.day < 0 || a.day > 6 || !validTime(a.start) || !validTime(a.end) || minutes(a.start) >= minutes(a.end) || ![15,30,45,60].includes(Number(a.slotMinutes)))) return res.status(400).json({ error: 'Invalid schedule.' }); d.availability = availability.map(a => ({ day: a.day, start: a.start, end: a.end, slotMinutes: Number(a.slotMinutes) })); d.unavailableDates = [...new Set((req.body.unavailableDates || []).filter(validDate))]; save(); res.json(d); });
+app.get('/api/admin/doctors',auth,async(req,res,next)=>{try{res.json(await getDoctors(true))}catch(e){next(e)}});
+app.post('/api/admin/doctors',auth,async(req,res,next)=>{const client=await pool.connect();try{const name=clean(req.body.name,120),specialty=clean(req.body.specialty,160),availability=req.body.availability||[],dates=(req.body.unavailableDates||[]).filter(validDate);if(!name||!specialty||!validSchedule(availability))return res.status(400).json({error:'Complete the doctor details and review the schedule.'});await client.query('BEGIN');const doctor={id:id(),name,specialty};await client.query('INSERT INTO doctors(id,name,specialty) VALUES($1,$2,$3)',[doctor.id,name,specialty]);await replaceSchedule(client,doctor.id,availability,dates);await client.query('COMMIT');res.status(201).json(await getDoctor(doctor.id,true))}catch(e){await client.query('ROLLBACK');next(e)}finally{client.release()}});
+app.patch('/api/admin/doctors/:id',auth,async(req,res,next)=>{const client=await pool.connect();try{const current=await getDoctor(req.params.id,true);if(!current)return res.status(404).json({error:'Doctor not found.'});const name=req.body.name===undefined?current.name:clean(req.body.name,120),specialty=req.body.specialty===undefined?current.specialty:clean(req.body.specialty,160),availability=req.body.availability===undefined?current.availability:req.body.availability,dates=req.body.unavailableDates===undefined?current.unavailableDates:req.body.unavailableDates.filter(validDate);if(!name||!specialty||!validSchedule(availability))return res.status(400).json({error:'Review the doctor details and schedule.'});await client.query('BEGIN');await client.query('UPDATE doctors SET name=$1,specialty=$2,active=$3,updated_at=now() WHERE id=$4',[name,specialty,req.body.active===undefined?current.active:req.body.active!==false,req.params.id]);await replaceSchedule(client,req.params.id,availability,dates);await client.query('COMMIT');res.json(await getDoctor(req.params.id,true))}catch(e){await client.query('ROLLBACK');next(e)}finally{client.release()}});
+app.get('/api/appointments',auth,async(req,res,next)=>{try{const {rows}=await pool.query(`SELECT id,reference,doctor_id AS "doctorId",appointment_date AS date,to_char(appointment_time,'HH24:MI') AS time,full_name AS "fullName",phone,email,service,message,status,created_at AS "createdAt" FROM appointments ORDER BY appointment_date,appointment_time`);res.json(rows)}catch(e){next(e)}});
+app.patch('/api/appointments/:id',auth,async(req,res,next)=>{try{if(!appointmentStatuses.includes(req.body.status))return res.status(400).json({error:'Invalid status.'});const {rows}=await pool.query('UPDATE appointments SET status=$1,updated_at=now() WHERE id=$2 RETURNING *',[req.body.status,req.params.id]);if(!rows[0])return res.status(404).json({error:'Appointment not found.'});res.json(rows[0])}catch(e){if(e.code==='23505')return res.status(409).json({error:'That time already has an active appointment.'});next(e)}});
+app.delete('/api/appointments/:id',auth,async(req,res,next)=>{try{const result=await pool.query('DELETE FROM appointments WHERE id=$1',[req.params.id]);if(!result.rowCount)return res.status(404).json({error:'Appointment not found.'});res.status(204).end()}catch(e){next(e)}});
 
-app.use(express.static(__dirname, {
-  maxAge: '1d', index: 'index.html',
-  setHeaders: (res, filePath) => {
-    if (/\.(?:html|js|css)$/i.test(filePath)) res.setHeader('Cache-Control', 'no-cache, must-revalidate');
-  }
-}));
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.listen(PORT, '0.0.0.0', () => console.log(`Brilliant Healthcare listening on ${PORT}`));
+app.use(express.static(__dirname,{maxAge:'1d',index:'index.html',setHeaders:(res,filePath)=>{if(/\.(?:html|js|css)$/i.test(filePath))res.setHeader('Cache-Control','no-cache, must-revalidate')}}));
+app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'index.html')));
+app.use((error,req,res,next)=>{console.error(error.code||error.message);res.status(500).json({error:'The service could not complete your request. Please try again.'})});
+
+async function start(){await initDatabase({adminEmail:(process.env.ADMIN_EMAIL||'admin@brillianthealthcare.com').toLowerCase(),adminName:'Clinic Administrator',adminPasswordHash:hashPassword(process.env.ADMIN_PASSWORD||'ChangeMe123!')});app.listen(PORT,'0.0.0.0',()=>console.log(`Brilliant Healthcare listening on ${PORT} with PostgreSQL`))}
+start().catch(error=>{console.error('Startup failed:',error.message);process.exit(1)});
