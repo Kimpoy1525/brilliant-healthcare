@@ -25,7 +25,7 @@
             <form id="loginForm">
                 <label>Email address<input name="email" type="email" autocomplete="username" required></label>
                 <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
-                <button class="btn btn-primary" type="submit">Sign in securely</button>
+                <button id="loginSubmit" class="btn btn-primary" type="submit"><span>Sign in securely</span></button>
                 <p id="loginError" class="form-error" role="alert"></p>
             </form>
             <p class="security-note">Authorized clinic personnel only. Patient information is protected and should not be shared.</p>
@@ -86,6 +86,13 @@
             </section>
         </div>
     </main>
+    <div id="portalLoading" class="portal-loading" hidden role="status" aria-live="polite" aria-busy="true">
+        <div class="portal-loading-card">
+            <span class="portal-spinner" aria-hidden="true"></span>
+            <strong id="portalLoadingText">Loading secure portal…</strong>
+            <small>Please wait. Do not close this page.</small>
+        </div>
+    </div>
     <div id="portalNotice" class="portal-notice" role="status"></div>
     <script src="portal.js?v=2"></script>
 </body>

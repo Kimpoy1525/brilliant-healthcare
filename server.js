@@ -47,14 +47,15 @@ app.disable('x-powered-by');
 app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com'],imgSrc:["'self'",'data:','https:'],scriptSrc:["'self'"],connectSrc:["'self'"]}},crossOriginEmbedderPolicy:false}));
 app.use(express.json({limit:'20kb',type:'application/json'}));
 app.use((req,res,next)=>{res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');next()});
+app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');res.setHeader('Pragma','no-cache');next()});
 
 app.get('/health',async(req,res,next)=>{try{await pool.query('SELECT 1');res.json({status:'ok',database:'connected'})}catch(e){next(e)}});
 app.post('/api/login',async(req,res,next)=>{try{
   if(rateLimited(attempts,req.ip,8,15*60_000)) return res.status(429).json({error:'Too many attempts. Try again later.'});
   const email=clean(req.body.email,200).toLowerCase(), {rows}=await pool.query('SELECT * FROM admins WHERE email=$1',[email]); const user=rows[0];
   if(!user||!verifyPassword(String(req.body.password||''),user.password_hash)) return res.status(401).json({error:'Invalid email or password.'});
-  const token=crypto.randomBytes(32).toString('base64url'), expires=new Date(Date.now()+8*60*60_000); await pool.query('INSERT INTO admin_sessions(token_hash,admin_id,expires_at) VALUES($1,$2,$3)',[hashToken(token),user.id,expires]);
-  res.cookie(COOKIE,token,{httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict',path:'/',maxAge:8*60*60_000}); res.json({user:{name:user.name,email:user.email,role:'admin'}});
+  const token=crypto.randomBytes(32).toString('base64url'), expires=new Date(Date.now()+30*60_000); await pool.query('INSERT INTO admin_sessions(token_hash,admin_id,expires_at) VALUES($1,$2,$3)',[hashToken(token),user.id,expires]);
+  res.cookie(COOKIE,token,{httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict',path:'/',maxAge:30*60_000}); res.json({user:{name:user.name,email:user.email,role:'admin'}});
 }catch(e){next(e)}});
 app.post('/api/logout',auth,async(req,res,next)=>{try{const token=cookies(req)[COOKIE];await pool.query('DELETE FROM admin_sessions WHERE token_hash=$1',[hashToken(token)]);res.clearCookie(COOKIE,{path:'/'});res.status(204).end()}catch(e){next(e)}});
 app.get('/api/me',auth,(req,res)=>res.json(req.user));
