@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="booking-fix.css">
     <link rel="stylesheet" href="hospital-refresh.css">
     <link rel="stylesheet" href="service-photos.css">
+    <link rel="stylesheet" href="private-hospital.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
@@ -34,10 +35,10 @@
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="#about">Patient Information</a></li>
                 <li><a href="#services">Services</a></li>
-                <li><a href="#why-us">Why Us</a></li>
-                <li><a href="#contact">Appointments</a></li>
+                <li><a href="#medical-team">Doctors</a></li>
+                <li><a href="#contact">Contact</a></li>
                 <li><a href="portal.html">Admin Portal</a></li>
             </ul>
             <a href="#contact" class="btn btn-primary nav-cta">Book Appointment</a>
@@ -55,27 +56,27 @@
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
-                <span class="badge">Specialized care. Personal attention.</span>
-                <h1>Clinical excellence, delivered with <span class="gradient-text">genuine care.</span></h1>
-                <p>Brilliant Healthcare brings specialized dialysis and dependable diagnostic services together in one welcoming, patient-centered facility.</p>
+                <span class="badge">Dialysis &amp; Diagnostic Center</span>
+                <h1>Specialist care, made easier to access.</h1>
+                <p>Plan your visit, review services, and choose from the available schedule of your preferred physician—all in one place.</p>
                 <div class="hero-buttons">
-                    <a href="#contact" class="btn btn-primary">Request an Appointment <span aria-hidden="true">→</span></a>
-                    <a href="#services" class="btn btn-secondary">Explore Our Services</a>
+                    <a href="#contact" class="btn btn-primary">Book an appointment</a>
+                    <a href="#medical-team" class="btn btn-secondary">Find a doctor</a>
                 </div>
             </div>
             <div class="hero-image">
                 <div class="hero-image-frame"><img src="images/Brilliant Building.jpg" alt="Brilliant Healthcare facility entrance" class="hero-img" width="1200" height="900" fetchpriority="high"></div>
-                <div class="hero-care-card"><span>✓</span><div><strong>A calmer care experience</strong><small>Clear guidance at every step</small></div></div>
+                <div class="hero-care-card"><span aria-hidden="true">●</span><div><strong>Now accepting appointment requests</strong><small>View live physician availability</small></div></div>
             </div>
         </div>
     </section>
 
-    <section class="care-strip" aria-label="Care commitments">
+    <section class="patient-actions" aria-label="Patient quick actions">
         <div class="container">
-            <div><strong>Specialist-led care</strong><span>Experienced clinical team</span></div>
-            <div><strong>Modern diagnostics</strong><span>Accurate, dependable results</span></div>
-            <div><strong>Patient-first service</strong><span>Clear guidance at every visit</span></div>
-            <div><strong>Easy scheduling</strong><span>Live doctor availability</span></div>
+            <a href="#contact"><span>01</span><div><strong>Book an appointment</strong><small>Choose a doctor, date, and time</small></div><b aria-hidden="true">→</b></a>
+            <a href="#medical-team"><span>02</span><div><strong>Find a doctor</strong><small>View specialties and availability</small></div><b aria-hidden="true">→</b></a>
+            <a href="#services"><span>03</span><div><strong>Explore services</strong><small>Know what to expect before visiting</small></div><b aria-hidden="true">→</b></a>
+            <a href="tel:+15551234567"><span>04</span><div><strong>Call the clinic</strong><small>+1 (555) 123-4567</small></div><b aria-hidden="true">→</b></a>
         </div>
     </section>
 
@@ -88,26 +89,26 @@
                     <div class="about-image-note"><strong>One center</strong><span>Coordinated dialysis and diagnostics</span></div>
                 </div>
                 <div class="about-content">
-                    <span class="badge">About Us</span>
-                    <h2>Leading Dialysis & Diagnostic Center</h2>
-                    <p>At <strong>Brilliant Healthcare</strong>, we are dedicated to providing exceptional medical care with a focus on dialysis treatment and advanced diagnostic services. Our state-of-the-art facility is equipped with the latest technology, and our team of experienced specialists is committed to delivering personalized care to every patient.</p>
-                    <p>We understand the challenges that come with kidney disease and the importance of accurate diagnosis. That's why we've built a center that combines medical expertise with genuine compassion.</p>
+                    <span class="badge">Patient information</span>
+                    <h2>Know what to expect before your visit</h2>
+                    <p><strong>Brilliant Healthcare</strong> brings dialysis care and diagnostic services together in one coordinated center. Our appointment system shows physician availability before you submit your request.</p>
+                    <p>Please bring a valid ID, your physician’s referral or previous results when applicable, and a current list of medicines. The clinic will provide service-specific preparation instructions when your appointment is confirmed.</p>
                     <div class="about-features">
                         <div class="about-feature">
                             <span class="check-icon">✓</span>
-                            <span>24/7 Emergency Care</span>
+                            <span>Live appointment availability</span>
                         </div>
                         <div class="about-feature">
                             <span class="check-icon">✓</span>
-                            <span>Certified Nephrologists</span>
+                            <span>Specialist-led services</span>
                         </div>
                         <div class="about-feature">
                             <span class="check-icon">✓</span>
-                            <span>Modern Dialysis Machines</span>
+                            <span>Clear visit preparation</span>
                         </div>
                         <div class="about-feature">
                             <span class="check-icon">✓</span>
-                            <span>Comprehensive Lab Testing</span>
+                            <span>Privacy-conscious booking</span>
                         </div>
                     </div>
                 </div>
@@ -158,6 +159,26 @@
         </div>
     </section>
 
+    <section class="medical-team" id="medical-team" aria-labelledby="medicalTeamTitle">
+        <div class="container">
+            <div class="team-heading">
+                <div><span class="badge">Medical team</span><h2 id="medicalTeamTitle">Meet your physician</h2></div>
+                <p>Review the handling physician and go directly to the live appointment calendar.</p>
+            </div>
+            <article class="physician-profile">
+                <div class="physician-photo"><img src="images/generic-doctor.png" alt="Temporary physician profile placeholder" loading="lazy"></div>
+                <div class="physician-details">
+                    <span>Nephrology &amp; Internal Medicine</span>
+                    <h3>Dr. James Raphael</h3>
+                    <p>Handling physician for dialysis-related consultations and selected internal medicine appointments.</p>
+                    <dl><div><dt>Clinic schedule</dt><dd>View the live calendar for current availability</dd></div><div><dt>Appointment type</dt><dd>Clinic-administered request and confirmation</dd></div></dl>
+                    <a class="btn btn-primary" href="#contact">View schedule and book</a>
+                </div>
+            </article>
+            <p class="placeholder-note">Physician photograph is a temporary placeholder and will be replaced with an approved clinic photo.</p>
+        </div>
+    </section>
+
     <div class="service-modal" id="serviceModal" hidden>
         <div class="service-modal-backdrop" data-close-modal></div>
         <section class="service-modal-panel" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle" tabindex="-1">
@@ -171,40 +192,40 @@
     <section class="why-us" id="why-us">
         <div class="container">
             <div class="section-header">
-                <span class="badge">Why Choose Us</span>
-                <h2>Why Brilliant Healthcare?</h2>
-                <p>We are committed to providing the highest standard of care with a personal touch.</p>
+                <span class="badge">Care standards</span>
+                <h2>Designed around a safer, clearer visit</h2>
+                <p>Practical features that help patients prepare, schedule, and communicate with the clinic.</p>
             </div>
             <div class="why-us-grid">
                 <div class="why-us-card">
                     <div class="why-us-number">01</div>
-                    <h3>Expert Medical Team</h3>
-                    <p>Our team consists of highly qualified nephrologists, diagnosticians, and support staff with years of specialized experience.</p>
+                    <h3>Coordinated medical team</h3>
+                    <p>Services and physician schedules are managed by the clinic administrator in one system.</p>
                 </div>
                 <div class="why-us-card">
                     <div class="why-us-number">02</div>
-                    <h3>Advanced Technology</h3>
-                    <p>We invest in the latest medical equipment and diagnostic tools to ensure accurate results and effective treatments.</p>
+                    <h3>Current availability</h3>
+                    <p>Available times appear in green, while unavailable times are clearly marked and cannot be selected.</p>
                 </div>
                 <div class="why-us-card">
                     <div class="why-us-number">03</div>
-                    <h3>Patient-Centered Care</h3>
-                    <p>Every treatment plan is personalized to meet your unique needs, with compassionate support throughout your journey.</p>
+                    <h3>Clear preparation</h3>
+                    <p>Each service explains what it involves, what to expect, and how to prepare before your visit.</p>
                 </div>
                 <div class="why-us-card">
                     <div class="why-us-number">04</div>
-                    <h3>Clean & Safe Environment</h3>
-                    <p>Our facility maintains the highest standards of hygiene and safety, ensuring a comfortable experience for all patients.</p>
+                    <h3>Privacy-conscious forms</h3>
+                    <p>Appointment requests collect only necessary scheduling details and link directly to the Privacy Notice.</p>
                 </div>
                 <div class="why-us-card">
                     <div class="why-us-number">05</div>
-                    <h3>Affordable Pricing</h3>
-                    <p>Quality healthcare should be accessible. We offer competitive pricing and work with various insurance providers.</p>
+                    <h3>Administrative confirmation</h3>
+                    <p>The clinic team reviews each request and confirms the reserved schedule with the patient.</p>
                 </div>
                 <div class="why-us-card">
                     <div class="why-us-number">06</div>
-                    <h3>Convenient Location</h3>
-                    <p>Easily accessible with ample parking, flexible appointment scheduling, and minimal wait times.</p>
+                    <h3>Direct clinic contact</h3>
+                    <p>Phone, email, operating hours, and location details stay visible and easy to find.</p>
                 </div>
             </div>
         </div>
@@ -272,9 +293,9 @@
         <div class="container">
             <div class="contact-wrapper">
                 <div class="contact-info">
-                    <span class="badge">Get In Touch</span>
-                    <h2>Contact Us Today</h2>
-                    <p>Your health is our priority. Reach out to schedule an appointment or ask any questions.</p>
+                    <span class="badge">Appointments &amp; contact</span>
+                    <h2>Plan your clinic visit</h2>
+                    <p>Choose an available schedule online or contact the clinic team if you need assistance.</p>
                     <div class="info-items">
                         <div class="info-item">
                             <span class="info-icon">01</span>
@@ -385,8 +406,9 @@
                     </ul>
                 </div>
                 <div class="footer-newsletter">
-                    <h4>Stay Connected</h4>
-                    <p>Subscribe to our health newsletter for tips and updates.</p>
+                    <h4>Clinic assistance</h4>
+                    <p>For appointment support, call the clinic during operating hours.</p>
+                    <a class="footer-call" href="tel:+15551234567">+1 (555) 123-4567</a>
                     <form class="newsletter-form">
                         <input type="email" placeholder="Your Email" required>
                         <button type="submit" class="btn-subscribe" aria-label="Subscribe">→</button>
