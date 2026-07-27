@@ -27,7 +27,21 @@ const calendarDays = document.getElementById("calendarDays");
 const calendarMonth = document.getElementById("calendarMonth");
 let doctors = [], calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 dateInput.min = new Date().toISOString().slice(0, 10); dateInput.max = new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
-fetch("/api/doctors").then(r => r.json()).then(data => { doctors = data; doctors.forEach(d => doctorSelect.add(new Option(`${d.name} — ${d.specialty}`, d.id))); if (!doctors.length) slotHelp.textContent = "Online scheduling is being configured. Please call the clinic."; }).catch(() => { slotHelp.textContent = "Schedules could not be loaded."; });
+fetch("/api/doctors").then(r => r.json()).then(data => {
+    doctors = data;
+    doctors.forEach(d => doctorSelect.add(new Option(`${d.name} — ${d.specialty}`, d.id)));
+    if (!doctors.length) { slotHelp.textContent = "Online scheduling is being configured. Please call the clinic."; return; }
+    if (document.body.classList.contains("appointments-page")) {
+        const params = new URLSearchParams(location.search);
+        const requestedService = params.get("service");
+        const serviceSelect = form.elements.service;
+        if (requestedService && [...serviceSelect.options].some(option => option.value === requestedService)) serviceSelect.value = requestedService;
+        if (params.get("doctor") === "james-raphael") {
+            const james = doctors.find(d => d.name.includes("James Raphael"));
+            if (james) { doctorSelect.value = james.id; doctorSelect.dispatchEvent(new Event("change")); }
+        }
+    }
+}).catch(() => { slotHelp.textContent = "Schedules could not be loaded."; });
 function formatTime(value) { return new Date(`2000-01-01T${value}:00`).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
 function localDateValue(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`; }
 function renderCalendar() {
@@ -84,7 +98,19 @@ function openServiceModal(card) { const detail = serviceDetails[card.dataset.ser
 function closeServiceModal(restoreFocus = true) { serviceModal.hidden = true; document.body.classList.remove("modal-open"); if (restoreFocus) modalTrigger?.focus(); }
 document.querySelectorAll(".service-card[data-service]").forEach(card => { card.addEventListener("click", () => openServiceModal(card)); card.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openServiceModal(card); } }); });
 serviceModal.querySelectorAll("[data-close-modal]").forEach(button => button.addEventListener("click", closeServiceModal)); document.addEventListener("keydown", event => { if (event.key === "Escape" && !serviceModal.hidden) closeServiceModal(); });
-document.getElementById("serviceModalBook").addEventListener("click", function (event) { event.preventDefault(); form.elements.service.value = this.dataset.service; const james = doctors.find(d => d.name.includes("James Raphael")); if (james) { doctorSelect.value = james.id; doctorSelect.dispatchEvent(new Event("change")); } closeServiceModal(false); form.classList.remove("booking-highlight"); requestAnimationFrame(() => { form.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); form.classList.add("booking-highlight"); form.setAttribute("tabindex", "-1"); form.focus({ preventScroll: true }); setTimeout(() => form.classList.remove("booking-highlight"), 1600); }); });
+document.getElementById("serviceModalBook").addEventListener("click", function (event) {
+    event.preventDefault();
+    if (!document.body.classList.contains("appointments-page")) {
+        location.href = `appointments.html?service=${encodeURIComponent(this.dataset.service)}&doctor=james-raphael`;
+        return;
+    }
+    form.elements.service.value = this.dataset.service;
+    const james = doctors.find(d => d.name.includes("James Raphael"));
+    if (james) { doctorSelect.value = james.id; doctorSelect.dispatchEvent(new Event("change")); }
+    closeServiceModal(false);
+    form.classList.remove("booking-highlight");
+    requestAnimationFrame(() => { form.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); form.classList.add("booking-highlight"); form.setAttribute("tabindex", "-1"); form.focus({ preventScroll: true }); setTimeout(() => form.classList.remove("booking-highlight"), 1600); });
+});
 
 const reveal = document.querySelectorAll(".service-card, .why-us-card, .testimonial-card");
 if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) reveal.forEach(x => x.classList.add("fade-in")); else { const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add("fade-in"); observer.unobserve(entry.target); } }), { threshold: .1 }); reveal.forEach(x => observer.observe(x)); }

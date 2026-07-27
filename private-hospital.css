@@ -71,3 +71,15 @@ body,button,input,select,textarea{font-family:Muli,Arial,sans-serif}
 .contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{border-color:#1cb651;box-shadow:0 0 0 3px rgba(28,182,81,.12)}
 .footer{background:#075381}.footer-call{color:#8de4a8}
 @media(max-width:768px){.navbar .container{height:74px}.nav-links{top:74px}.patient-actions{background:#066aab}}
+
+/* Multi-page layout */
+.home-page .about,.home-page .services,.home-page .medical-team,.home-page .why-us,.home-page .testimonials,.home-page .visit-path,.home-page .contact{display:none}
+.inner-page .patient-actions,.inner-page .about,.inner-page .services,.inner-page .medical-team,.inner-page .why-us,.inner-page .testimonials,.inner-page .visit-path,.inner-page .contact{display:none}
+.patient-information-page .about,.patient-information-page .why-us,.services-page .services,.doctors-page .medical-team,.appointments-page .visit-path,.appointments-page .contact{display:block}
+.inner-page .hero{min-height:330px;background:#f5f8fa;border-bottom:1px solid var(--line)}
+.inner-page .hero .container{display:block;min-height:330px;padding-block:68px}
+.inner-page .hero-content{max-width:800px}.inner-page .hero-content h1{font-size:clamp(2.4rem,4vw,3.55rem)}
+.inner-page .hero-image{display:none}.inner-page .hero-buttons{margin-top:24px}
+.patient-information-page .nav-links a[href="patient-information.html"],.services-page .nav-links a[href="services.html"],.doctors-page .nav-links a[href="doctors.html"],.appointments-page .nav-links a[href="appointments.html"],.home-page .nav-links a[href="index.html"]{color:#066aab}
+.patient-information-page .nav-links a[href="patient-information.html"]:after,.services-page .nav-links a[href="services.html"]:after,.doctors-page .nav-links a[href="doctors.html"]:after,.appointments-page .nav-links a[href="appointments.html"]:after,.home-page .nav-links a[href="index.html"]:after{transform:scaleX(1)}
+@media(max-width:768px){.inner-page .hero,.inner-page .hero .container{min-height:0}.inner-page .hero .container{padding-block:52px}.inner-page .nav-links a:after{display:none}}
