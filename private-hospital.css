@@ -78,12 +78,14 @@ body,button,input,select,textarea{font-family:Muli,Arial,sans-serif}
 .inner-page .patient-actions,.inner-page .about,.inner-page .services,.inner-page .medical-team,.inner-page .why-us,.inner-page .testimonials,.inner-page .visit-path,.inner-page .contact{display:none}
 .patient-information-page .about,.patient-information-page .why-us,.services-page .services,.doctors-page .medical-team,.appointments-page .visit-path,.appointments-page .contact{display:block}
 .inner-page .hero{min-height:330px;background:#f5f8fa;border-bottom:1px solid var(--line)}
-.inner-page .hero .container{display:block;min-height:330px;padding-block:68px}
-.inner-page .hero-content{max-width:800px}.inner-page .hero-content h1{font-size:clamp(2.4rem,4vw,3.55rem)}
-.inner-page .hero-image{display:none}.inner-page .hero-buttons{margin-top:24px}
+.inner-page .hero .container{display:grid;min-height:430px;grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:clamp(40px,6vw,76px);align-items:center;padding-block:56px}
+.inner-page .hero-content{max-width:760px}.inner-page .hero-content h1{font-size:clamp(2.4rem,4vw,3.55rem)}
+.inner-page .hero-image{display:block;width:100%;max-width:520px;justify-self:end;padding:0}.inner-page .hero-image-frame{width:100%;aspect-ratio:16/10;border-radius:3px}.inner-page .hero-img{object-position:center}.inner-page .hero-buttons{margin-top:24px}
+.temporary-image-note{margin-top:8px;color:#73828a;font-size:.61rem;text-align:right}
 .patient-information-page .nav-links a[href="patient-information.html"],.services-page .nav-links a[href="services.html"],.doctors-page .nav-links a[href="doctors.html"],.appointments-page .nav-links a[href="appointments.html"],.home-page .nav-links a[href="index.html"]{color:#066aab}
 .patient-information-page .nav-links a[href="patient-information.html"]:after,.services-page .nav-links a[href="services.html"]:after,.doctors-page .nav-links a[href="doctors.html"]:after,.appointments-page .nav-links a[href="appointments.html"]:after,.home-page .nav-links a[href="index.html"]:after{transform:scaleX(1)}
-@media(max-width:768px){.inner-page .hero,.inner-page .hero .container{min-height:0}.inner-page .hero .container{padding-block:52px}.inner-page .nav-links a:after{display:none}}
+@media(max-width:1000px){.inner-page .hero .container{grid-template-columns:minmax(0,1fr);gap:34px}.inner-page .hero-image{width:min(100%,680px);max-width:none;justify-self:start}.inner-page .hero-image-frame{aspect-ratio:16/9}}
+@media(max-width:768px){.inner-page .hero,.inner-page .hero .container{min-height:0}.inner-page .hero .container{padding-block:52px}.inner-page .nav-links a:after{display:none}.temporary-image-note{text-align:left}}
 
 /* Final phone layout safeguards */
 @media(max-width:768px){
@@ -98,6 +100,7 @@ body{font-size:16px}
 .hero-content{width:100%;max-width:100%;min-width:0}.hero-content h1,.inner-page .hero-content h1{width:100%;max-width:100%;font-size:clamp(2.15rem,10.5vw,3rem);letter-spacing:-.04em;line-height:1.08;overflow-wrap:break-word}.hero-content>p{width:100%;max-width:100%;font-size:.92rem;line-height:1.7}
 .hero-buttons{display:grid;width:100%;grid-template-columns:1fr;gap:10px}.hero-buttons .btn{width:100%;min-width:0;padding-inline:14px;text-align:center}
 .hero-image{width:100%;max-width:100%;margin:0;padding:0}.hero-image-frame{width:100%;min-height:0;aspect-ratio:4/4.25;border-radius:2px}.hero-care-card{position:static;width:100%;max-width:100%;margin-top:10px}
+.inner-page .hero-image-frame{aspect-ratio:16/10}
 .patient-actions .container{grid-template-columns:1fr;padding-inline:14px}.patient-actions a,.patient-actions a:first-child{width:100%;min-height:82px;padding:16px 12px;border-inline:0}
 .about,.services,.medical-team,.why-us,.contact{width:100%;padding:64px 0}.section-header{width:100%;margin-bottom:30px;text-align:left}.section-header .badge{justify-content:flex-start}
 .about-grid,.contact-wrapper{width:100%;grid-template-columns:minmax(0,1fr);gap:38px}.about-image{width:100%;max-width:100%}.about-image:before{display:none}.about-img{width:100%;aspect-ratio:4/3}.about-image-note{position:static;width:100%;margin-top:8px}.about-features{grid-template-columns:1fr}
