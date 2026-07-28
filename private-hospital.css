@@ -84,3 +84,38 @@ body,button,input,select,textarea{font-family:Muli,Arial,sans-serif}
 .patient-information-page .nav-links a[href="patient-information.html"],.services-page .nav-links a[href="services.html"],.doctors-page .nav-links a[href="doctors.html"],.appointments-page .nav-links a[href="appointments.html"],.home-page .nav-links a[href="index.html"]{color:#066aab}
 .patient-information-page .nav-links a[href="patient-information.html"]:after,.services-page .nav-links a[href="services.html"]:after,.doctors-page .nav-links a[href="doctors.html"]:after,.appointments-page .nav-links a[href="appointments.html"]:after,.home-page .nav-links a[href="index.html"]:after{transform:scaleX(1)}
 @media(max-width:768px){.inner-page .hero,.inner-page .hero .container{min-height:0}.inner-page .hero .container{padding-block:52px}.inner-page .nav-links a:after{display:none}}
+
+/* Final phone layout safeguards */
+@media(max-width:768px){
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{font-size:16px}
+.container{width:100%;max-width:100%;margin-inline:0;padding-inline:18px}
+.site-header,.navbar{width:100%;max-width:100%}.navbar .container{width:100%;height:70px;padding-inline:14px}
+.navbar .logo{min-width:0;gap:8px}.navbar .logo-mark{width:44px;height:44px;flex-basis:44px;border-radius:8px}.navbar .logo-img{width:108px;height:108px;transform:translate(-32px,-24px)}
+.logo-copy{min-width:0}.logo-copy strong{display:block;overflow:hidden;max-width:210px;font-size:.79rem;text-overflow:ellipsis;white-space:nowrap}.logo-copy small{display:none}
+.hamburger{display:block;flex:0 0 44px;margin-left:auto}.nav-links{top:70px;width:100%;max-height:0;padding-inline:18px}.nav-links.active{max-height:calc(100vh - 70px);overflow-y:auto;padding:8px 18px 20px}.nav-links a{padding:14px 2px;font-size:.82rem}
+.hero,.inner-page .hero{width:100%;min-height:0}.hero .container,.inner-page .hero .container{display:grid;width:100%;min-height:0;grid-template-columns:minmax(0,1fr);gap:30px;padding:44px 18px 52px}
+.hero-content{width:100%;max-width:100%;min-width:0}.hero-content h1,.inner-page .hero-content h1{width:100%;max-width:100%;font-size:clamp(2.15rem,10.5vw,3rem);letter-spacing:-.04em;line-height:1.08;overflow-wrap:break-word}.hero-content>p{width:100%;max-width:100%;font-size:.92rem;line-height:1.7}
+.hero-buttons{display:grid;width:100%;grid-template-columns:1fr;gap:10px}.hero-buttons .btn{width:100%;min-width:0;padding-inline:14px;text-align:center}
+.hero-image{width:100%;max-width:100%;margin:0;padding:0}.hero-image-frame{width:100%;min-height:0;aspect-ratio:4/4.25;border-radius:2px}.hero-care-card{position:static;width:100%;max-width:100%;margin-top:10px}
+.patient-actions .container{grid-template-columns:1fr;padding-inline:14px}.patient-actions a,.patient-actions a:first-child{width:100%;min-height:82px;padding:16px 12px;border-inline:0}
+.about,.services,.medical-team,.why-us,.contact{width:100%;padding:64px 0}.section-header{width:100%;margin-bottom:30px;text-align:left}.section-header .badge{justify-content:flex-start}
+.about-grid,.contact-wrapper{width:100%;grid-template-columns:minmax(0,1fr);gap:38px}.about-image{width:100%;max-width:100%}.about-image:before{display:none}.about-img{width:100%;aspect-ratio:4/3}.about-image-note{position:static;width:100%;margin-top:8px}.about-features{grid-template-columns:1fr}
+.services-grid{width:100%;grid-template-columns:minmax(0,1fr);gap:14px;border:0}.service-card{width:100%;min-width:0;min-height:0}.service-photo{height:190px}.service-card-body{padding:20px 20px 54px}
+.team-heading{width:100%;margin-bottom:26px}.team-heading h2,.about-content h2,.section-header h2,.contact-info h2{font-size:clamp(1.9rem,8vw,2.45rem);line-height:1.16}
+.doctor-directory{width:100%;gap:18px}.doctor-directory .physician-profile,.physician-profile{width:100%;grid-template-columns:minmax(0,1fr)}.doctor-directory .physician-photo,.physician-photo{width:100%;min-height:0;height:285px;max-height:none}.physician-details{min-width:0;padding:24px 20px}.physician-details h3{font-size:1.5rem}.physician-details dl{grid-template-columns:1fr;gap:12px}.physician-details .btn{width:100%;padding-inline:12px}
+.why-us-grid{grid-template-columns:minmax(0,1fr);gap:12px}.why-us-card{width:100%;min-height:0;padding:22px}
+.visit-path{width:100%;padding:60px 0}.visit-path .container{width:100%;grid-template-columns:minmax(0,1fr);gap:28px}.visit-steps{width:100%}.visit-steps article{width:100%;min-width:0;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:15px}.visit-steps article>span{width:38px;height:38px}.visit-steps p{overflow-wrap:break-word}
+.contact-form{width:100%;max-width:100%;margin:0;padding:22px 16px}.form-row{grid-template-columns:minmax(0,1fr);gap:14px;margin-bottom:14px}.contact-form input,.contact-form select,.contact-form textarea{min-width:0;font-size:16px}
+.schedule-calendar{width:100%;padding:11px 8px}.calendar-toolbar{gap:8px}.calendar-toolbar strong{min-width:0;font-size:.83rem;text-align:center}.calendar-legend{flex-wrap:wrap;gap:8px 14px}.calendar-grid{width:100%;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}.calendar-day{width:100%;min-width:0;min-height:36px;padding:2px;font-size:.64rem}
+.time-picker{width:100%;padding:12px 9px}.time-slots{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.time-slot{min-width:0;padding:9px 2px;font-size:.66rem}
+.consent{width:100%;line-height:1.5}.btn-full{width:100%}
+.service-modal{padding:8px}.service-modal-panel{width:100%;max-height:calc(100dvh - 16px);grid-template-columns:1fr;border-radius:10px}.service-modal-visual{height:190px;border-radius:10px 10px 0 0}.service-modal-content{padding:24px 17px}.service-modal-content .btn{width:100%;padding-inline:12px}
+.footer{width:100%;padding-top:48px}.footer-content{width:100%;grid-template-columns:minmax(0,1fr);gap:28px}.footer .logo{max-width:100%}.footer-brand>p{max-width:100%}.footer-bottom{line-height:1.7}
+.notification{right:12px;left:12px;max-width:none;top:82px}
+}
+@media(max-width:380px){
+.container{padding-inline:14px}.navbar .container{padding-inline:10px}.logo-copy strong{max-width:185px;font-size:.73rem}
+.hero .container,.inner-page .hero .container{padding:38px 14px 46px}.hero-content h1,.inner-page .hero-content h1{font-size:2rem}
+.time-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-form{padding-inline:12px}
+}
