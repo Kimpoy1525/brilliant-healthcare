@@ -79,7 +79,8 @@ function renderAppointments(){
         const reference=document.createElement("span");reference.className="appointment-reference";reference.textContent=`Ref ${a.reference}`;
         heading.append(name,reference);
         const grid=document.createElement("div");grid.className="patient-grid";
-        grid.append(patientField("Phone",a.phone,"tel:"),patientField("Email",a.email,a.email?"mailto:":null),patientField("Service",serviceName(a.service)),patientField("Assigned doctor",a.doctorName||"Doctor record unavailable"));
+        const reminder=a.reminderSentAt?`Sent ${new Date(a.reminderSentAt).toLocaleString()}`:a.smsConsent?({"scheduled":"Scheduled","failed":"Delivery retry pending","invalid_number":"Invalid mobile number"})[a.reminderStatus]||"Scheduled":"Not authorized";
+        grid.append(patientField("Phone",a.phone,"tel:"),patientField("Email",a.email,a.email?"mailto:":null),patientField("Service",serviceName(a.service)),patientField("Assigned doctor",a.doctorName||"Doctor record unavailable"),patientField("SMS reminder",reminder));
         const question=document.createElement("div");question.className=`patient-question${a.message?"":" empty-question"}`;
         const questionLabel=document.createElement("small");questionLabel.textContent="Patient question or scheduling need";
         const questionText=document.createElement("p");questionText.textContent=a.message||"No question or additional note was provided.";
@@ -98,6 +99,7 @@ function renderAppointments(){
 document.getElementById("statusFilter").addEventListener("change",renderAppointments);
 document.getElementById("dateFilter").addEventListener("change",renderAppointments);
 document.getElementById("clearFilters").addEventListener("click",()=>{document.getElementById("statusFilter").value="";document.getElementById("dateFilter").value="";renderAppointments()});
+document.getElementById("runReminders").addEventListener("click",async event=>{const button=event.currentTarget,original=button.textContent;button.disabled=true;button.textContent="Sending reminders…";try{const result=await api("/api/admin/reminders/run",{method:"POST"});notify(`Reminder check complete: ${result.sent||0} sent, ${result.failed||0} failed.`);await loadAppointments()}catch(e){notify(e.message)}finally{button.disabled=false;button.textContent=original}});
 async function initializePortal(){
     showLoading("Securing the administration portal…");
     try{await fetch("/api/logout",{method:"POST"})}catch{}

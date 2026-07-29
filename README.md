@@ -13,3 +13,9 @@ The database schema is created automatically on startup with Row Level Security 
 ## Railway
 
 Set `DATABASE_URL`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` in Railway. Appointments, doctors, schedules, and administrator sessions are stored in Supabase PostgreSQL. `railway.toml` configures the start command and database-aware health check.
+
+## SMS appointment reminders
+
+Set `SEMAPHORE_API_KEY` in Railway to enable automatic reminders through Semaphore. Set `SEMAPHORE_SENDER_NAME` after the clinic's sender name is approved; if omitted, Semaphore uses the account default. The server checks every 15 minutes for active, consented appointments scheduled for the following day in the `Asia/Manila` time zone. Each reminder is recorded in PostgreSQL before it can be considered complete, and an advisory lock prevents overlapping deployments from sending duplicates.
+
+The SMS does not contain the requested service, diagnosis, patient question, or other clinical details. Delivery credits and an active Semaphore account are required.

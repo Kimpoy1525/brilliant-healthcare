@@ -334,7 +334,7 @@
                     <p class="form-intro">Choose a doctor, date, and an available time. Green times are available; red times are already reserved.</p>
                     <div class="form-row">
                         <label>Full name <span>*</span><input name="fullName" type="text" autocomplete="name" required></label>
-                        <label>Phone number <span>*</span><input name="phone" type="tel" autocomplete="tel" required></label>
+                        <label>Philippine mobile number <span>*</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="09XX XXX XXXX" pattern="(?:\+?63|0)9\d{9}" title="Enter a Philippine mobile number such as 09171234567." required></label>
                     </div>
                     <div class="form-row">
                         <label>Email address<input name="email" type="email" autocomplete="email"></label>
@@ -366,7 +366,7 @@
                         <input type="hidden" name="time" id="appointmentTime" required>
                     </fieldset>
                     <label class="message-label">Questions or scheduling needs<textarea name="message" placeholder="Please do not include sensitive medical information." rows="4"></textarea></label>
-                    <label class="consent"><input name="consent" type="checkbox" required> I agree to be contacted about this appointment and acknowledge the <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. <span>*</span></label>
+                    <label class="consent"><input name="smsConsent" type="checkbox" required> I agree to receive an automated SMS reminder at this mobile number one day before my appointment and acknowledge the <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. <span>*</span></label>
                     <p class="privacy-note">Your chosen time is reserved after submission, pending clinic confirmation. For emergencies, contact emergency services instead of using this form.</p>
                     <button type="submit" class="btn btn-primary btn-full">Send Appointment Request <span aria-hidden="true">→</span></button>
                 </form>

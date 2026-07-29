@@ -70,10 +70,20 @@ CREATE TABLE IF NOT EXISTS appointments (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS sms_consent boolean NOT NULL DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_status text NOT NULL DEFAULT 'not_scheduled';
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_sent_at timestamptz;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_attempted_at timestamptz;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_attempts integer NOT NULL DEFAULT 0;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_provider_id text NOT NULL DEFAULT '';
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_error text NOT NULL DEFAULT '';
 CREATE UNIQUE INDEX IF NOT EXISTS appointments_active_slot
   ON appointments(doctor_id, appointment_date, appointment_time)
   WHERE status NOT IN ('cancelled','declined');
 CREATE INDEX IF NOT EXISTS appointments_date_idx ON appointments(appointment_date, appointment_time);
+CREATE INDEX IF NOT EXISTS appointments_sms_reminder_idx
+  ON appointments(appointment_date, reminder_sent_at)
+  WHERE sms_consent=true AND status IN ('pending','confirmed');
 CREATE TABLE IF NOT EXISTS admin_sessions (
   token_hash text PRIMARY KEY,
   admin_id uuid NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
