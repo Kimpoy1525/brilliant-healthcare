@@ -19,9 +19,9 @@ async function main() {
       duplicateRejected = error.code === '23505';
       await client.query('ROLLBACK TO SAVEPOINT duplicate_test');
     }
-    const rls = await client.query(`SELECT count(*)::int AS count FROM pg_class WHERE relrowsecurity=true AND relname IN ('admins','doctors','doctor_schedules','doctor_unavailable_dates','appointments','admin_sessions')`);
+    const rls = await client.query(`SELECT count(*)::int AS count FROM pg_class WHERE relrowsecurity=true AND relname IN ('admins','doctors','doctor_schedules','doctor_unavailable_dates','appointments','admin_sessions','login_attempts')`);
     console.log(JSON.stringify({ duplicateRejected, rlsTables: rls.rows[0].count, transactionRolledBack: true }));
-    if (!duplicateRejected || rls.rows[0].count !== 6) throw new Error('Database security verification failed.');
+    if (!duplicateRejected || rls.rows[0].count !== 7) throw new Error('Database security verification failed.');
     await client.query('ROLLBACK');
   } finally {
     client.release();

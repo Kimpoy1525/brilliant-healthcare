@@ -1,5 +1,6 @@
 "use strict";
-const token=()=>true,headers=()=>({"Content-Type":"application/json"});
+let csrfValue="";
+const token=()=>true,headers=()=>({"Content-Type":"application/json",...(csrfValue?{"X-CSRF-Token":csrfValue}:{})});
 const loginView=document.getElementById("loginView"),dashboard=document.getElementById("dashboard"),identity=document.getElementById("identity"),logout=document.getElementById("logout"),notice=document.getElementById("portalNotice");
 const loading=document.getElementById("portalLoading"),loadingText=document.getElementById("portalLoadingText"),loginSubmit=document.getElementById("loginSubmit");
 const adminPassword=document.getElementById("adminPassword"),togglePassword=document.getElementById("togglePassword");
@@ -11,16 +12,16 @@ function concealPassword(){adminPassword.type="password";togglePassword.textCont
 togglePassword.addEventListener("click",()=>{const visible=adminPassword.type==="text";adminPassword.type=visible?"password":"text";togglePassword.textContent=visible?"Show":"Hide";togglePassword.setAttribute("aria-pressed",String(!visible));adminPassword.focus()});
 function notify(message){notice.textContent=message;notice.classList.add("show");setTimeout(()=>notice.classList.remove("show"),3500)}
 async function api(url,options={}){const response=await fetch(url,{...options,headers:{...headers(),...(options.headers||{})}});if(response.status===401){showLogin();throw new Error("Please sign in again.")}const data=response.status===204?null:await response.json();if(!response.ok)throw new Error(data.error||"Request failed.");return data}
-function showLogin(){clearTimeout(inactivityTimer);currentUser=undefined;concealPassword();loginView.hidden=false;dashboard.hidden=true;logout.hidden=true;identity.textContent=""}
+function showLogin(){clearTimeout(inactivityTimer);currentUser=undefined;csrfValue="";concealPassword();loginView.hidden=false;dashboard.hidden=true;logout.hidden=true;identity.textContent=""}
 async function boot(){
     showLoading("Loading your secure dashboard…");
-    try{currentUser=await api("/api/me");loginView.hidden=true;dashboard.hidden=false;logout.hidden=false;identity.textContent=`${currentUser.name} · ${currentUser.role}`;document.getElementById("dashboardTitle").textContent=currentUser.role==="admin"?"Administrator dashboard":"Doctor dashboard";document.getElementById("adminTools").hidden=currentUser.role!=="admin";document.getElementById("scheduleTools").hidden=currentUser.role!=="doctor";if(currentUser.role==="admin")await loadDoctors();else await loadSchedule();await loadAppointments();armSessionTimeout()}catch(error){document.getElementById("loginError").textContent=error.message;showLogin()}finally{hideLoading()}
+    try{currentUser=await api("/api/me");csrfValue=currentUser.csrfToken||"";delete currentUser.csrfToken;loginView.hidden=true;dashboard.hidden=false;logout.hidden=false;identity.textContent=`${currentUser.name} · ${currentUser.role}`;document.getElementById("dashboardTitle").textContent=currentUser.role==="admin"?"Administrator dashboard":"Doctor dashboard";document.getElementById("adminTools").hidden=currentUser.role!=="admin";document.getElementById("scheduleTools").hidden=currentUser.role!=="doctor";if(currentUser.role==="admin")await loadDoctors();else await loadSchedule();await loadAppointments();armSessionTimeout()}catch(error){document.getElementById("loginError").textContent=error.message;showLogin()}finally{hideLoading()}
 }
 document.getElementById("loginForm").addEventListener("submit",async event=>{
     event.preventDefault();const error=document.getElementById("loginError");error.textContent="";loginSubmit.disabled=true;loginSubmit.querySelector("span").textContent="Signing in…";showLoading("Verifying your credentials…");
     try{await fetch("/api/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(event.target)))}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error);return d});event.target.reset();await boot()}catch(e){error.textContent=e.message;hideLoading()}finally{loginSubmit.disabled=false;loginSubmit.querySelector("span").textContent="Sign in securely"}
 });
-async function secureLogout(message){showLoading("Signing out securely…");try{await fetch("/api/logout",{method:"POST"})}catch{}showLogin();hideLoading();if(message)notify(message)}
+async function secureLogout(message){showLoading("Signing out securely…");try{await api("/api/logout",{method:"POST"})}catch{}showLogin();hideLoading();if(message)notify(message)}
 logout.addEventListener("click",()=>secureLogout());document.getElementById("refresh").addEventListener("click",boot);
 ["pointerdown","keydown"].forEach(type=>document.addEventListener(type,()=>{if(currentUser)armSessionTimeout()},{passive:true}));
 let adminDoctors=[];
@@ -102,7 +103,6 @@ document.getElementById("clearFilters").addEventListener("click",()=>{document.g
 document.getElementById("runReminders").addEventListener("click",async event=>{const button=event.currentTarget,original=button.textContent;button.disabled=true;button.textContent="Sending reminders…";try{const result=await api("/api/admin/reminders/run",{method:"POST"});notify(`Reminder check complete: ${result.sent||0} sent, ${result.failed||0} failed.`);await loadAppointments()}catch(e){notify(e.message)}finally{button.disabled=false;button.textContent=original}});
 async function initializePortal(){
     showLoading("Securing the administration portal…");
-    try{await fetch("/api/logout",{method:"POST"})}catch{}
     showLogin();hideLoading();document.querySelector('#loginForm input[name="email"]').focus();
 }
 initializePortal();

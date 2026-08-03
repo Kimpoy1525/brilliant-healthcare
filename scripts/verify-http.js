@@ -7,13 +7,15 @@ async function request(url, options = {}) {
 
 async function main() {
   const base = process.env.VERIFY_BASE_URL || 'http://localhost:3219';
+  const mutationHeaders = { 'Content-Type': 'application/json', Origin: base };
   const login = await request(`${base}/api/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: mutationHeaders,
     body: JSON.stringify({ email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD })
   });
   const cookie = login.response.headers.get('set-cookie').split(';')[0];
   const authenticated = await request(`${base}/api/me`, { headers: { Cookie: cookie } });
+  const adminHeaders = { Cookie: cookie, Origin: base, 'X-CSRF-Token': authenticated.body.csrfToken };
   const doctors = (await request(`${base}/api/doctors`)).body;
   const doctor = doctors.find(item => item.name.includes('James Raphael'));
   let chosen;
@@ -27,20 +29,20 @@ async function main() {
   if (!chosen) throw new Error('No verification slot available.');
   const booking = await request(`${base}/api/appointments`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ doctorId: doctor.id, ...chosen, fullName: 'Automated Verification', phone: '000-VERIFY', service: 'checkup', message: 'Automatically removed after verification.' })
+    headers: mutationHeaders,
+    body: JSON.stringify({ doctorId: doctor.id, ...chosen, fullName: 'Automated Verification', phone: '09171234567', service: 'checkup', message: 'Automatically removed after verification.', smsConsent: true })
   });
   let duplicateRejected = false;
   try {
     await request(`${base}/api/appointments`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ doctorId: doctor.id, ...chosen, fullName: 'Duplicate Verification', phone: '000-VERIFY', service: 'checkup' })
+      headers: mutationHeaders,
+      body: JSON.stringify({ doctorId: doctor.id, ...chosen, fullName: 'Duplicate Verification', phone: '09171234567', service: 'checkup', smsConsent: true })
     });
   } catch (error) { duplicateRejected = error.message.startsWith('400:') || error.message.startsWith('409:'); }
   const appointments = (await request(`${base}/api/appointments`, { headers: { Cookie: cookie } })).body;
   const created = appointments.find(item => item.reference === booking.body.reference);
-  await request(`${base}/api/appointments/${created.id}`, { method: 'DELETE', headers: { Cookie: cookie } });
+  await request(`${base}/api/appointments/${created.id}`, { method: 'DELETE', headers: adminHeaders });
   console.log(JSON.stringify({ adminRole: authenticated.body.role, doctor: doctor.name, bookingCreated: true, duplicateRejected, testRecordDeleted: true }));
 }
 

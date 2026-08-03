@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const helmet = require('helmet');
-const { pool, initDatabase, getDoctors, getDoctor, replaceSchedule } = require('./database');
+const { pool, initDatabase, getDoctors, getDoctor, replaceSchedule, isLoginBlocked, recordLoginFailure, clearLoginFailures } = require('./database');
 const { normalizePhilippineMobile, processAppointmentReminders, startReminderScheduler } = require('./sms-reminders');
 
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required. Configure the Supabase transaction-pooler URL.');
@@ -12,14 +12,18 @@ if (IS_PRODUCTION && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD.
 const app = express();
 const PORT = process.env.PORT || 3000;
 const COOKIE = '__Host-bh_admin';
-const attempts = new Map();
 const bookingAttempts = new Map();
 const appointmentStatuses = ['pending','confirmed','completed','cancelled','declined'];
+const SECURITY_PEPPER = process.env.SECURITY_PEPPER || process.env.ADMIN_PASSWORD || 'local-development-only';
 
 function id() { return crypto.randomUUID(); }
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) { return `${salt}:${crypto.scryptSync(password, salt, 64).toString('hex')}`; }
 function verifyPassword(password, stored = '') { const [salt,key] = stored.split(':'); if (!salt || !key) return false; const actual=crypto.scryptSync(password,salt,64), expected=Buffer.from(key,'hex'); return actual.length===expected.length && crypto.timingSafeEqual(actual,expected); }
 function hashToken(token) { return crypto.createHash('sha256').update(token).digest('hex'); }
+function securityKey(kind, value) { return crypto.createHmac('sha256', SECURITY_PEPPER).update(`${kind}:${value}`).digest('hex'); }
+function csrfToken(sessionToken) { return crypto.createHmac('sha256', SECURITY_PEPPER).update(`csrf:${sessionToken}`).digest('base64url'); }
+function safeEqual(a, b) { const one=Buffer.from(String(a||'')), two=Buffer.from(String(b||'')); return one.length===two.length && crypto.timingSafeEqual(one,two); }
+function validUuid(value) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || ''); }
 function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(value || '') && !Number.isNaN(Date.parse(`${value}T00:00:00`)); }
 function validTime(value) { return /^([01]\d|2[0-3]):[0-5]\d$/.test(value || ''); }
 function minutes(value) { const [h,m]=value.split(':').map(Number); return h*60+m; }
@@ -33,8 +37,12 @@ async function auth(req,res,next) {
   try {
     const token=cookies(req)[COOKIE]; if(!token) return res.status(401).json({error:'Please sign in.'});
     const {rows}=await pool.query(`SELECT a.id,a.name,a.email,'admin' AS role FROM admin_sessions s JOIN admins a ON a.id=s.admin_id WHERE s.token_hash=$1 AND s.expires_at>now()`,[hashToken(token)]);
-    if(!rows[0]) return res.status(401).json({error:'Session expired.'}); req.user=rows[0]; next();
+    if(!rows[0]) return res.status(401).json({error:'Session expired.'}); req.user=rows[0]; req.sessionToken=token; next();
   } catch(error){next(error)}
+}
+function csrf(req,res,next) {
+  if(!safeEqual(req.get('x-csrf-token'),csrfToken(req.sessionToken))) return res.status(403).json({error:'Security check failed. Refresh the page and try again.'});
+  next();
 }
 async function available(doctor,date,time) {
   if(!doctor||!validDate(date)||!validTime(time)||date<new Date().toISOString().slice(0,10)||doctor.unavailableDates.includes(date)) return false;
@@ -46,21 +54,24 @@ async function available(doctor,date,time) {
 
 app.set('trust proxy',1);
 app.disable('x-powered-by');
-app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com'],imgSrc:["'self'",'data:','https:'],scriptSrc:["'self'"],connectSrc:["'self'"]}},crossOriginEmbedderPolicy:false}));
+app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],baseUri:["'self'"],objectSrc:["'none'"],frameAncestors:["'none'"],formAction:["'self'"],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com'],imgSrc:["'self'",'data:','https:'],scriptSrc:["'self'"],connectSrc:["'self'"]}},referrerPolicy:{policy:'no-referrer'},crossOriginEmbedderPolicy:false}));
 app.use(express.json({limit:'20kb',type:'application/json'}));
 app.use((req,res,next)=>{res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');next()});
 app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');res.setHeader('Pragma','no-cache');next()});
+app.use('/api',(req,res,next)=>{if(!['POST','PATCH','PUT','DELETE'].includes(req.method))return next();const origin=req.get('origin');const expected=`${req.protocol}://${req.get('host')}`;if(!origin||origin!==expected)return res.status(403).json({error:'Request origin was rejected.'});next()});
 
 app.get('/health',async(req,res,next)=>{try{await pool.query('SELECT 1');res.json({status:'ok',database:'connected'})}catch(e){next(e)}});
 app.post('/api/login',async(req,res,next)=>{try{
-  if(rateLimited(attempts,req.ip,8,15*60_000)) return res.status(429).json({error:'Too many attempts. Try again later.'});
-  const email=clean(req.body.email,200).toLowerCase(), {rows}=await pool.query('SELECT * FROM admins WHERE email=$1',[email]); const user=rows[0];
-  if(!user||!verifyPassword(String(req.body.password||''),user.password_hash)) return res.status(401).json({error:'Invalid email or password.'});
-  const token=crypto.randomBytes(32).toString('base64url'), expires=new Date(Date.now()+30*60_000); await pool.query('INSERT INTO admin_sessions(token_hash,admin_id,expires_at) VALUES($1,$2,$3)',[hashToken(token),user.id,expires]);
+  const email=clean(req.body.email,200).toLowerCase(), keys=[securityKey('ip',req.ip),securityKey('email',email)];
+  if(await isLoginBlocked(keys)) return res.status(429).json({error:'Too many attempts. Try again in 15 minutes.'});
+  const {rows}=await pool.query('SELECT * FROM admins WHERE email=$1',[email]); const user=rows[0];
+  if(!user||!verifyPassword(String(req.body.password||''),user.password_hash)){await recordLoginFailure(keys);return res.status(401).json({error:'Invalid email or password.'})}
+  await clearLoginFailures(keys);
+  const token=crypto.randomBytes(32).toString('base64url'), expires=new Date(Date.now()+30*60_000); await pool.query('DELETE FROM admin_sessions WHERE admin_id=$1 OR expires_at<=now()',[user.id]);await pool.query('INSERT INTO admin_sessions(token_hash,admin_id,expires_at) VALUES($1,$2,$3)',[hashToken(token),user.id,expires]);
   res.cookie(COOKIE,token,{httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict',path:'/',maxAge:30*60_000}); res.json({user:{name:user.name,email:user.email,role:'admin'}});
 }catch(e){next(e)}});
-app.post('/api/logout',auth,async(req,res,next)=>{try{const token=cookies(req)[COOKIE];await pool.query('DELETE FROM admin_sessions WHERE token_hash=$1',[hashToken(token)]);res.clearCookie(COOKIE,{path:'/'});res.status(204).end()}catch(e){next(e)}});
-app.get('/api/me',auth,(req,res)=>res.json(req.user));
+app.post('/api/logout',auth,csrf,async(req,res,next)=>{try{const token=cookies(req)[COOKIE];await pool.query('DELETE FROM admin_sessions WHERE token_hash=$1',[hashToken(token)]);res.clearCookie(COOKIE,{path:'/',httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict'});res.status(204).end()}catch(e){next(e)}});
+app.get('/api/me',auth,(req,res)=>res.json({...req.user,csrfToken:csrfToken(req.sessionToken)}));
 app.get('/api/doctors',async(req,res,next)=>{try{res.json(await getDoctors(false))}catch(e){next(e)}});
 app.get('/api/doctors/:id/slots',async(req,res,next)=>{try{const doctor=await getDoctor(req.params.id,false),date=clean(req.query.date,10);if(!doctor||!validDate(date))return res.status(400).json({error:'Choose a valid doctor and date.'});const day=new Date(`${date}T12:00:00`).getDay(),rule=doctor.availability.find(x=>x.day===day),slots=[];if(rule)for(let value=minutes(rule.start);value+rule.slotMinutes<=minutes(rule.end);value+=rule.slotMinutes){const time=`${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;slots.push({time,available:await available(doctor,date,time)})}res.json({doctor,date,unavailable:doctor.unavailableDates.includes(date),slots})}catch(e){next(e)}});
 app.post('/api/appointments',async(req,res,next)=>{try{
@@ -74,15 +85,18 @@ app.post('/api/appointments',async(req,res,next)=>{try{
 }catch(e){next(e)}});
 
 app.get('/api/admin/doctors',auth,async(req,res,next)=>{try{res.json(await getDoctors(true))}catch(e){next(e)}});
-app.post('/api/admin/doctors',auth,async(req,res,next)=>{const client=await pool.connect();try{const name=clean(req.body.name,120),specialty=clean(req.body.specialty,160),credentials=clean(req.body.credentials,160),bio=clean(req.body.bio,800),languages=clean(req.body.languages,200),photoUrl=clean(req.body.photoUrl,500),accepting=req.body.acceptingNewPatients!==false,availability=req.body.availability||[],dates=(req.body.unavailableDates||[]).filter(validDate);if(!name||!specialty||!validSchedule(availability))return res.status(400).json({error:'Complete the doctor details and review the schedule.'});if(!validPhotoUrl(photoUrl))return res.status(400).json({error:'Use a secure HTTPS photo URL.'});await client.query('BEGIN');const doctor={id:id(),name,specialty};await client.query('INSERT INTO doctors(id,name,specialty,credentials,bio,languages,photo_url,accepting_new_patients) VALUES($1,$2,$3,$4,$5,$6,$7,$8)',[doctor.id,name,specialty,credentials,bio,languages,photoUrl,accepting]);await replaceSchedule(client,doctor.id,availability,dates);await client.query('COMMIT');res.status(201).json(await getDoctor(doctor.id,true))}catch(e){await client.query('ROLLBACK');next(e)}finally{client.release()}});
-app.patch('/api/admin/doctors/:id',auth,async(req,res,next)=>{const client=await pool.connect();try{const current=await getDoctor(req.params.id,true);if(!current)return res.status(404).json({error:'Doctor not found.'});const name=req.body.name===undefined?current.name:clean(req.body.name,120),specialty=req.body.specialty===undefined?current.specialty:clean(req.body.specialty,160),credentials=req.body.credentials===undefined?current.credentials:clean(req.body.credentials,160),bio=req.body.bio===undefined?current.bio:clean(req.body.bio,800),languages=req.body.languages===undefined?current.languages:clean(req.body.languages,200),photoUrl=req.body.photoUrl===undefined?current.photoUrl:clean(req.body.photoUrl,500),accepting=req.body.acceptingNewPatients===undefined?current.acceptingNewPatients:req.body.acceptingNewPatients!==false,availability=req.body.availability===undefined?current.availability:req.body.availability,dates=req.body.unavailableDates===undefined?current.unavailableDates:req.body.unavailableDates.filter(validDate);if(!name||!specialty||!validSchedule(availability))return res.status(400).json({error:'Review the doctor details and schedule.'});if(!validPhotoUrl(photoUrl))return res.status(400).json({error:'Use a secure HTTPS photo URL.'});await client.query('BEGIN');await client.query('UPDATE doctors SET name=$1,specialty=$2,credentials=$3,bio=$4,languages=$5,photo_url=$6,accepting_new_patients=$7,active=$8,updated_at=now() WHERE id=$9',[name,specialty,credentials,bio,languages,photoUrl,accepting,req.body.active===undefined?current.active:req.body.active!==false,req.params.id]);await replaceSchedule(client,req.params.id,availability,dates);await client.query('COMMIT');res.json(await getDoctor(req.params.id,true))}catch(e){await client.query('ROLLBACK');next(e)}finally{client.release()}});
+app.post('/api/admin/doctors',auth,csrf,async(req,res,next)=>{const client=await pool.connect();try{const name=clean(req.body.name,120),specialty=clean(req.body.specialty,160),credentials=clean(req.body.credentials,160),bio=clean(req.body.bio,800),languages=clean(req.body.languages,200),photoUrl=clean(req.body.photoUrl,500),accepting=req.body.acceptingNewPatients!==false,availability=req.body.availability||[],dates=(req.body.unavailableDates||[]).filter(validDate);if(!name||!specialty||!validSchedule(availability))return res.status(400).json({error:'Complete the doctor details and review the schedule.'});if(!validPhotoUrl(photoUrl))return res.status(400).json({error:'Use a secure HTTPS photo URL.'});await client.query('BEGIN');const doctor={id:id(),name,specialty};await client.query('INSERT INTO doctors(id,name,specialty,credentials,bio,languages,photo_url,accepting_new_patients) VALUES($1,$2,$3,$4,$5,$6,$7,$8)',[doctor.id,name,specialty,credentials,bio,languages,photoUrl,accepting]);await replaceSchedule(client,doctor.id,availability,dates);await client.query('COMMIT');res.status(201).json(await getDoctor(doctor.id,true))}catch(e){await client.query('ROLLBACK');next(e)}finally{client.release()}});
+app.patch('/api/admin/doctors/:id',auth,csrf,async(req,res,next)=>{const client=await pool.connect();try{if(!validUuid(req.params.id))return res.status(400).json({error:'Invalid doctor.'});const current=await getDoctor(req.params.id,true);if(!current)return res.status(404).json({error:'Doctor not found.'});const name=req.body.name===undefined?current.name:clean(req.body.name,120),specialty=req.body.specialty===undefined?current.specialty:clean(req.body.specialty,160),credentials=req.body.credentials===undefined?current.credentials:clean(req.body.credentials,160),bio=req.body.bio===undefined?current.bio:clean(req.body.bio,800),languages=req.body.languages===undefined?current.languages:clean(req.body.languages,200),photoUrl=req.body.photoUrl===undefined?current.photoUrl:clean(req.body.photoUrl,500),accepting=req.body.acceptingNewPatients===undefined?current.acceptingNewPatients:req.body.acceptingNewPatients!==false,availability=req.body.availability===undefined?current.availability:req.body.availability,dates=req.body.unavailableDates===undefined?current.unavailableDates:req.body.unavailableDates.filter(validDate);if(!name||!specialty||!validSchedule(availability))return res.status(400).json({error:'Review the doctor details and schedule.'});if(!validPhotoUrl(photoUrl))return res.status(400).json({error:'Use a secure HTTPS photo URL.'});await client.query('BEGIN');await client.query('UPDATE doctors SET name=$1,specialty=$2,credentials=$3,bio=$4,languages=$5,photo_url=$6,accepting_new_patients=$7,active=$8,updated_at=now() WHERE id=$9',[name,specialty,credentials,bio,languages,photoUrl,accepting,req.body.active===undefined?current.active:req.body.active!==false,req.params.id]);await replaceSchedule(client,req.params.id,availability,dates);await client.query('COMMIT');res.json(await getDoctor(req.params.id,true))}catch(e){await client.query('ROLLBACK');next(e)}finally{client.release()}});
 app.get('/api/appointments',auth,async(req,res,next)=>{try{const {rows}=await pool.query(`SELECT a.id,a.reference,a.doctor_id AS "doctorId",d.name AS "doctorName",a.appointment_date AS date,to_char(a.appointment_time,'HH24:MI') AS time,a.full_name AS "fullName",a.phone,a.email,a.service,a.message,a.status,a.sms_consent AS "smsConsent",a.reminder_status AS "reminderStatus",a.reminder_sent_at AS "reminderSentAt",a.reminder_attempted_at AS "reminderAttemptedAt",a.reminder_error AS "reminderError",a.created_at AS "createdAt" FROM appointments a LEFT JOIN doctors d ON d.id=a.doctor_id ORDER BY a.appointment_date,a.appointment_time`);res.json(rows)}catch(e){next(e)}});
-app.post('/api/admin/reminders/run',auth,async(req,res,next)=>{try{if(!process.env.SEMAPHORE_API_KEY)return res.status(503).json({error:'SMS reminders are not active. Add SEMAPHORE_API_KEY in Railway first.'});res.json(await processAppointmentReminders())}catch(e){next(e)}});
-app.patch('/api/appointments/:id',auth,async(req,res,next)=>{try{if(!appointmentStatuses.includes(req.body.status))return res.status(400).json({error:'Invalid status.'});const {rows}=await pool.query('UPDATE appointments SET status=$1,updated_at=now() WHERE id=$2 RETURNING *',[req.body.status,req.params.id]);if(!rows[0])return res.status(404).json({error:'Appointment not found.'});res.json(rows[0])}catch(e){if(e.code==='23505')return res.status(409).json({error:'That time already has an active appointment.'});next(e)}});
-app.delete('/api/appointments/:id',auth,async(req,res,next)=>{try{const result=await pool.query('DELETE FROM appointments WHERE id=$1',[req.params.id]);if(!result.rowCount)return res.status(404).json({error:'Appointment not found.'});res.status(204).end()}catch(e){next(e)}});
+app.post('/api/admin/reminders/run',auth,csrf,async(req,res,next)=>{try{if(!process.env.SEMAPHORE_API_KEY)return res.status(503).json({error:'SMS reminders are not active. Add SEMAPHORE_API_KEY in Railway first.'});res.json(await processAppointmentReminders())}catch(e){next(e)}});
+app.patch('/api/appointments/:id',auth,csrf,async(req,res,next)=>{try{if(!validUuid(req.params.id)||!appointmentStatuses.includes(req.body.status))return res.status(400).json({error:'Invalid appointment update.'});const {rows}=await pool.query('UPDATE appointments SET status=$1,updated_at=now() WHERE id=$2 RETURNING *',[req.body.status,req.params.id]);if(!rows[0])return res.status(404).json({error:'Appointment not found.'});res.json(rows[0])}catch(e){if(e.code==='23505')return res.status(409).json({error:'That time already has an active appointment.'});next(e)}});
+app.delete('/api/appointments/:id',auth,csrf,async(req,res,next)=>{try{if(!validUuid(req.params.id))return res.status(400).json({error:'Invalid appointment.'});const result=await pool.query('DELETE FROM appointments WHERE id=$1',[req.params.id]);if(!result.rowCount)return res.status(404).json({error:'Appointment not found.'});res.status(204).end()}catch(e){next(e)}});
 
-app.use(express.static(__dirname,{maxAge:'1d',index:'index.html',setHeaders:(res,filePath)=>{if(/\.(?:html|js|css)$/i.test(filePath))res.setHeader('Cache-Control','no-cache, must-revalidate')}}));
-app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'index.html')));
+const PUBLIC_FILES=new Set(['index.html','patient-information.html','services.html','doctors.html','appointments.html','privacy.html','portal.html','script.js','portal.js','motion.js','doctors-directory.js','styles.css','services-modal.css','service-photos.css','private-hospital.css','privacy.css','portal.css','admin.css','booking-fix.css','hospital-refresh.css','modern.css','motion.css']);
+app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'index.html')));
+app.get('/:file',(req,res,next)=>{if(!PUBLIC_FILES.has(req.params.file))return next();res.setHeader('Cache-Control','no-cache, must-revalidate');res.sendFile(path.join(__dirname,req.params.file))});
+app.use('/images',express.static(path.join(__dirname,'images'),{dotfiles:'deny',maxAge:'7d',immutable:true}));
+app.use((req,res)=>res.status(404).type('text').send('Not found.'));
 app.use((error,req,res,next)=>{console.error(error.code||error.message);res.status(500).json({error:'The service could not complete your request. Please try again.'})});
 
 async function start(){await initDatabase({adminEmail:(process.env.ADMIN_EMAIL||'admin@brillianthealthcare.com').toLowerCase(),adminName:'Clinic Administrator',adminPasswordHash:hashPassword(process.env.ADMIN_PASSWORD||'ChangeMe123!')});app.listen(PORT,'0.0.0.0',()=>console.log(`Brilliant Healthcare listening on ${PORT} with PostgreSQL`));startReminderScheduler()}

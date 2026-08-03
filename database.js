@@ -91,13 +91,19 @@ CREATE TABLE IF NOT EXISTS admin_sessions (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS admin_sessions_expiry_idx ON admin_sessions(expires_at);
+CREATE TABLE IF NOT EXISTS login_attempts (
+  key_hash text NOT NULL,
+  attempted_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS login_attempts_lookup_idx ON login_attempts(key_hash, attempted_at);
 ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE doctors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE doctor_schedules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE doctor_unavailable_dates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_sessions ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions FROM PUBLIC;
+ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts FROM PUBLIC;
 `;
 
 async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
@@ -126,6 +132,18 @@ async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
     await pool.query('INSERT INTO doctor_schedules VALUES($1,$2,$3,$4,$5)', [doctorId, 6, '09:00', '13:00', 30]);
   }
   await pool.query('DELETE FROM admin_sessions WHERE expires_at < now()');
+  await pool.query("DELETE FROM login_attempts WHERE attempted_at < now() - interval '24 hours'");
+
+  // Supabase's Data API roles do not need access: all application data is
+  // reached through this private server connection.
+  await pool.query(`DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
+      REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts FROM anon;
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
+      REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts FROM authenticated;
+    END IF;
+  END $$`);
 }
 
 async function getDoctors(includeInactive = false) {
@@ -155,4 +173,19 @@ async function replaceSchedule(client, doctorId, availability, unavailableDates)
   for (const date of unavailableDates) await client.query('INSERT INTO doctor_unavailable_dates VALUES($1,$2)', [doctorId,date]);
 }
 
-module.exports = { pool, initDatabase, getDoctors, getDoctor, replaceSchedule };
+async function isLoginBlocked(keyHashes, limit = 5, windowMinutes = 15) {
+  const { rows } = await pool.query(`SELECT count(*)::integer AS attempts
+    FROM login_attempts WHERE key_hash = ANY($1::text[])
+    AND attempted_at > now() - ($2 * interval '1 minute') GROUP BY key_hash`, [keyHashes, windowMinutes]);
+  return rows.some(row => row.attempts >= limit);
+}
+
+async function recordLoginFailure(keyHashes) {
+  await pool.query('INSERT INTO login_attempts(key_hash) SELECT unnest($1::text[])', [keyHashes]);
+}
+
+async function clearLoginFailures(keyHashes) {
+  await pool.query('DELETE FROM login_attempts WHERE key_hash = ANY($1::text[])', [keyHashes]);
+}
+
+module.exports = { pool, initDatabase, getDoctors, getDoctor, replaceSchedule, isLoginBlocked, recordLoginFailure, clearLoginFailures };
