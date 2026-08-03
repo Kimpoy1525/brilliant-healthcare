@@ -19,10 +19,10 @@ function renderDoctor(doctor){
     const photo=element("div","physician-photo");
     const image=document.createElement("img");
     image.src=doctor.photoUrl||"images/generic-doctor.png";
-    image.alt=doctor.photoUrl?`Professional portrait of ${doctor.name}`:"Temporary physician portrait placeholder";
+    image.alt=doctor.photoUrl?`Professional portrait of ${doctor.name}`:"Physician profile image";
     image.loading="lazy";
     image.referrerPolicy="no-referrer";
-    image.onerror=()=>{image.onerror=null;image.src="images/generic-doctor.png";image.alt="Temporary physician portrait placeholder"};
+    image.onerror=()=>{image.onerror=null;image.src="images/generic-doctor.png";image.alt="Physician profile image"};
     photo.append(image);
 
     const details=element("div","physician-details");
