@@ -122,3 +122,18 @@ body{font-size:16px}
 .hero .container,.inner-page .hero .container{padding:38px 14px 46px}.hero-content h1,.inner-page .hero-content h1{font-size:2rem}
 .time-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.contact-form{padding-inline:12px}
 }
+
+/* Official Brilliant Healthcare brand system */
+:root{--ink:#1a4649;--teal:#0189a1;--teal-dark:#1a4649;--mint:#edf7f4;--gold:#58a148;--clinic-blue:#0189a1;--line:#d9e6e5}
+.topbar{background:#f6f9f8}.topbar p span,.nav-links a:after{background:#58a148}.topbar a,.logo-copy strong,.nav-links a:hover{color:#0189a1}
+.navbar .logo-mark{overflow:hidden;background:#fff;border-color:#d9e6e5;border-radius:10px}.navbar .logo-img{width:100%;height:100%;object-fit:cover;transform:scale(1.36)!important}
+.btn-primary,.btn-primary:hover{background:#0189a1}.btn-primary:hover{background:#1a4649}.btn-secondary{color:#0189a1;border-color:#0189a1}
+.hero-content h1,.about-content h2,.section-header h2,.contact-info h2,.team-heading h2,.service-card h3,.why-us-card h3,.physician-details h3,.contact-form h3{color:#0189a1}
+.badge,.form-kicker,.physician-details>span,.service-card[role=button]:after,.why-us-number{color:#58a148}
+.patient-actions{background:#0189a1}.patient-actions a:hover{background:#01798e}.patient-actions b{color:#b9e6a8}
+.about-image-note,.visit-steps article>span{background:#1a4649}.check-icon{color:#397f35;background:#edf7e9}
+.service-card[role=button]:hover{border-color:#58a148!important}.physician-profile,.contact-form{border-top-color:#58a148}
+.contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{border-color:#0189a1;box-shadow:0 0 0 3px rgba(1,137,161,.13)}
+.footer{background:#1a4649}.footer-call{color:#b9e6a8}.footer .logo{width:280px;height:118px;padding:0;overflow:hidden}.footer .logo-img{width:100%;height:100%;object-fit:cover;transform:none!important}
+.patient-information-page .nav-links a[href="patient-information.html"],.services-page .nav-links a[href="services.html"],.doctors-page .nav-links a[href="doctors.html"],.appointments-page .nav-links a[href="appointments.html"],.home-page .nav-links a[href="index.html"]{color:#0189a1}
+@media(max-width:768px){.patient-actions{background:#0189a1}.navbar .logo-img{transform:scale(1.36)!important}.footer .logo{width:min(100%,280px)}}
