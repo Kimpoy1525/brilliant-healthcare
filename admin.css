@@ -10,6 +10,10 @@
 .delete-link{color:#a13f3f!important}
 @media(max-width:600px){.doctor-details,.doctor-row{grid-template-columns:1fr}.doctor-buttons{flex-wrap:wrap}}
 .appointment-heading-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.password-control{width:100%}
+.password-control input{display:block;width:100%;min-height:46px;padding-right:76px}
+.password-control #togglePassword{top:50%;right:7px;display:inline-flex;min-width:58px;height:32px;align-items:center;justify-content:center;margin:0;padding:0 10px;line-height:1;transform:translateY(-50%);box-shadow:none}
+.password-control #togglePassword:hover:not(:disabled),.password-control #togglePassword:active:not(:disabled){transform:translateY(-50%);box-shadow:none}
 .appointment-filters{grid-template-columns:minmax(180px,1.4fr) repeat(4,minmax(145px,1fr)) auto}
 .admin-pagination{display:flex;align-items:center;justify-content:center;gap:16px;padding:18px;border-top:1px solid var(--portal-line)}
 .admin-pagination span{color:var(--portal-muted);font-size:.72rem;font-weight:800}
