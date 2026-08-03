@@ -1,3 +1,5 @@
+const { pool } = require('../database');
+
 async function request(url, options = {}) {
   const response = await fetch(url, options);
   const body = response.status === 204 ? null : await response.json();
@@ -40,9 +42,10 @@ async function main() {
       body: JSON.stringify({ doctorId: doctor.id, ...chosen, fullName: 'Duplicate Verification', phone: '09171234567', service: 'checkup', smsConsent: true })
     });
   } catch (error) { duplicateRejected = error.message.startsWith('400:') || error.message.startsWith('409:'); }
-  const appointments = (await request(`${base}/api/appointments`, { headers: { Cookie: cookie } })).body;
+  const appointments = (await request(`${base}/api/admin/appointments?search=${encodeURIComponent(booking.body.reference)}`, { headers: { Cookie: cookie } })).body.items;
   const created = appointments.find(item => item.reference === booking.body.reference);
-  await request(`${base}/api/appointments/${created.id}`, { method: 'DELETE', headers: adminHeaders });
+  await pool.query('DELETE FROM appointments WHERE id=$1', [created.id]);
+  await pool.end();
   console.log(JSON.stringify({ adminRole: authenticated.body.role, doctor: doctor.name, bookingCreated: true, duplicateRejected, testRecordDeleted: true }));
 }
 

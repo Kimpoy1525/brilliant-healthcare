@@ -11,9 +11,10 @@ function normalizedConnectionString(value) {
   return `${match[1]}${encodeURIComponent(decodeURIComponent(match[2]))}:${encodeURIComponent(match[3])}@${match[4]}`;
 }
 
+const databaseCa = process.env.DATABASE_CA_CERT?.replace(/\\n/g, '\n');
 const pool = new Pool({
   connectionString: normalizedConnectionString(process.env.DATABASE_URL),
-  ssl: (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) ? { rejectUnauthorized: false } : undefined,
+  ssl: (process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT) ? (databaseCa ? { ca: databaseCa, rejectUnauthorized: true } : { rejectUnauthorized: false }) : undefined,
   max: 8,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000
@@ -28,6 +29,9 @@ CREATE TABLE IF NOT EXISTS admins (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'super_admin';
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS last_login_at timestamptz;
 CREATE TABLE IF NOT EXISTS doctors (
   id uuid PRIMARY KEY,
   name text NOT NULL,
@@ -77,9 +81,19 @@ ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_attempted_at timestam
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_attempts integer NOT NULL DEFAULT 0;
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_provider_id text NOT NULL DEFAULT '';
 ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_error text NOT NULL DEFAULT '';
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS archived_at timestamptz;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS archived_by uuid REFERENCES admins(id);
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS archive_reason text NOT NULL DEFAULT '';
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_index i JOIN pg_class c ON c.oid=i.indexrelid
+    WHERE c.relname='appointments_active_slot'
+      AND pg_get_expr(i.indpred,i.indrelid) NOT ILIKE '%archived_at%'
+  ) THEN EXECUTE 'DROP INDEX appointments_active_slot'; END IF;
+END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS appointments_active_slot
   ON appointments(doctor_id, appointment_date, appointment_time)
-  WHERE status NOT IN ('cancelled','declined');
+  WHERE archived_at IS NULL AND status NOT IN ('cancelled','declined');
 CREATE INDEX IF NOT EXISTS appointments_date_idx ON appointments(appointment_date, appointment_time);
 CREATE INDEX IF NOT EXISTS appointments_sms_reminder_idx
   ON appointments(appointment_date, reminder_sent_at)
@@ -95,6 +109,18 @@ CREATE TABLE IF NOT EXISTS login_attempts (
   key_hash text NOT NULL,
   attempted_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS admin_audit_events (
+  id uuid PRIMARY KEY,
+  admin_id uuid REFERENCES admins(id) ON DELETE SET NULL,
+  action text NOT NULL,
+  entity_type text NOT NULL,
+  entity_id text NOT NULL DEFAULT '',
+  details jsonb NOT NULL DEFAULT '{}'::jsonb,
+  ip_hash text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS admin_audit_events_created_idx ON admin_audit_events(created_at DESC);
+CREATE INDEX IF NOT EXISTS admin_audit_events_admin_idx ON admin_audit_events(admin_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS login_attempts_lookup_idx ON login_attempts(key_hash, attempted_at);
 ALTER TABLE admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE doctors ENABLE ROW LEVEL SECURITY;
@@ -103,14 +129,15 @@ ALTER TABLE doctor_unavailable_dates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts FROM PUBLIC;
+ALTER TABLE admin_audit_events ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts, admin_audit_events FROM PUBLIC;
 `;
 
 async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
   await pool.query(schema);
   const admin = await pool.query('SELECT id FROM admins ORDER BY created_at LIMIT 1');
   if (admin.rows.length) {
-    await pool.query('UPDATE admins SET name=$1,email=$2,password_hash=$3,updated_at=now() WHERE id=$4',
+    await pool.query("UPDATE admins SET name=$1,email=$2,password_hash=$3,role='super_admin',active=true,updated_at=now() WHERE id=$4",
       [adminName, adminEmail, adminPasswordHash, admin.rows[0].id]);
   } else {
     await pool.query('INSERT INTO admins(id,name,email,password_hash) VALUES($1,$2,$3,$4)',
@@ -138,10 +165,10 @@ async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
   // reached through this private server connection.
   await pool.query(`DO $$ BEGIN
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='anon') THEN
-      REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts FROM anon;
+      REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts, admin_audit_events FROM anon;
     END IF;
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='authenticated') THEN
-      REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts FROM authenticated;
+      REVOKE ALL ON admins, doctors, doctor_schedules, doctor_unavailable_dates, appointments, admin_sessions, login_attempts, admin_audit_events FROM authenticated;
     END IF;
   END $$`);
 }

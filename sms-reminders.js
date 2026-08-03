@@ -77,6 +77,7 @@ async function processAppointmentReminders({ targetDate = manilaDate(1) } = {}) 
       SELECT a.id,a.reference,a.appointment_date,a.appointment_time,a.phone
       FROM appointments a
       WHERE a.appointment_date=$1
+        AND a.archived_at IS NULL
         AND a.status IN ('pending','confirmed')
         AND a.sms_consent=true
         AND a.reminder_sent_at IS NULL

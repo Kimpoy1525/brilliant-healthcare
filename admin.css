@@ -10,6 +10,15 @@
 .delete-link{color:#a13f3f!important}
 @media(max-width:600px){.doctor-details,.doctor-row{grid-template-columns:1fr}.doctor-buttons{flex-wrap:wrap}}
 .appointment-heading-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.appointment-filters{grid-template-columns:minmax(180px,1.4fr) repeat(4,minmax(145px,1fr)) auto}
+.admin-pagination{display:flex;align-items:center;justify-content:center;gap:16px;padding:18px;border-top:1px solid var(--portal-line)}
+.admin-pagination span{color:var(--portal-muted);font-size:.72rem;font-weight:800}
+.staff-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:14px;align-items:end;margin-bottom:24px;padding:18px;background:#f7f9fa;border:1px solid var(--portal-line)}
+.staff-list,.audit-list{display:grid;border-top:1px solid var(--portal-line)}
+.staff-row,.audit-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;padding:16px 4px;border-bottom:1px solid var(--portal-line)}
+.staff-row>div:first-child,.audit-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
+.staff-row span,.audit-row span{display:grid;gap:3px}.staff-row small,.audit-row small{color:var(--portal-muted);font-size:.6rem;font-weight:800;text-transform:uppercase}.staff-row strong,.audit-row strong{font-size:.77rem;overflow-wrap:anywhere}
+.staff-controls{display:flex;gap:9px;align-items:center}.staff-controls select{min-width:190px}.staff-controls .btn{min-height:44px}
 
 /* Mobile administration workspace */
 html,body{max-width:100%;overflow-x:hidden}
@@ -45,10 +54,13 @@ input,select,textarea,button{max-width:100%}
   .day-row label:last-child{grid-column:1/-1}
   .day-row input[type=time],.day-row select{width:100%;font-size:16px}
   input,select,textarea{font-size:16px}
+  .staff-form,.staff-row,.audit-row{grid-template-columns:1fr;grid-auto-flow:row}
+  .staff-controls{align-items:stretch;flex-direction:column}.staff-controls select,.staff-controls button{width:100%}
+  .admin-pagination{justify-content:space-between;gap:8px}.admin-pagination .btn{padding-inline:13px}
 }
 
 @media(max-width:380px){
-  .metrics-grid,.day-row{grid-template-columns:1fr}
+  .dashboard-metrics,.day-row{grid-template-columns:1fr}
   .day-row>*{grid-column:1!important}
   .portal-brand span{font-size:.75rem}
 }

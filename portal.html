@@ -55,11 +55,32 @@
                     <div class="appointment-heading-actions"><button id="runReminders" class="btn btn-secondary" type="button">Run reminders now</button><span id="appointmentResultCount" class="result-count">0 records</span></div>
                 </div>
                 <div class="appointment-filters" aria-label="Appointment filters">
-                    <label>Appointment date<input id="dateFilter" type="date"></label>
+                    <label>Search<input id="appointmentSearch" type="search" placeholder="Name, phone, or reference"></label>
+                    <label>From date<input id="dateFromFilter" type="date"></label>
+                    <label>To date<input id="dateToFilter" type="date"></label>
                     <label>Status<select id="statusFilter"><option value="">All statuses</option><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option><option value="declined">Declined</option></select></label>
+                    <label>Doctor<select id="doctorFilter"><option value="">All doctors</option></select></label>
                     <button id="clearFilters" class="btn btn-secondary" type="button">Clear filters</button>
                 </div>
                 <div id="appointments" class="appointments"></div>
+                <nav class="admin-pagination" aria-label="Appointment pages"><button id="previousAppointments" class="btn btn-secondary" type="button">Previous</button><span id="appointmentPage">Page 1</span><button id="nextAppointments" class="btn btn-secondary" type="button">Next</button></nav>
+            </section>
+
+            <section id="staffTools" class="panel" hidden>
+                <div class="panel-title"><div><p class="eyebrow">Access control</p><h2>Staff accounts</h2><p>Give each authorized staff member an individual account. Use read-only access whenever editing is not required.</p></div></div>
+                <form id="staffForm" class="staff-form">
+                    <label>Full name<input name="name" maxlength="120" required></label>
+                    <label>Email address<input name="email" type="email" autocomplete="off" required></label>
+                    <label>Role<select name="role"><option value="viewer">Read-only viewer</option><option value="appointment_manager">Appointment manager</option><option value="super_admin">System administrator</option></select></label>
+                    <label>Temporary password<input name="password" type="password" minlength="16" autocomplete="new-password" required></label>
+                    <button class="btn btn-primary" type="submit">Create staff account</button>
+                </form>
+                <div id="staffList" class="staff-list"></div>
+            </section>
+
+            <section id="auditTools" class="panel" hidden>
+                <div class="panel-title"><div><p class="eyebrow">Accountability</p><h2>Administrative activity</h2><p>Recent sign-ins and changes are recorded for security and operational review.</p></div><button id="refreshAudit" class="btn btn-secondary" type="button">Refresh activity</button></div>
+                <div id="auditList" class="audit-list"></div>
             </section>
 
             <section id="adminTools" class="panel" hidden>
@@ -87,15 +108,6 @@
                 <div id="doctorList" class="doctor-list"></div>
             </section>
 
-            <section id="scheduleTools" class="panel" hidden>
-                <h2>My weekly schedule</h2>
-                <p>Enable clinic days, set working hours, and choose the appointment length.</p>
-                <form id="scheduleForm">
-                    <div id="weekSchedule" class="week-schedule"></div>
-                    <label class="blocked-label">Unavailable dates <small>Comma-separated dates (YYYY-MM-DD), for leave or holidays</small><input id="unavailableDates" placeholder="2026-08-14, 2026-08-15"></label>
-                    <button class="btn btn-primary" type="submit">Save schedule</button>
-                </form>
-            </section>
         </div>
     </main>
     <div id="portalLoading" class="portal-loading" hidden role="status" aria-live="polite" aria-busy="true">
@@ -107,6 +119,6 @@
         </div>
     </div>
     <div id="portalNotice" class="portal-notice" role="status"></div>
-    <script src="portal.js?v=2"></script>
+    <script src="portal.js?v=3"></script>
 </body>
 </html>
