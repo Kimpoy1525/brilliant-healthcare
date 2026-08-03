@@ -140,3 +140,19 @@ body{font-size:16px}
 .btn-map{color:#1a4649;background:#f1f7f5;border-color:#a9c9c5}.btn-map:hover{color:#fff;background:#1a4649;border-color:#1a4649}
 .map-link{display:inline-flex;align-items:center;gap:5px;margin-top:7px;color:#0189a1;font-family:Poppins,Arial,sans-serif;font-size:.7rem;font-weight:700}.map-link:hover{text-decoration:underline;text-underline-offset:3px}
 .footer-map-link{display:inline-flex;align-items:center;gap:5px;margin-top:10px;color:#fff;font-size:.72rem;font-weight:700;text-decoration:underline;text-decoration-color:rgba(255,255,255,.38);text-underline-offset:4px}.footer-map-link:hover{color:#b9e6a8}
+
+/* Patient-facing navigation and support — restrained clinical layout */
+.patient-actions{padding:26px 0;background:#f4f8f7;border-block:1px solid #dce8e6}
+.patient-actions .container{gap:12px;padding-block:0}
+.patient-actions a,.patient-actions a:first-child{min-height:96px;padding:19px 20px;color:#1a4649;background:#fff;border:1px solid #d7e3e1;border-left:3px solid #0189a1;border-radius:4px;box-shadow:0 5px 16px rgba(26,70,73,.045)}
+.patient-actions a>span{display:none}.patient-actions strong{color:#1a4649;font-size:.82rem}.patient-actions small{color:#647779;font-size:.68rem}.patient-actions b{display:grid;width:30px;height:30px;place-items:center;color:#0189a1;background:#eaf5f5;border-radius:50%}
+.patient-actions a:hover{background:#fff;border-color:#a8cdca;box-shadow:0 9px 22px rgba(26,70,73,.08)}
+.why-us{background:#fff;border-top:1px solid #e1e9e8}
+.why-us>.container{display:grid;grid-template-columns:minmax(260px,.7fr) minmax(0,1.3fr);gap:clamp(50px,7vw,92px);align-items:start}
+.why-us .section-header{margin:0;text-align:left}.why-us .section-header .badge{justify-content:flex-start}.why-us .section-header h2{max-width:390px;font-size:clamp(2rem,3.3vw,3rem);line-height:1.13}.why-us .section-header p{max-width:370px;margin-top:18px;line-height:1.75}
+.why-us-grid{display:grid;grid-template-columns:1fr;gap:0;border-top:1px solid #cfdcda}
+.why-us-card{display:grid;min-height:0;grid-template-columns:42px minmax(0,1fr);gap:4px 18px;padding:22px 4px;background:transparent;border:0;border-bottom:1px solid #dce6e4;border-radius:0;box-shadow:none}
+.why-us-number{grid-row:1/3;width:34px;height:34px;margin:0;place-items:center;color:#397f35!important;background:#edf6e9!important;border-radius:50%;font-size:0}.why-us-number:before{font-size:.78rem;content:"✓"}
+.why-us-card h3{align-self:end;color:#1a4649;font-size:.94rem}.why-us-card p{max-width:650px;margin-top:3px;color:#667678;font-size:.8rem;line-height:1.65}.why-us-card:hover{box-shadow:none;transform:none}
+@media(max-width:900px){.why-us>.container{grid-template-columns:1fr;gap:36px}.why-us .section-header h2,.why-us .section-header p{max-width:650px}}
+@media(max-width:768px){.patient-actions{padding:16px 0}.patient-actions .container{gap:9px;padding-inline:18px}.patient-actions a,.patient-actions a:first-child{min-height:82px;padding:15px 16px;border:1px solid #d7e3e1;border-left:3px solid #0189a1}.why-us>.container{display:grid}.why-us-card{grid-template-columns:36px minmax(0,1fr);gap-x:13px;padding:19px 0}.why-us-number{width:30px;height:30px}}
