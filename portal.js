@@ -8,8 +8,8 @@ let currentUser,appointments=[],inactivityTimer;
 function showLoading(message){loadingText.textContent=message;loading.hidden=false}
 function hideLoading(){loading.hidden=true}
 function armSessionTimeout(){clearTimeout(inactivityTimer);if(currentUser)inactivityTimer=setTimeout(()=>secureLogout("You were signed out after 15 minutes of inactivity."),15*60_000)}
-function concealPassword(){adminPassword.type="password";togglePassword.textContent="Show";togglePassword.setAttribute("aria-pressed","false")}
-togglePassword.addEventListener("click",()=>{const visible=adminPassword.type==="text";adminPassword.type=visible?"password":"text";togglePassword.textContent=visible?"Show":"Hide";togglePassword.setAttribute("aria-pressed",String(!visible));adminPassword.focus()});
+function concealPassword(){adminPassword.type="password";togglePassword.classList.remove("is-visible");togglePassword.setAttribute("aria-pressed","false");togglePassword.setAttribute("aria-label","Show password")}
+togglePassword.addEventListener("click",()=>{const visible=adminPassword.type==="text";adminPassword.type=visible?"password":"text";togglePassword.classList.toggle("is-visible",!visible);togglePassword.setAttribute("aria-pressed",String(!visible));togglePassword.setAttribute("aria-label",visible?"Show password":"Hide password");adminPassword.focus()});
 function notify(message){notice.textContent=message;notice.classList.add("show");setTimeout(()=>notice.classList.remove("show"),3500)}
 async function api(url,options={}){const response=await fetch(url,{...options,headers:{...headers(),...(options.headers||{})}});if(response.status===401){showLogin();throw new Error("Please sign in again.")}const data=response.status===204?null:await response.json();if(!response.ok)throw new Error(data.error||"Request failed.");return data}
 function showLogin(){clearTimeout(inactivityTimer);currentUser=undefined;csrfValue="";concealPassword();loginView.hidden=false;dashboard.hidden=true;logout.hidden=true;identity.textContent=""}

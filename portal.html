@@ -7,7 +7,7 @@
     <title>Clinic Administration | Brilliant Healthcare</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="portal.css">
-    <link rel="stylesheet" href="admin.css?v=2">
+    <link rel="stylesheet" href="admin.css?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -27,7 +27,10 @@
                 <label>Password
                     <span class="password-control">
                         <input id="adminPassword" name="password" type="password" autocomplete="current-password" required>
-                        <button id="togglePassword" type="button" aria-controls="adminPassword" aria-pressed="false">Show</button>
+                        <button id="togglePassword" type="button" aria-controls="adminPassword" aria-pressed="false" aria-label="Show password">
+                            <svg class="password-eye password-eye-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.4 12s3.5-6 9.6-6 9.6 6 9.6 6-3.5 6-9.6 6-9.6-6-9.6-6Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="password-eye password-eye-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.2A10.8 10.8 0 0 1 12 6c6.1 0 9.6 6 9.6 6a15.7 15.7 0 0 1-2.5 3.1M6.4 6.4C3.8 8.1 2.4 12 2.4 12s3.5 6 9.6 6c1.4 0 2.7-.3 3.8-.8M9.9 9.9A3 3 0 0 0 14.1 14.1"/></svg>
+                        </button>
                     </span>
                 </label>
                 <button id="loginSubmit" class="btn btn-primary" type="submit"><span>Sign in securely</span></button>
@@ -119,6 +122,6 @@
         </div>
     </div>
     <div id="portalNotice" class="portal-notice" role="status"></div>
-    <script src="portal.js?v=3"></script>
+    <script src="portal.js?v=4"></script>
 </body>
 </html>
