@@ -1,0 +1,17 @@
+/* Temporary launch state: keep appointment booking and administration private. */
+a[href^="appointments.html"],
+a[href^="portal.html"],
+.top-strip .container > p,
+.hero-care-card,
+.doctor-card dl,
+#serviceModalBook,
+.visit-guidance,
+.visit-steps,
+.contact-form {
+    display: none !important;
+}
+
+/* Keep contact details balanced after the booking form is hidden. */
+.contact-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
