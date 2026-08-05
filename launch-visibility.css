@@ -14,3 +14,23 @@ a[href^="portal.html"],
 .contact-grid {
     grid-template-columns: minmax(0, 1fr) !important;
 }
+
+/* Center and visually group the remaining clinic details in the top bar. */
+.topbar .container {
+    justify-content: center;
+}
+
+.topbar .container > div {
+    width: auto;
+    justify-content: center;
+    gap: 0;
+}
+
+.topbar .container > div > * {
+    padding-inline: 20px;
+    white-space: nowrap;
+}
+
+.topbar .container > div > * + * {
+    border-left: 1px solid rgba(22, 58, 56, 0.13);
+}
