@@ -1,7 +1,6 @@
 /* Temporary launch state: keep appointment booking and administration private. */
 a[href^="appointments.html"],
 a[href^="portal.html"],
-.top-strip .container > p,
 .hero-care-card,
 .doctor-card dl,
 #serviceModalBook,
