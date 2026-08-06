@@ -32,6 +32,11 @@ CREATE TABLE IF NOT EXISTS admins (
 ALTER TABLE admins ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'super_admin';
 ALTER TABLE admins ADD COLUMN IF NOT EXISTS active boolean NOT NULL DEFAULT true;
 ALTER TABLE admins ADD COLUMN IF NOT EXISTS last_login_at timestamptz;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='admins_role_check') THEN
+    ALTER TABLE admins ADD CONSTRAINT admins_role_check CHECK (role IN ('super_admin','appointment_manager','viewer'));
+  END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS doctors (
   id uuid PRIMARY KEY,
   name text NOT NULL,

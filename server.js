@@ -8,14 +8,18 @@ const { normalizePhilippineMobile, processAppointmentReminders, startReminderSch
 if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required. Configure the Supabase transaction-pooler URL.');
 const IS_PRODUCTION = process.env.NODE_ENV === 'production' || Boolean(process.env.RAILWAY_ENVIRONMENT);
 if (IS_PRODUCTION && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD.length < 16)) throw new Error('ADMIN_PASSWORD must contain at least 16 characters in production.');
+if (IS_PRODUCTION && (!process.env.SECURITY_PEPPER || process.env.SECURITY_PEPPER.length < 32)) throw new Error('SECURITY_PEPPER must be an independent random value of at least 32 characters in production.');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const COOKIE = '__Host-bh_admin';
 const bookingAttempts = new Map();
+const publicReadAttempts = new Map();
 const appointmentStatuses = ['pending','confirmed','completed','cancelled','declined'];
 const adminRoles = ['super_admin','appointment_manager','viewer'];
+const appointmentServices = new Set(['hemodialysis','peritoneal-dialysis','lab-diagnostics','cardiac','radiology','checkup','other']);
 const SECURITY_PEPPER = process.env.SECURITY_PEPPER || process.env.ADMIN_PASSWORD || 'local-development-only';
+const PRODUCTION_ORIGIN = 'https://bhcopc.com';
 
 function id() { return crypto.randomUUID(); }
 function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) { return `${salt}:${crypto.scryptSync(password, salt, 64).toString('hex')}`; }
@@ -26,13 +30,15 @@ function csrfToken(sessionToken) { return crypto.createHmac('sha256', SECURITY_P
 function safeEqual(a, b) { const one=Buffer.from(String(a||'')), two=Buffer.from(String(b||'')); return one.length===two.length && crypto.timingSafeEqual(one,two); }
 function validUuid(value) { return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value || ''); }
 function validEmail(value) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value || ''); }
-function validDate(value) { return /^\d{4}-\d{2}-\d{2}$/.test(value || '') && !Number.isNaN(Date.parse(`${value}T00:00:00`)); }
+function validDate(value) { if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return false;const parsed=new Date(`${value}T00:00:00Z`);return !Number.isNaN(parsed.valueOf())&&parsed.toISOString().slice(0,10)===value; }
+function manilaToday() { const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Manila',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts().filter(x=>x.type!=='literal').map(x=>[x.type,x.value]));return `${parts.year}-${parts.month}-${parts.day}`; }
+function validAppointmentDate(value) { if(!validDate(value))return false;const today=manilaToday(),limit=new Date(`${today}T00:00:00Z`);limit.setUTCDate(limit.getUTCDate()+90);return value>=today&&value<=limit.toISOString().slice(0,10); }
 function validTime(value) { return /^([01]\d|2[0-3]):[0-5]\d$/.test(value || ''); }
 function minutes(value) { const [h,m]=value.split(':').map(Number); return h*60+m; }
 function clean(value, max = 250) { return String(value || '').trim().slice(0,max); }
 function validPhotoUrl(value) { if (!value) return true; if (value.startsWith('/images/')) return true; try { return new URL(value).protocol === 'https:'; } catch { return false; } }
 function cookies(req) { return Object.fromEntries(String(req.headers.cookie || '').split(';').map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf('=');return [decodeURIComponent(x.slice(0,i)),decodeURIComponent(x.slice(i+1))]})); }
-function rateLimited(map, key, limit, windowMs) { const now=Date.now(), recent=(map.get(key)||[]).filter(t=>now-t<windowMs); if(recent.length>=limit) return true; recent.push(now); map.set(key,recent); return false; }
+function rateLimited(map, key, limit, windowMs) { const now=Date.now(), recent=(map.get(key)||[]).filter(t=>now-t<windowMs);if(recent.length>=limit)return true;recent.push(now);map.set(key,recent);if(map.size>5000){for(const [entry,times] of map){if(!times.some(t=>now-t<windowMs))map.delete(entry);if(map.size<=4000)break}}return false; }
 function validSchedule(availability) { return Array.isArray(availability) && !availability.some(a=>!Number.isInteger(a.day)||a.day<0||a.day>6||!validTime(a.start)||!validTime(a.end)||minutes(a.start)>=minutes(a.end)||![15,30,45,60].includes(Number(a.slotMinutes))); }
 
 async function auth(req,res,next) {
@@ -51,7 +57,7 @@ function csrf(req,res,next) {
   next();
 }
 async function available(doctor,date,time) {
-  if(!doctor||!validDate(date)||!validTime(time)||date<new Date().toISOString().slice(0,10)||doctor.unavailableDates.includes(date)) return false;
+  if(!doctor||!validAppointmentDate(date)||!validTime(time)||doctor.unavailableDates.includes(date)) return false;
   const day=new Date(`${date}T12:00:00`).getDay(), rule=doctor.availability.find(x=>x.day===day); if(!rule) return false;
   const value=minutes(time),start=minutes(rule.start),end=minutes(rule.end); if(value<start||value+rule.slotMinutes>end||(value-start)%rule.slotMinutes!==0) return false;
   const {rows}=await pool.query(`SELECT 1 FROM appointments WHERE doctor_id=$1 AND appointment_date=$2 AND appointment_time=$3 AND archived_at IS NULL AND status NOT IN ('cancelled','declined')`,[doctor.id,date,time]);
@@ -59,33 +65,36 @@ async function available(doctor,date,time) {
 }
 
 app.set('trust proxy',1);
+app.set('etag',false);
 app.disable('x-powered-by');
-app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],baseUri:["'self'"],objectSrc:["'none'"],frameAncestors:["'none'"],formAction:["'self'"],styleSrc:["'self'","'unsafe-inline'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com'],imgSrc:["'self'",'data:','https:'],scriptSrc:["'self'"],connectSrc:["'self'"]}},referrerPolicy:{policy:'no-referrer'},crossOriginEmbedderPolicy:false}));
+app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],baseUri:["'self'"],objectSrc:["'none'"],frameAncestors:["'none'"],formAction:["'self'"],styleSrc:["'self'",'https://fonts.googleapis.com'],fontSrc:["'self'",'https://fonts.gstatic.com'],imgSrc:["'self'",'data:','https:'],scriptSrc:["'self'"],connectSrc:["'self'"],workerSrc:["'none'"],mediaSrc:["'none'"]}},referrerPolicy:{policy:'no-referrer'},crossOriginEmbedderPolicy:false,hsts:{maxAge:31536000,includeSubDomains:true,preload:true}}));
 app.use(express.json({limit:'20kb',type:'application/json'}));
-app.use((req,res,next)=>{res.setHeader('Permissions-Policy','geolocation=(), microphone=(), camera=()');next()});
-app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');res.setHeader('Pragma','no-cache');next()});
-app.use('/api',(req,res,next)=>{if(!['POST','PATCH','PUT','DELETE'].includes(req.method))return next();const origin=req.get('origin');const expected=`${req.protocol}://${req.get('host')}`;if(!origin||origin!==expected)return res.status(403).json({error:'Request origin was rejected.'});next()});
+app.use((req,res,next)=>{res.setHeader('Permissions-Policy','accelerometer=(), autoplay=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');next()});
+app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');res.setHeader('Pragma','no-cache');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');next()});
+app.use('/api',(req,res,next)=>{if(!['POST','PATCH','PUT','DELETE'].includes(req.method))return next();if(!req.is('application/json'))return res.status(415).json({error:'Requests must use application/json.'});const origin=req.get('origin'),expected=IS_PRODUCTION?PRODUCTION_ORIGIN:`${req.protocol}://${req.get('host')}`;if(!origin||origin!==expected)return res.status(403).json({error:'Request origin was rejected.'});next()});
 
-app.get('/health',async(req,res,next)=>{try{await pool.query('SELECT 1');res.json({status:'ok',database:'connected'})}catch(e){next(e)}});
+app.get('/health',async(req,res,next)=>{try{await pool.query('SELECT 1');res.setHeader('Cache-Control','no-store');res.json({status:'ok'})}catch(e){next(e)}});
 app.post('/api/login',async(req,res,next)=>{try{
   const email=clean(req.body.email,200).toLowerCase(), keys=[securityKey('ip',req.ip),securityKey('email',email)];
   if(await isLoginBlocked(keys)) return res.status(429).json({error:'Too many attempts. Try again in 15 minutes.'});
   const {rows}=await pool.query('SELECT * FROM admins WHERE email=$1 AND active=true',[email]); const user=rows[0];
-  if(!user||!verifyPassword(String(req.body.password||''),user.password_hash)){await recordLoginFailure(keys);return res.status(401).json({error:'Invalid email or password.'})}
+  const password=String(req.body.password||'');
+  if(!validEmail(email)||password.length>256||!user||!verifyPassword(password,user.password_hash)){await recordLoginFailure(keys);return res.status(401).json({error:'Invalid email or password.'})}
   await clearLoginFailures(keys);
   const token=crypto.randomBytes(32).toString('base64url'), expires=new Date(Date.now()+30*60_000); await pool.query('DELETE FROM admin_sessions WHERE admin_id=$1 OR expires_at<=now()',[user.id]);await pool.query('INSERT INTO admin_sessions(token_hash,admin_id,expires_at) VALUES($1,$2,$3)',[hashToken(token),user.id,expires]);await pool.query('UPDATE admins SET last_login_at=now() WHERE id=$1',[user.id]);req.user=user;await audit(req,'login','session',user.id);
-  res.cookie(COOKIE,token,{httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict',path:'/',maxAge:30*60_000}); res.json({user:{name:user.name,email:user.email,role:'admin'}});
+  res.cookie(COOKIE,token,{httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict',priority:'high',path:'/',maxAge:30*60_000}); res.json({user:{name:user.name,email:user.email,role:'admin'}});
 }catch(e){next(e)}});
 app.post('/api/logout',auth,csrf,async(req,res,next)=>{try{const token=cookies(req)[COOKIE];await pool.query('DELETE FROM admin_sessions WHERE token_hash=$1',[hashToken(token)]);res.clearCookie(COOKIE,{path:'/',httpOnly:true,secure:IS_PRODUCTION,sameSite:'strict'});res.status(204).end()}catch(e){next(e)}});
 app.get('/api/me',auth,(req,res)=>res.json({...req.user,csrfToken:csrfToken(req.sessionToken)}));
-app.get('/api/doctors',async(req,res,next)=>{try{res.json(await getDoctors(false))}catch(e){next(e)}});
-app.get('/api/doctors/:id/slots',async(req,res,next)=>{try{const doctor=await getDoctor(req.params.id,false),date=clean(req.query.date,10);if(!doctor||!validDate(date))return res.status(400).json({error:'Choose a valid doctor and date.'});const day=new Date(`${date}T12:00:00`).getDay(),rule=doctor.availability.find(x=>x.day===day),slots=[];if(rule)for(let value=minutes(rule.start);value+rule.slotMinutes<=minutes(rule.end);value+=rule.slotMinutes){const time=`${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;slots.push({time,available:await available(doctor,date,time)})}res.json({doctor,date,unavailable:doctor.unavailableDates.includes(date),slots})}catch(e){next(e)}});
+app.get('/api/doctors',(req,res,next)=>{if(rateLimited(publicReadAttempts,`doctors:${req.ip}`,120,10*60_000))return res.status(429).json({error:'Too many requests.'});next()},async(req,res,next)=>{try{res.json(await getDoctors(false))}catch(e){next(e)}});
+app.get('/api/doctors/:id/slots',(req,res,next)=>{if(rateLimited(publicReadAttempts,`slots:${req.ip}`,120,10*60_000))return res.status(429).json({error:'Too many requests.'});next()},async(req,res,next)=>{try{const doctor=await getDoctor(req.params.id,false),date=clean(req.query.date,10);if(!doctor||!validAppointmentDate(date))return res.status(400).json({error:'Choose a valid doctor and date.'});const day=new Date(`${date}T12:00:00`).getDay(),rule=doctor.availability.find(x=>x.day===day),slots=[];if(rule)for(let value=minutes(rule.start);value+rule.slotMinutes<=minutes(rule.end);value+=rule.slotMinutes){const time=`${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;slots.push({time,available:await available(doctor,date,time)})}res.json({doctor,date,unavailable:doctor.unavailableDates.includes(date),slots})}catch(e){next(e)}});
 app.post('/api/appointments',async(req,res,next)=>{try{
   if(rateLimited(bookingAttempts,req.ip,6,10*60_000)) return res.status(429).json({error:'Too many booking requests. Please wait and try again.'});
   const doctorId=clean(req.body.doctorId,40),date=clean(req.body.date,10),time=clean(req.body.time,5),doctor=await getDoctor(doctorId,false);
   const fullName=clean(req.body.fullName,120),phone=normalizePhilippineMobile(req.body.phone),email=clean(req.body.email,200),service=clean(req.body.service,80),message=clean(req.body.message,1000),smsConsent=req.body.smsConsent===true||req.body.smsConsent==='on';
-  if(!fullName||!phone||!service||!smsConsent||!(await available(doctor,date,time))) return res.status(400).json({error:'Complete the required details, use a valid Philippine mobile number, and consent to the appointment reminder.'});
-  const reference=`BH-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+  if(phone&&rateLimited(bookingAttempts,securityKey('booking-phone',phone),3,60*60_000))return res.status(429).json({error:'Too many booking requests for this phone number. Please contact the clinic if you need assistance.'});
+  if(!fullName||!phone||(email&&!validEmail(email))||!appointmentServices.has(service)||!smsConsent||!(await available(doctor,date,time))) return res.status(400).json({error:'Complete the required details, use valid contact information, and select an available appointment.'});
+  const reference=`BH-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
   try{await pool.query(`INSERT INTO appointments(id,reference,doctor_id,appointment_date,appointment_time,full_name,phone,email,service,message,sms_consent,reminder_status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'scheduled')`,[id(),reference,doctorId,date,time,fullName,phone,email||null,service,message,smsConsent])}catch(error){if(error.code==='23505')return res.status(409).json({error:'That time was just reserved. Please choose another slot.'});throw error}
   res.status(201).json({reference,status:'pending',message:'Your slot is reserved pending clinic confirmation. An SMS reminder is scheduled for the day before your appointment.'});
 }catch(e){next(e)}});
@@ -158,7 +167,7 @@ app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'index.html')));
 app.get('/:file',(req,res,next)=>{if(!PUBLIC_FILES.has(req.params.file))return next();res.setHeader('Cache-Control','no-cache, must-revalidate');res.sendFile(path.join(__dirname,req.params.file))});
 app.use('/images',express.static(path.join(__dirname,'images'),{dotfiles:'deny',maxAge:'7d',immutable:true}));
 app.use((req,res)=>res.status(404).type('text').send('Not found.'));
-app.use((error,req,res,next)=>{console.error(error.code||error.message);res.status(500).json({error:'The service could not complete your request. Please try again.'})});
+app.use((error,req,res,next)=>{if(error?.type==='entity.parse.failed')return res.status(400).json({error:'The request contained invalid JSON.'});console.error(error.code||error.message);res.status(500).json({error:'The service could not complete your request. Please try again.'})});
 
 async function start(){await initDatabase({adminEmail:(process.env.ADMIN_EMAIL||'admin@brillianthealthcare.com').toLowerCase(),adminName:'Clinic Administrator',adminPasswordHash:hashPassword(process.env.ADMIN_PASSWORD||'ChangeMe123!')});app.listen(PORT,'0.0.0.0',()=>console.log(`Brilliant Healthcare listening on ${PORT} with PostgreSQL`));startReminderScheduler()}
 start().catch(error=>{console.error('Startup failed:',error.message);process.exit(1)});

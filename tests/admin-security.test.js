@@ -34,3 +34,17 @@ test('appointment list uses server-side pagination', () => {
   assert.match(server, /LIMIT \$\$\{values\.length-1\} OFFSET/);
   assert.match(portal, /appointmentQuery\(\)/);
 });
+
+test('production secrets and browser isolation are enforced', () => {
+  assert.match(server, /SECURITY_PEPPER must be an independent random value/);
+  assert.match(server, /sameSite:'strict',priority:'high'/);
+  assert.match(server, /workerSrc:\["'none'"\]/);
+  assert.doesNotMatch(server, /styleSrc:\[[^\]]*unsafe-inline/);
+});
+
+test('public appointment inputs and API requests are constrained', () => {
+  assert.match(server, /appointmentServices\.has\(service\)/);
+  assert.match(server, /validAppointmentDate/);
+  assert.match(server, /Requests must use application\/json/);
+  assert.match(server, /booking-phone/);
+});
