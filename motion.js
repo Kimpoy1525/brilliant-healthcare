@@ -44,3 +44,26 @@ if(reducedMotion||!("IntersectionObserver" in window)){
 window.addEventListener("pageshow",event=>{
     if(event.persisted)revealElements.forEach(element=>element.classList.add("is-visible"));
 });
+
+// Lightweight 2.5D hero: pointer depth on desktop, gentle autonomous motion elsewhere.
+const depthScene=document.querySelector("[data-hero-depth]");
+if(depthScene&&!reducedMotion){
+    const depthLayers=[...depthScene.querySelectorAll("[data-depth]")];
+    let frame=0;
+    const renderDepth=(x,y)=>{
+        cancelAnimationFrame(frame);
+        frame=requestAnimationFrame(()=>{
+            depthLayers.forEach(layer=>{
+                const depth=Number(layer.dataset.depth)||0;
+                layer.style.setProperty("--depth-x",`${x*depth}px`);
+                layer.style.setProperty("--depth-y",`${y*depth}px`);
+            });
+        });
+    };
+    depthScene.addEventListener("pointermove",event=>{
+        if(event.pointerType&&event.pointerType!=="mouse")return;
+        const box=depthScene.getBoundingClientRect();
+        renderDepth((event.clientX-box.left)/box.width-.5,(event.clientY-box.top)/box.height-.5);
+    });
+    depthScene.addEventListener("pointerleave",()=>renderDepth(0,0));
+}

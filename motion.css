@@ -27,6 +27,28 @@
 .service-modal:not([hidden]) .service-modal-backdrop{animation:professional-fade 260ms ease-out}
 .nav-links a{transition:color var(--motion-fast)}.logo-mark{transition:transform 280ms var(--motion-ease)}.logo:hover .logo-mark{transform:scale(1.04)}
 .footer-links a{position:relative;transition:color var(--motion-fast),padding-left var(--motion-fast)}.footer-links a:hover{padding-left:4px}
+/* Calm, lightweight 2.5D healthcare hero */
+.hero-depth{isolation:isolate;perspective:1000px}
+.hero-depth [data-depth]{transform:translate3d(var(--depth-x,0),var(--depth-y,0),0);transition:transform 700ms var(--motion-ease)}
+.hero-depth .hero-image-frame{position:relative;z-index:2;box-shadow:0 28px 70px rgba(26,70,73,.18)}
+.hero-depth .hero-image-frame:after{position:absolute;inset:0;background:linear-gradient(145deg,rgba(255,255,255,.18),transparent 42%,rgba(1,137,161,.08));content:"";pointer-events:none}
+.hero-orbit{position:absolute;z-index:0;border:1px solid rgba(1,137,161,.18);border-radius:50%;pointer-events:none}
+.hero-orbit-one{inset:-34px -42px 22px 42px;animation:orbit-breathe 8s ease-in-out infinite}
+.hero-orbit-two{inset:22px 28px -25px -30px;border-color:rgba(88,161,72,.2);animation:orbit-breathe 10s 1s ease-in-out infinite reverse}
+.hero-medical-cross{position:absolute;z-index:4;top:6%;right:-5%;width:74px;height:74px;background:linear-gradient(145deg,#fff,#e8f7f5);border:1px solid rgba(1,137,161,.2);border-radius:22px;box-shadow:0 18px 35px rgba(26,70,73,.16);animation:medical-float 5.5s ease-in-out infinite;pointer-events:none}
+.hero-medical-cross span{position:absolute;top:50%;left:50%;display:block;background:#58a148;border-radius:4px;transform:translate(-50%,-50%)}
+.hero-medical-cross span:first-child{width:34px;height:11px}.hero-medical-cross span:last-child{width:11px;height:34px}
+.hero-pulse{position:absolute;z-index:4;right:-3%;bottom:12%;width:58%;padding:10px 14px;background:rgba(255,255,255,.9);border:1px solid rgba(1,137,161,.2);border-radius:12px;box-shadow:0 14px 30px rgba(26,70,73,.13);backdrop-filter:blur(8px);pointer-events:none}
+.hero-pulse svg{display:block;width:100%;height:auto}.hero-pulse path{fill:none;stroke:#0189a1;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:410;stroke-dashoffset:410;animation:pulse-draw 3.8s ease-in-out infinite}
+.hero-particle{position:absolute;z-index:3;width:16px;height:16px;background:#58a148;border:4px solid rgba(255,255,255,.9);border-radius:50%;box-shadow:0 6px 18px rgba(26,70,73,.18);animation:particle-float 5s ease-in-out infinite;pointer-events:none}
+.particle-one{top:19%;left:-4%}.particle-two{top:47%;right:-3%;width:12px;height:12px;animation-delay:-1.5s}.particle-three{right:16%;bottom:2%;width:20px;height:20px;background:#0189a1;animation-delay:-3s}
+@keyframes orbit-breathe{50%{transform:scale(1.035) rotate(2deg);opacity:.65}}
+@keyframes medical-float{50%{margin-top:-9px;rotate:2deg}}
+@keyframes particle-float{50%{margin-top:-12px;scale:1.08}}
+@keyframes pulse-draw{0%{stroke-dashoffset:410;opacity:.3}45%,75%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:-410;opacity:.3}}
+.visit-steps{position:relative}.visit-steps:before{position:absolute;top:27px;bottom:27px;left:27px;width:2px;background:linear-gradient(#0189a1,#58a148);content:"";opacity:.28;transform:scaleY(0);transform-origin:top;transition:transform 1.2s var(--motion-ease)}
+.visit-path-intro.is-visible~.visit-steps:before,.visit-steps:has(.is-visible):before{transform:scaleY(1)}
+@media(max-width:768px){.hero-medical-cross{right:2%;width:58px;height:58px;border-radius:17px}.hero-pulse{right:3%;bottom:5%;width:62%}.particle-one{left:1%}.hero-orbit{display:none}}
 /* Consistent responsive button feedback */
 .btn,.hamburger,.service-modal-close,.calendar-toolbar button,.calendar-day,.time-slot,.notification-close,.btn-subscribe,.service-card[role=button]{will-change:transform;transform-origin:center;transition:transform 220ms var(--motion-ease),box-shadow 220ms ease,background-color 220ms ease,border-color 220ms ease,color 220ms ease}
 .btn:focus-visible,.hamburger:focus-visible,.service-modal-close:focus-visible,.calendar-toolbar button:focus-visible,.calendar-day:focus-visible,.time-slot:focus-visible,.notification-close:focus-visible,.service-card[role=button]:focus-visible{transform:translateY(-2px) scale(1.025);box-shadow:0 10px 24px rgba(6,76,116,.16)}
@@ -53,4 +75,5 @@
 @media(prefers-reduced-motion:reduce){
 *,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition-duration:.01ms!important;transition-delay:0ms!important}
 .motion-reveal,.motion-reveal.motion-from-left,.motion-reveal.motion-from-right{opacity:1!important;transform:none!important}
+.hero-depth [data-depth]{transform:none!important}.hero-orbit,.hero-medical-cross,.hero-particle,.hero-pulse path{animation:none!important}.hero-pulse path{stroke-dashoffset:0}.visit-steps:before{transform:scaleY(1)}
 }
