@@ -1,0 +1,318 @@
+:root {
+    /* Brand palette sampled from the official Brilliant Healthcare mark. */
+    --brand-teal: #008ba3;
+    --brand-teal-dark: #006f83;
+    --brand-green: #55a546;
+    --brand-ink: #173f43;
+    --brand-muted: #607577;
+    --brand-tint: #eef7f5;
+    --ink: var(--brand-ink);
+    --muted: var(--brand-muted);
+    --teal: var(--brand-teal);
+    --teal-dark: var(--brand-ink);
+    --clinic-blue: var(--brand-teal);
+    --gold: var(--brand-green);
+    --mint: var(--brand-tint);
+    --page-gutter: clamp(20px, 4vw, 48px);
+    --section-space: clamp(68px, 8vw, 104px);
+    --surface-border: #d6e5e3;
+    --surface-shadow: 0 18px 45px rgba(26, 70, 73, .08);
+}
+
+body {
+    color: var(--brand-ink);
+    background: #fff;
+}
+
+:focus-visible {
+    outline-color: rgba(0, 139, 163, .42);
+}
+
+.topbar,
+.footer {
+    background: var(--brand-ink);
+}
+
+.topbar,
+.topbar a,
+.topbar p,
+.topbar span {
+    color: #fff;
+}
+
+.topbar a:hover {
+    color: #fff;
+}
+
+.topbar .map-link,
+.topbar .container > div > a:last-child {
+    color: #a8df98;
+}
+
+.topbar .map-link:hover,
+.topbar .container > div > a:last-child:hover {
+    color: #fff;
+}
+
+.topbar .container > div > a,
+.topbar .container > div > span {
+    position: relative;
+    z-index: 0;
+    transition: color .18s ease, transform .18s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .topbar .container > div > a:hover,
+    .topbar .container > div > span:hover {
+        z-index: 1;
+        color: #a8df98;
+        transform: translateY(-2px) scale(1.04);
+    }
+
+    .topbar .container > div > a:last-child:hover {
+        color: #fff;
+    }
+}
+
+.topbar p span,
+.nav-links a:after {
+    background: var(--brand-green);
+}
+
+.logo-copy strong,
+.nav-links a:hover,
+.map-link,
+.inner-page .hero-content h1,
+.about-content h2,
+.section-header h2,
+.contact-info h2,
+.team-heading h2,
+.service-card h3,
+.physician-details h3,
+.contact-form h3 {
+    color: var(--brand-teal);
+}
+
+.badge,
+.form-kicker,
+.physician-details > span,
+.why-us-number,
+.section-label {
+    color: var(--brand-green);
+}
+
+.btn-primary,
+.btn-primary:hover {
+    background: var(--brand-teal);
+}
+
+.btn-primary:hover {
+    background: var(--brand-teal-dark);
+}
+
+.btn-secondary {
+    color: var(--brand-teal);
+    border-color: var(--brand-teal);
+}
+
+.about-image-note,
+.visit-steps article > span {
+    background: var(--brand-ink);
+}
+
+.container {
+    width: min(calc(100% - (var(--page-gutter) * 2)), 1180px);
+}
+
+.about,
+.services,
+.medical-team,
+.why-us,
+.testimonials,
+.visit-path,
+.contact {
+    padding-block: var(--section-space);
+}
+
+.inner-page .hero {
+    background: #f4f8f7;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.inner-page .hero:before,
+.inner-hero-art:before,
+.inner-hero-art:after,
+.inner-page main > section:not(.hero):before {
+    display: none;
+}
+
+.inner-page .inner-hero-art .hero-image-frame,
+.patient-information-page .about-img,
+.patient-information-page .about-image:before {
+    border-radius: 12px;
+}
+
+.inner-page .inner-hero-art .hero-image-frame {
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--surface-shadow);
+}
+
+.inner-page .hero-content h1 {
+    max-width: 680px;
+    color: var(--brand-teal);
+    font-size: clamp(2.55rem, 4.5vw, 4.25rem);
+    line-height: 1.04;
+    text-wrap: balance;
+}
+
+.inner-page .hero .badge {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    backdrop-filter: none;
+}
+
+.patient-information-page .about-grid {
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    gap: clamp(44px, 6vw, 82px);
+    align-items: center;
+}
+
+.patient-information-page .about-image {
+    width: 100%;
+    padding: 0;
+}
+
+.patient-information-page .patient-visit-photo {
+    width: 100%;
+    height: auto !important;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    box-shadow: var(--surface-shadow);
+    object-fit: cover;
+    object-position: center 48%;
+}
+
+.patient-information-page .about-image:before {
+    top: -14px;
+    left: -14px;
+    display: block;
+    width: 55%;
+    height: 55%;
+    background: #e5f1ef;
+}
+
+.patient-information-page .about-content {
+    padding: clamp(28px, 4vw, 46px);
+    background: #fff;
+    border: 1px solid var(--surface-border);
+    border-radius: 10px;
+    box-shadow: 0 14px 38px rgba(26, 70, 73, .055);
+}
+
+.about-image-note {
+    right: -12px;
+    bottom: 18px;
+    border-radius: 4px;
+}
+
+.services-page .services {
+    background: #f6f8f8;
+}
+
+.services-page .service-card {
+    background: #fff !important;
+    border: 1px solid var(--surface-border) !important;
+    border-radius: 8px;
+    box-shadow: none;
+    transform: none;
+}
+
+.services-page .service-card:hover {
+    border-color: var(--brand-green) !important;
+    box-shadow: 0 12px 30px rgba(26, 70, 73, .08);
+    transform: translateY(-2px);
+}
+
+.services-page .service-photo:after {
+    display: none;
+}
+
+.services-page .service-card .service-card-body {
+    padding: 24px 26px 58px;
+}
+
+.physician-profile,
+.contact-form,
+.why-us-card,
+.testimonial-card {
+    border-radius: 8px;
+}
+
+.doctors-page .physician-photo img[src*="james-raphael"] {
+    object-position: center 18%;
+}
+
+.service-modal-panel,
+.service-modal-visual {
+    border-radius: 10px;
+}
+
+.service-modal-panel {
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .24);
+}
+
+.service-modal-backdrop {
+    background: rgba(12, 38, 40, .72);
+    backdrop-filter: none;
+}
+
+@media (max-width: 900px) {
+    .patient-information-page .about-grid {
+        grid-template-columns: 1fr;
+        gap: 34px;
+    }
+
+    .patient-information-page .about-image {
+        width: min(100%, 720px);
+        margin-inline: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --page-gutter: 18px;
+        --section-space: 62px;
+    }
+
+    .inner-page .hero .container {
+        padding-block: 46px 56px;
+    }
+
+    .patient-information-page .about-content {
+        padding: 26px 22px;
+    }
+
+    .patient-information-page .about-image:before {
+        display: none;
+    }
+
+    .about-image-note {
+        position: static;
+        width: 100%;
+        margin-top: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *:before,
+    *:after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

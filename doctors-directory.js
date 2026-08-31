@@ -18,11 +18,12 @@ function renderDoctor(doctor){
     const article=element("article","physician-profile");
     const photo=element("div","physician-photo");
     const image=document.createElement("img");
-    image.src=doctor.photoUrl||"images/generic-doctor.png";
-    image.alt=doctor.photoUrl?`Professional portrait of ${doctor.name}`:"Physician profile image";
+    const defaultPhoto=doctor.name.includes("James Raphael")?"images/james-raphael.jpg":"images/generic-doctor.png";
+    image.src=doctor.photoUrl||defaultPhoto;
+    image.alt=`${doctor.name}, ${doctor.specialty}`;
     image.loading="lazy";
     image.referrerPolicy="no-referrer";
-    image.onerror=()=>{image.onerror=null;image.src="images/generic-doctor.png";image.alt="Physician profile image"};
+    image.onerror=()=>{image.onerror=null;image.src=defaultPhoto};
     photo.append(image);
 
     const details=element("div","physician-details");
@@ -48,8 +49,8 @@ function renderDoctor(doctor){
 fetch("/api/doctors")
     .then(response=>{if(!response.ok)throw new Error();return response.json()})
     .then(doctors=>{
+        if(!doctors.length)return;
         directory.replaceChildren();
-        if(!doctors.length){directory.append(element("p","doctor-directory-loading","No physician profiles are currently published. Please contact the clinic."));return}
         doctors.forEach(doctor=>directory.append(renderDoctor(doctor)));
     })
-    .catch(()=>{directory.replaceChildren(element("p","doctor-directory-loading","Physician profiles could not be loaded. Please refresh or contact the clinic."))});
+    .catch(()=>{});

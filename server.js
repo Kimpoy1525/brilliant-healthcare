@@ -17,7 +17,11 @@ const bookingAttempts = new Map();
 const publicReadAttempts = new Map();
 const appointmentStatuses = ['pending','confirmed','completed','cancelled','declined'];
 const adminRoles = ['super_admin','appointment_manager','viewer'];
-const appointmentServices = new Set(['hemodialysis','peritoneal-dialysis','lab-diagnostics','cardiac','radiology','checkup','other']);
+const appointmentServices = new Set([
+  'hematology','microscopy','serology','chemistry',
+  'hemodialysis','peritoneal-dialysis','lab-diagnostics','cardiac','radiology','checkup',
+  'other'
+]);
 const SECURITY_PEPPER = process.env.SECURITY_PEPPER || process.env.ADMIN_PASSWORD || 'local-development-only';
 const PRODUCTION_ORIGIN = 'https://bhcopc.com';
 
@@ -162,7 +166,13 @@ app.patch('/api/admin/doctors/:id',auth,csrf,async(req,res,next)=>{const client=
 app.post('/api/admin/reminders/run',auth,csrf,async(req,res,next)=>{try{if(!process.env.SEMAPHORE_API_KEY)return res.status(503).json({error:'SMS reminders are not active. Add SEMAPHORE_API_KEY in Railway first.'});res.json(await processAppointmentReminders())}catch(e){next(e)}});
 app.patch('/api/appointments/:id',auth,csrf,async(req,res,next)=>{try{if(!validUuid(req.params.id)||!appointmentStatuses.includes(req.body.status))return res.status(400).json({error:'Invalid appointment update.'});const {rows}=await pool.query('UPDATE appointments SET status=$1,updated_at=now() WHERE id=$2 AND archived_at IS NULL RETURNING *',[req.body.status,req.params.id]);if(!rows[0])return res.status(404).json({error:'Appointment not found.'});res.json(rows[0])}catch(e){if(e.code==='23505')return res.status(409).json({error:'That time already has an active appointment.'});next(e)}});
 
-const PUBLIC_FILES=new Set(['index.html','patient-information.html','services.html','doctors.html','privacy.html','script.js','motion.js','doctors-directory.js','styles.css','services-modal.css','service-photos.css','private-hospital.css','privacy.css','booking-fix.css','hospital-refresh.css','modern.css','motion.css','launch-visibility.css']);
+const PUBLIC_FILES = new Set([
+  'index.html','patient-information.html','services.html','doctors.html','appointments.html','privacy.html','portal.html',
+  'script.js','motion.js','doctors-directory.js','portal.js',
+  'styles.css','modern.css','private-hospital.css','motion.css','production.css','hospital-refresh.css',
+  'services-modal.css','laboratory-modal.css','service-photos.css','booking-fix.css','launch-visibility.css',
+  'privacy.css','portal.css','admin.css'
+]);
 app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'index.html')));
 app.get('/:file',(req,res,next)=>{if(!PUBLIC_FILES.has(req.params.file))return next();res.setHeader('Cache-Control','no-cache, must-revalidate');res.sendFile(path.join(__dirname,req.params.file))});
 app.use('/images',express.static(path.join(__dirname,'images'),{dotfiles:'deny',maxAge:'7d',immutable:true}));

@@ -11,12 +11,14 @@
     <link rel="stylesheet" href="modern.css">
     <link rel="stylesheet" href="privacy.css">
     <link rel="stylesheet" href="services-modal.css">
+    <link rel="stylesheet" href="laboratory-modal.css">
     <link rel="stylesheet" href="booking-fix.css">
     <link rel="stylesheet" href="hospital-refresh.css">
     <link rel="stylesheet" href="service-photos.css">
     <link rel="stylesheet" href="private-hospital.css">
     <link rel="stylesheet" href="motion.css?v=20260806-4">
     <link rel="stylesheet" href="launch-visibility.css">
+    <link rel="stylesheet" href="production.css?v=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -67,7 +69,7 @@
                 </div>
             </div>
             <div class="hero-image inner-hero-art hero-depth" data-hero-depth>
-                <div class="hero-image-frame"><img src="images/hero-services-temp.png" alt="Clinical team preparing modern diagnostic equipment" class="hero-img" width="1710" height="920" fetchpriority="high"></div>
+                <div class="hero-image-frame"><img src="images/hero-services-temp.jpg?v=1" alt="Clinical team preparing modern diagnostic equipment" class="hero-img" width="1710" height="920" fetchpriority="high"></div>
             </div>
         </div>
     </section>
@@ -77,7 +79,7 @@
         <div class="container">
             <div class="about-grid">
                 <div class="about-image">
-                    <img src="images/Brilliant Building.jpg" alt="Exterior of the Brilliant Healthcare center" class="about-img" loading="lazy">
+                    <img src="images/facility-reception.jpeg?v=1" alt="Brilliant Healthcare reception area and illuminated clinic sign" class="about-img facility-front" loading="lazy" width="1024" height="768">
                     <div class="about-image-note"><strong>One center</strong><span>Coordinated dialysis and diagnostics</span></div>
                 </div>
                 <div class="about-content">
@@ -114,38 +116,28 @@
             <div class="section-header">
                 <span class="badge">Our Services</span>
                 <h2>Comprehensive Medical Services</h2>
-                <p>From routine check-ups to specialized dialysis care, we offer a full range of medical services under one roof.</p>
+                <p>Explore our clinical laboratory services, all provided with careful patient support under one roof.</p>
             </div>
             <div class="services-grid">
-                <div class="service-card" role="button" tabindex="0" data-service="hemodialysis" aria-haspopup="dialog">
-                    <div class="service-photo"><img src="images/service-hemodialysis.png" alt="Modern hemodialysis treatment chair and equipment" loading="lazy" width="1536" height="1024"></div>
-                    <div class="service-card-body"><h3>Hemodialysis</h3>
-                    <p>Advanced hemodialysis treatments using state-of-the-art machines to effectively filter waste and toxins from your blood.</p></div>
+                <div class="service-card" role="button" tabindex="0" data-service="hematology" aria-haspopup="dialog">
+                    <div class="service-photo"><img src="images/service-hematology.jpg?v=2" alt="Laboratory professional operating an automated hematology analyzer" loading="lazy" width="1536" height="1024"></div>
+                    <div class="service-card-body"><h3>Hematology</h3>
+                    <p>Blood testing services that evaluate blood cells, clotting, and other important indicators used in diagnosis and monitoring.</p></div>
                 </div>
-                <div class="service-card" role="button" tabindex="0" data-service="peritoneal-dialysis" aria-haspopup="dialog">
-                    <div class="service-photo"><img src="images/service-peritoneal-dialysis.png" alt="Clinician preparing sealed peritoneal dialysis supplies" loading="lazy" width="1536" height="1024"></div>
-                    <div class="service-card-body"><h3>Peritoneal Dialysis</h3>
-                    <p>Flexible peritoneal dialysis options with comprehensive training and support for home-based treatment.</p></div>
+                <div class="service-card" role="button" tabindex="0" data-service="microscopy" aria-haspopup="dialog">
+                    <div class="service-photo"><img src="images/service-microscopy.jpg?v=1" alt="Laboratory professional examining a specimen with a microscope" loading="lazy" width="1536" height="1024"></div>
+                    <div class="service-card-body"><h3>Microscopy</h3>
+                    <p>Careful examination of urine, stool, and other specimens to help identify conditions and support accurate clinical decisions.</p></div>
                 </div>
-                <div class="service-card" role="button" tabindex="0" data-service="lab-diagnostics" aria-haspopup="dialog">
-                    <div class="service-photo"><img src="images/service-lab-diagnostics.png" alt="Laboratory professional working with diagnostic samples" loading="lazy" width="1536" height="1024"></div>
-                    <div class="service-card-body"><h3>Lab Diagnostics</h3>
-                    <p>Full-service diagnostic laboratory offering accurate blood tests, urine analysis, and specialized pathology services.</p></div>
+                <div class="service-card" role="button" tabindex="0" data-service="serology" aria-haspopup="dialog">
+                    <div class="service-photo"><img src="images/service-serology.jpg?v=3" alt="Laboratory professional processing a serology test with an immunoassay analyzer" loading="lazy" width="1536" height="1024"></div>
+                    <div class="service-card-body"><h3>Serology</h3>
+                    <p>Laboratory tests that detect antibodies, antigens, hormones, and immune markers to support screening and diagnosis.</p></div>
                 </div>
-                <div class="service-card" role="button" tabindex="0" data-service="cardiac" aria-haspopup="dialog">
-                    <div class="service-photo"><img src="images/service-cardiac-diagnostics.png" alt="Clinician preparing cardiac diagnostic equipment" loading="lazy" width="1536" height="1024"></div>
-                    <div class="service-card-body"><h3>Cardiac Diagnostics</h3>
-                    <p>Comprehensive cardiac testing including ECG, echocardiograms, and stress tests for heart health assessment.</p></div>
-                </div>
-                <div class="service-card" role="button" tabindex="0" data-service="radiology" aria-haspopup="dialog">
-                    <div class="service-photo"><img src="images/service-radiology.png" alt="Physician beside modern ultrasound imaging equipment" loading="lazy" width="1536" height="1024"></div>
-                    <div class="service-card-body"><h3>Radiology & Imaging</h3>
-                    <p>Digital X-ray, ultrasound, and other imaging services to support accurate diagnosis and treatment planning.</p></div>
-                </div>
-                <div class="service-card" role="button" tabindex="0" data-service="checkup" aria-haspopup="dialog">
-                    <div class="service-photo"><img src="images/service-health-checkup.png" alt="Doctor checking a patient's blood pressure" loading="lazy" width="1536" height="1024"></div>
-                    <div class="service-card-body"><h3>Health Checkups</h3>
-                    <p>Comprehensive health screening packages designed to detect health issues early and promote wellness.</p></div>
+                <div class="service-card" role="button" tabindex="0" data-service="chemistry" aria-haspopup="dialog">
+                    <div class="service-photo"><img src="images/service-chemistry.jpg?v=3" alt="Laboratory professional operating an automated clinical chemistry analyzer" loading="lazy" width="1536" height="1024"></div>
+                    <div class="service-card-body"><h3>Chemistry</h3>
+                    <p>Clinical chemistry tests that measure blood sugar, lipids, enzymes, electrolytes, and organ-function indicators.</p></div>
                 </div>
             </div>
         </div>
@@ -174,8 +166,8 @@
         <div class="service-modal-backdrop" data-close-modal></div>
         <section class="service-modal-panel" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle" tabindex="-1">
             <button class="service-modal-close" type="button" data-close-modal aria-label="Close service details">×</button>
-            <div class="service-modal-visual"><img id="serviceModalImage" src="images/generic-doctor.png" alt="Dr. James Raphael, handling physician"><span>Dr. James Raphael · Handling physician</span></div>
-            <div class="service-modal-content"><p class="modal-kicker" id="serviceModalKicker"></p><h2 id="serviceModalTitle"></h2><p class="modal-summary" id="serviceModalSummary"></p><div class="modal-doctor"><small>Handling physician</small><strong>Dr. James Raphael</strong><span>Nephrology &amp; Internal Medicine</span></div><div class="modal-sections"><div><h3>About this service</h3><p id="serviceModalAbout"></p></div><div><h3>What to expect</h3><ul id="serviceModalExpect"></ul></div><div><h3>Before your visit</h3><p id="serviceModalPrepare"></p></div></div><p class="modal-disclaimer">General information only. Your clinician will determine whether this service is appropriate for you.</p><a href="#contact" class="btn btn-primary" id="serviceModalBook">View schedule &amp; book</a></div>
+            <div class="service-modal-visual"><img id="serviceModalImage" src="images/generic-doctor.png" alt="Dr. James Raphael, handling physician"><span id="serviceModalVisualLabel">Dr. James Raphael · Handling physician</span></div>
+            <div class="service-modal-content"><p class="modal-kicker" id="serviceModalKicker"></p><h2 id="serviceModalTitle"></h2><p class="modal-summary" id="serviceModalSummary"></p><div class="modal-doctor" id="serviceModalDoctor"><small>Handling physician</small><strong>Dr. James Raphael</strong><span>Nephrology &amp; Internal Medicine</span></div><div class="modal-sections"><div><h3 id="serviceModalAboutHeading">About this service</h3><p id="serviceModalAbout"></p></div><div><h3 id="serviceModalListHeading">What to expect</h3><ul id="serviceModalExpect"></ul></div><div><h3>Before your visit</h3><p id="serviceModalPrepare"></p></div></div><p class="modal-disclaimer">General information only. Your clinician will determine whether this service is appropriate for you.</p><a href="#contact" class="btn btn-primary" id="serviceModalBook">View schedule &amp; book</a></div>
         </section>
     </div>
 
@@ -304,12 +296,10 @@
                         <label>Email address<input name="email" type="email" autocomplete="email"></label>
                         <label>Service needed <span>*</span><select name="service" required>
                             <option value="" disabled selected>Choose a service</option>
-                            <option value="hemodialysis">Hemodialysis</option>
-                            <option value="peritoneal-dialysis">Peritoneal Dialysis</option>
-                            <option value="lab-diagnostics">Lab Diagnostics</option>
-                            <option value="cardiac">Cardiac Diagnostics</option>
-                            <option value="radiology">Radiology & Imaging</option>
-                            <option value="checkup">Health Checkup</option>
+                            <option value="hematology">Hematology</option>
+                            <option value="microscopy">Microscopy</option>
+                            <option value="serology">Serology</option>
+                            <option value="chemistry">Chemistry</option>
                             <option value="other">Other</option>
                         </select></label>
                     </div>
@@ -363,11 +353,10 @@
                 <div class="footer-links">
                     <h4>Our Services</h4>
                     <ul>
-                        <li><a href="services.html">Hemodialysis</a></li>
-                        <li><a href="services.html">Peritoneal Dialysis</a></li>
-                        <li><a href="services.html">Lab Diagnostics</a></li>
-                        <li><a href="services.html">Cardiac Diagnostics</a></li>
-                        <li><a href="services.html">Radiology & Imaging</a></li>
+                        <li><a href="services.html">Hematology</a></li>
+                        <li><a href="services.html">Microscopy</a></li>
+                        <li><a href="services.html">Serology</a></li>
+                        <li><a href="services.html">Chemistry</a></li>
                     </ul>
                 </div>
                 <div class="footer-newsletter">
@@ -375,10 +364,6 @@
                     <p>For clinic assistance, call our team during operating hours.</p>
                     <a class="footer-call" href="tel:+639566857606">(0956) 685 7606</a>
                     <a class="footer-map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Get directions on Google Maps <span aria-hidden="true">↗</span></a>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Your Email" required>
-                        <button type="submit" class="btn-subscribe" aria-label="Subscribe">→</button>
-                    </form>
                 </div>
             </div>
             <div class="footer-bottom">

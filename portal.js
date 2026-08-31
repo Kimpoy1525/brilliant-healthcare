@@ -42,7 +42,7 @@ function localDateValue(date=new Date()){return`${date.getFullYear()}-${String(d
 function appointmentDate(value){return String(value||"").slice(0,10)}
 function displayDate(value){const date=appointmentDate(value);return new Date(`${date}T12:00:00`).toLocaleDateString([],{weekday:"short",month:"short",day:"numeric",year:"numeric"})}
 function displayTime(value){return new Date(`2000-01-01T${value}:00`).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}
-function serviceName(value){return({"hemodialysis":"Hemodialysis","peritoneal-dialysis":"Peritoneal Dialysis","lab-diagnostics":"Lab Diagnostics","cardiac":"Cardiac Diagnostics","radiology":"Radiology & Imaging","checkup":"Health Checkup","other":"Other"})[value]||value}
+function serviceName(value){return({"hematology":"Hematology","microscopy":"Microscopy","serology":"Serology","chemistry":"Chemistry","hemodialysis":"Hemodialysis","peritoneal-dialysis":"Peritoneal Dialysis","lab-diagnostics":"Lab Diagnostics","cardiac":"Cardiac Diagnostics","radiology":"Radiology & Imaging","checkup":"Health Checkup","other":"Other"})[value]||value}
 function patientField(label,value,href){
     const field=document.createElement("div");field.className="patient-field";
     const name=document.createElement("small");name.textContent=label;
