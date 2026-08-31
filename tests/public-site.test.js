@@ -64,7 +64,17 @@ test('laboratory service cards and modal data stay aligned', () => {
     assert.match(html, new RegExp(`data-service="${service}"`));
     assert.match(script, new RegExp(`"${service}"\\s*:`));
   }
-  assert.equal((html.match(/class="service-card" role="button"/g) || []).length, 4);
+  assert.equal((html.match(/class="service-card"[^>]*role="button"/g) || []).length, 4);
+});
+
+test('every footer links to the current laboratory service categories', () => {
+  for (const page of publicPages) {
+    const html = read(page);
+    for (const service of ['hematology', 'microscopy', 'serology', 'chemistry']) {
+      assert.match(html, new RegExp(`href="services\\.html#${service}"`), `${page} footer is missing ${service}`);
+    }
+    assert.doesNotMatch(html, /<h4>Our Services<\/h4>[\s\S]*?Hemodialysis[\s\S]*?<\/ul>/);
+  }
 });
 
 test('server serves every directly referenced public stylesheet and script', () => {
