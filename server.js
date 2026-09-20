@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const helmet = require('helmet');
+const { reportOperationalError, installPoolErrorHandler, createHealthHandler, installShutdown } = require('./public-runtime');
 const { pool, initDatabase, getDoctors, getDoctor, replaceSchedule, isLoginBlocked, recordLoginFailure, clearLoginFailures } = require('./database');
 const { normalizePhilippineMobile, processAppointmentReminders, startReminderScheduler } = require('./sms-reminders');
 
@@ -10,6 +11,7 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production' || Boolean(process.e
 if (IS_PRODUCTION && (!process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD.length < 16)) throw new Error('ADMIN_PASSWORD must contain at least 16 characters in production.');
 if (IS_PRODUCTION && (!process.env.SECURITY_PEPPER || process.env.SECURITY_PEPPER.length < 32)) throw new Error('SECURITY_PEPPER must be an independent random value of at least 32 characters in production.');
 
+installPoolErrorHandler(pool);
 const app = express();
 const PORT = process.env.PORT || 3000;
 const COOKIE = '__Host-bh_admin';
@@ -77,7 +79,7 @@ app.use((req,res,next)=>{res.setHeader('Permissions-Policy','accelerometer=(), a
 app.use('/api',(req,res,next)=>{res.setHeader('Cache-Control','no-store');res.setHeader('Pragma','no-cache');res.setHeader('X-Robots-Tag','noindex, nofollow, noarchive');next()});
 app.use('/api',(req,res,next)=>{if(!['POST','PATCH','PUT','DELETE'].includes(req.method))return next();if(!req.is('application/json'))return res.status(415).json({error:'Requests must use application/json.'});const origin=req.get('origin'),expected=IS_PRODUCTION?PRODUCTION_ORIGIN:`${req.protocol}://${req.get('host')}`;if(!origin||origin!==expected)return res.status(403).json({error:'Request origin was rejected.'});next()});
 
-app.get('/health',async(req,res,next)=>{try{await pool.query('SELECT 1');res.setHeader('Cache-Control','no-store');res.json({status:'ok'})}catch(e){next(e)}});
+app.get('/health', createHealthHandler(pool));
 app.post('/api/login',async(req,res,next)=>{try{
   const email=clean(req.body.email,200).toLowerCase(), keys=[securityKey('ip',req.ip),securityKey('email',email)];
   if(await isLoginBlocked(keys)) return res.status(429).json({error:'Too many attempts. Try again in 15 minutes.'});
@@ -173,11 +175,30 @@ const PUBLIC_FILES = new Set([
   'services-modal.css','laboratory-modal.css','service-photos.css','booking-fix.css','launch-visibility.css',
   'privacy.css','portal.css','admin.css'
 ]);
-app.get('/',(req,res)=>res.sendFile(path.join(__dirname,'index.html')));
-app.get('/:file',(req,res,next)=>{if(!PUBLIC_FILES.has(req.params.file))return next();res.setHeader('Cache-Control','no-cache, must-revalidate');res.sendFile(path.join(__dirname,req.params.file))});
-app.use('/images',express.static(path.join(__dirname,'images'),{dotfiles:'deny',maxAge:'7d',immutable:true}));
-app.use((req,res)=>res.status(404).type('text').send('Not found.'));
-app.use((error,req,res,next)=>{if(error?.type==='entity.parse.failed')return res.status(400).json({error:'The request contained invalid JSON.'});console.error(error.code||error.message);res.status(500).json({error:'The service could not complete your request. Please try again.'})});
+app.get('/', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+app.get('/:file', (req, res, next) => {
+  if (!PUBLIC_FILES.has(req.params.file)) return next();
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  res.sendFile(path.join(__dirname, req.params.file));
+});
+app.use('/images', express.static(path.join(__dirname, 'images'), { dotfiles: 'deny', maxAge: '1h' }));
+app.use((req, res) => {
+  res.status(404);
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.path.startsWith('/api/')) return res.json({ error: 'Not found.' });
+  if (req.accepts('html')) return res.sendFile(path.join(__dirname, 'not-found.html'));
+  res.type('text').send('Not found.');
+});
+app.use((error, req, res, next) => {
+  if (res.headersSent) return next(error);
+  if (error?.type === 'entity.parse.failed') return res.status(400).json({ error: 'The request contained invalid JSON.' });
+  if (error?.type === 'entity.too.large') return res.status(413).json({ error: 'The request is too large.' });
+  const reference = reportOperationalError('request_failed', error);
+  res.status(500).json({ error: 'The service could not complete your request. Please try again.', reference });
+});
 
-async function start(){await initDatabase({adminEmail:(process.env.ADMIN_EMAIL||'admin@brillianthealthcare.com').toLowerCase(),adminName:'Clinic Administrator',adminPasswordHash:hashPassword(process.env.ADMIN_PASSWORD||'ChangeMe123!')});app.listen(PORT,'0.0.0.0',()=>console.log(`Brilliant Healthcare listening on ${PORT} with PostgreSQL`));startReminderScheduler()}
+async function start(){await initDatabase({adminEmail:(process.env.ADMIN_EMAIL||'admin@brillianthealthcare.com').toLowerCase(),adminName:'Clinic Administrator',adminPasswordHash:hashPassword(process.env.ADMIN_PASSWORD||'ChangeMe123!')});const server=app.listen(PORT,'0.0.0.0',()=>console.log(`Brilliant Healthcare listening on ${PORT} with PostgreSQL`));installShutdown(server,pool);startReminderScheduler()}
 start().catch(error=>{console.error('Startup failed:',error.message);process.exit(1)});

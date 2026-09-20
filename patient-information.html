@@ -15,17 +15,16 @@
     <link rel="stylesheet" href="hospital-refresh.css">
     <link rel="stylesheet" href="service-photos.css">
     <link rel="stylesheet" href="private-hospital.css">
-    <link rel="stylesheet" href="motion.css?v=20260806-4">
     <link rel="stylesheet" href="launch-visibility.css">
     <link rel="stylesheet" href="production.css?v=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap">
 </head>
-<body class="inner-page patient-information-page">
-    <a class="skip-link" href="#home">Skip to main content</a>
+<body class="patient-facing inner-page patient-information-page">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="topbar">
         <div class="container">
-            <div><a href="tel:+639566857606">(0956) 685 7606</a><span>Mon–Sat, 8:00 AM–5:00 PM</span><a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" aria-label="View Brilliant Healthcare on Google Maps">View map ↗</a></div>
+            <div><a href="tel:+639566857606">(0956) 685 7606</a><span>Mon–Sat, 8:00 AM–5:00 PM</span><a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" aria-label="View Brilliant Healthcare on Google Maps">View map</a></div>
         </div>
     </div>
     <!-- Navigation -->
@@ -38,7 +37,7 @@
             </a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="index.html">Home</a></li>
-                <li><a href="patient-information.html">Patient Information</a></li>
+                <li><a href="patient-information.html" aria-current="page">Patient Information</a></li>
                 <li><a href="services.html">Services</a></li>
                 <li><a href="doctors.html">Doctors</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
@@ -55,14 +54,16 @@
     </header>
 
     <!-- Hero Section -->
-    <main>
+    <main id="main-content" tabindex="-1">
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
+                <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Patient information</span></nav>
                 <span class="badge">Patient information</span>
-                <h1>Prepare for your visit with confidence.</h1>
-                <p>Find practical guidance about documents, preparation, privacy, and what to expect during your clinic visit.</p>
+                <h1>Information for your visit</h1>
+                <p>A little preparation can make your clinic visit easier. Find out what to bring and how to get assistance from our team.</p>
                 <div class="hero-buttons">
+                    <a href="tel:+639566857606" class="btn btn-primary clinic-call">Call the clinic</a>
                     <a href="appointments.html" class="btn btn-primary">Book an appointment</a>
                     <a href="doctors.html" class="btn btn-secondary">Find a doctor</a>
                 </div>
@@ -105,6 +106,18 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="patient-faq" aria-labelledby="patientQuestionsTitle">
+        <div class="container editorial-grid">
+            <div class="editorial-intro"><p class="eyebrow">PRACTICAL INFORMATION</p><h2 id="patientQuestionsTitle">Questions before your visit?</h2><p>For help with your specific service or schedule, speak with the clinic team.</p><a class="text-link" href="tel:+639566857606">Call (0956) 685 7606</a></div>
+            <div class="patient-questions">
+                <details open><summary>How do I confirm a physician's schedule?</summary><p>Review the <a href="doctors.html">medical team page</a>, then call the clinic to confirm availability before travelling. Published hours may change.</p></details>
+                <details><summary>How do I prepare for a laboratory test?</summary><p>Check the information for your <a href="services.html">test category</a> and contact the laboratory for the instructions that apply to your requested test. Bring your physician's request when applicable.</p></details>
+                <details><summary>What are the clinic's operating hours?</summary><p>Monday to Saturday, 8:00 AM to 5:00 PM. Closed on Sunday. Call ahead to confirm availability for the service you need.</p></details>
+                <details><summary>Where can I ask about my information?</summary><p>Read our <a href="privacy.html">Privacy Notice</a> for information about how appointment information is handled and how to contact the clinic with a privacy request.</p></details>
             </div>
         </div>
     </section>
@@ -268,7 +281,7 @@
                             <div>
                                 <h4>Address</h4>
                                 <p>Brilliant Health Care OPC</p>
-                                <a class="map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">View on Google Maps <span aria-hidden="true">↗</span></a>
+                                <a class="map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">View on Google Maps</a>
                             </div>
                         </div>
                         <div class="info-item">
@@ -334,7 +347,7 @@
                     <label class="message-label">Questions or scheduling needs<textarea name="message" placeholder="Please do not include sensitive medical information." rows="4"></textarea></label>
                     <label class="consent"><input name="consent" type="checkbox" required> I agree to be contacted about this appointment and acknowledge the <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. <span>*</span></label>
                     <p class="privacy-note">Your chosen time is reserved after submission, pending clinic confirmation. For emergencies, contact emergency services instead of using this form.</p>
-                    <button type="submit" class="btn btn-primary btn-full">Send Appointment Request <span aria-hidden="true">→</span></button>
+                    <button type="submit" class="btn btn-primary btn-full">Send Appointment Request</button>
                 </form>
             </div>
         </div>
@@ -375,7 +388,7 @@
                     <h4>Clinic assistance</h4>
                     <p>For clinic assistance, call our team during operating hours.</p>
                     <a class="footer-call" href="tel:+639566857606">(0956) 685 7606</a>
-                    <a class="footer-map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Get directions on Google Maps <span aria-hidden="true">↗</span></a>
+                    <a class="footer-map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Get directions on Google Maps</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -385,6 +398,5 @@
     </footer>
 
     <script src="script.js?v=3"></script>
-    <script src="motion.js"></script>
 </body>
 </html>

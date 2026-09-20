@@ -16,17 +16,16 @@
     <link rel="stylesheet" href="hospital-refresh.css">
     <link rel="stylesheet" href="service-photos.css">
     <link rel="stylesheet" href="private-hospital.css">
-    <link rel="stylesheet" href="motion.css?v=20260806-4">
     <link rel="stylesheet" href="launch-visibility.css">
     <link rel="stylesheet" href="production.css?v=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap">
 </head>
-<body class="inner-page services-page">
-    <a class="skip-link" href="#home">Skip to main content</a>
+<body class="patient-facing inner-page services-page">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="topbar">
         <div class="container">
-            <div><a href="tel:+639566857606">(0956) 685 7606</a><span>Mon–Sat, 8:00 AM–5:00 PM</span><a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" aria-label="View Brilliant Healthcare on Google Maps">View map ↗</a></div>
+            <div><a href="tel:+639566857606">(0956) 685 7606</a><span>Mon–Sat, 8:00 AM–5:00 PM</span><a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" aria-label="View Brilliant Healthcare on Google Maps">View map</a></div>
         </div>
     </div>
     <!-- Navigation -->
@@ -40,7 +39,7 @@
             <ul class="nav-links" id="navLinks">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="patient-information.html">Patient Information</a></li>
-                <li><a href="services.html">Services</a></li>
+                <li><a href="services.html" aria-current="page">Services</a></li>
                 <li><a href="doctors.html">Doctors</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
                 <li><a href="portal.html">Admin Portal</a></li>
@@ -56,16 +55,18 @@
     </header>
 
     <!-- Hero Section -->
-    <main>
+    <main id="main-content" tabindex="-1">
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
+                <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Services</span></nav>
                 <span class="badge">Our services</span>
-                <h1>Specialist services in one coordinated center.</h1>
-                <p>Review each service and learn what to expect during your clinic visit.</p>
+                <h1>Laboratory services</h1>
+                <p>Explore our clinical laboratory categories and available tests. Contact the laboratory to confirm test availability and preparation requirements.</p>
                 <div class="hero-buttons">
+                    <a href="tel:+639566857606" class="btn btn-primary clinic-call">Call the clinic</a>
                     <a href="appointments.html" class="btn btn-primary">Book an appointment</a>
-                    <a href="doctors.html" class="btn btn-secondary">Find a doctor</a>
+                    <a href="#services" class="btn btn-secondary">Explore laboratory tests</a>
                 </div>
             </div>
             <div class="hero-image inner-hero-art hero-depth" data-hero-depth>
@@ -115,10 +116,22 @@
         <div class="container">
             <div class="section-header">
                 <span class="badge">Our Services</span>
-                <h2>Comprehensive Medical Services</h2>
-                <p>Explore our clinical laboratory services, all provided with careful patient support under one roof.</p>
+                <h2>Laboratory test directory</h2>
+                <p>Select a category to view available tests and preparation guidance. Tests marked S.O. are special-order tests; please contact the laboratory before your visit.</p>
             </div>
-            <div class="services-grid">
+            <form class="laboratory-search" id="laboratorySearch" role="search" hidden>
+                <label for="testSearch">Find a laboratory test</label>
+                <div class="laboratory-search-controls">
+                    <input id="testSearch" type="search" maxlength="80" placeholder="For example: CBC, urinalysis, or HbA1c" autocomplete="off" aria-controls="laboratoryCategories" aria-describedby="testSearchStatus">
+                    <button class="btn btn-secondary" type="reset">Clear search</button>
+                </div>
+                <p id="testSearchStatus" role="status" aria-live="polite">Showing all four laboratory categories.</p>
+            </form>
+            <div class="laboratory-no-results" id="testSearchEmpty" hidden>
+                <p>We couldn’t find that test in the published list. The clinic can help confirm availability.</p>
+                <a href="tel:+639566857606">Call (0956) 685 7606</a>
+            </div>
+            <div class="services-grid" id="laboratoryCategories">
                 <div class="service-card" id="hematology" role="button" tabindex="0" data-service="hematology" aria-haspopup="dialog">
                     <div class="service-photo"><img src="images/service-hematology.jpg?v=2" alt="Laboratory professional operating an automated hematology analyzer" loading="lazy" width="1536" height="1024"></div>
                     <div class="service-card-body"><h3>Hematology</h3>
@@ -258,7 +271,7 @@
                             <div>
                                 <h4>Address</h4>
                                 <p>Brilliant Health Care OPC</p>
-                                <a class="map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">View on Google Maps <span aria-hidden="true">↗</span></a>
+                                <a class="map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">View on Google Maps</a>
                             </div>
                         </div>
                         <div class="info-item">
@@ -322,7 +335,7 @@
                     <label class="message-label">Questions or scheduling needs<textarea name="message" placeholder="Please do not include sensitive medical information." rows="4"></textarea></label>
                     <label class="consent"><input name="consent" type="checkbox" required> I agree to be contacted about this appointment and acknowledge the <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. <span>*</span></label>
                     <p class="privacy-note">Your chosen time is reserved after submission, pending clinic confirmation. For emergencies, contact emergency services instead of using this form.</p>
-                    <button type="submit" class="btn btn-primary btn-full">Send Appointment Request <span aria-hidden="true">→</span></button>
+                    <button type="submit" class="btn btn-primary btn-full">Send Appointment Request</button>
                 </form>
             </div>
         </div>
@@ -363,7 +376,7 @@
                     <h4>Clinic assistance</h4>
                     <p>For clinic assistance, call our team during operating hours.</p>
                     <a class="footer-call" href="tel:+639566857606">(0956) 685 7606</a>
-                    <a class="footer-map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Get directions on Google Maps <span aria-hidden="true">↗</span></a>
+                    <a class="footer-map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Get directions on Google Maps</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -373,6 +386,5 @@
     </footer>
 
     <script src="script.js?v=3"></script>
-    <script src="motion.js"></script>
 </body>
 </html>

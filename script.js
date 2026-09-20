@@ -1,12 +1,17 @@
 "use strict";
 const hamburger = document.getElementById("hamburger");
 const navLinks = document.getElementById("navLinks");
-function setMenu(open) { hamburger.classList.toggle("active", open); navLinks.classList.toggle("active", open); hamburger.setAttribute("aria-expanded", String(open)); hamburger.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu"); document.body.classList.toggle("menu-open", open); }
+function setMenu(open) { if (document.body.classList.contains("patient-facing")) navLinks.inert = window.innerWidth <= 768 && !open; hamburger.classList.toggle("active", open); navLinks.classList.toggle("active", open); hamburger.setAttribute("aria-expanded", String(open)); hamburger.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu"); document.body.classList.toggle("menu-open", open); }
 hamburger.addEventListener("click", () => setMenu(hamburger.getAttribute("aria-expanded") !== "true"));
 document.querySelectorAll(".nav-links a").forEach((link) => link.addEventListener("click", () => setMenu(false)));
-document.addEventListener("keydown", (event) => { if (event.key === "Escape") setMenu(false); });
-window.addEventListener("resize", () => { if (window.innerWidth > 768) setMenu(false); });
-document.querySelectorAll('a[href^="#"]').forEach((anchor) => anchor.addEventListener("click", function (event) { const target = document.querySelector(this.getAttribute("href")); if (target) { event.preventDefault(); target.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); } }));
+document.addEventListener("keydown", (event) => { if (event.key === "Escape" && hamburger.getAttribute("aria-expanded") === "true") { setMenu(false); hamburger.focus(); } });
+window.addEventListener("resize", () => { if (window.innerWidth > 768) setMenu(false); else if (document.body.classList.contains("patient-facing")) navLinks.inert = hamburger.getAttribute("aria-expanded") !== "true"; });
+if (document.body.classList.contains("patient-facing")) {
+    navLinks.inert = window.innerWidth <= 768 && hamburger.getAttribute("aria-expanded") !== "true";
+    document.addEventListener("click", event => { if (!event.target.closest(".navbar")) setMenu(false); });
+}
+
+document.querySelectorAll('a[href^="#"]').forEach((anchor) => anchor.addEventListener("click", function (event) { const hash = this.getAttribute("href"); const target = hash.length > 1 ? document.getElementById(decodeURIComponent(hash.slice(1))) : null; if (target) { event.preventDefault(); if (this.classList.contains("skip-link")) target.focus({ preventScroll: true }); target.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); } }));
 
 function showNotification(message, type = "success") {
     document.querySelector(".notification")?.remove(); const notice = document.createElement("div"); notice.className = `notification notification-${type}`; notice.setAttribute("role", type === "error" ? "alert" : "status");
@@ -92,8 +97,41 @@ const serviceDetails = {
     "chemistry": { laboratory: true, kicker: "Laboratory services", title: "Chemistry", summary: "Clinical chemistry tests that measure blood sugar, lipids, enzymes, electrolytes, and organ-function indicators.", about: "Our chemistry services support routine screening, metabolic assessment, and monitoring of liver, kidney, and cardiovascular health.", expect: ["Albumin", "ALP (S.O.)", "Amylase (S.O.)", "B1B2TB (S.O.)", "BUA", "BUN", "Calcium", "Chloride", "Cholesterol", "Complete Hepatitis Profile (S.O.)", "Creatinine", "Creatinine Clearance (S.O.)", "Creatinine Kinase (CK-MB) (S.O.)", "CSF Protein (S.O.)", "CSF Sugar (S.O.)", "FBS / RBS", "Fecalysis", "GGTP (S.O.)", "HbA1c", "HDL / LDL", "Ketones - Non Diabetic (S.O.)", "LDH (S.O.)", "Lipase", "Lipid Profile", "Liver Profile", "Magnesium", "OGCT (50g)", "OGTT (75g) (Non-Pregnant)", "OGTT (100g)", "OGTT (75g) (Pregnant)", "Phosphorous", "Potassium", "SGOT (AST)", "SGPT (ALT)", "Sodium", "Total Protein", "Triglyceride", "VLDL"], prepare: "Some chemistry tests require fasting or timed collection. Confirm instructions with the laboratory before your visit and bring your physician's request, if applicable." }
 };
 const serviceModal = document.getElementById("serviceModal"), modalPanel = serviceModal.querySelector(".service-modal-panel"); let modalTrigger = null;
-function openServiceModal(card) { const detail = serviceDetails[card.dataset.service]; if (!detail) return; const isLaboratory = detail.laboratory === true; modalTrigger = card; modalPanel.classList.toggle("is-laboratory", isLaboratory); modalPanel.dataset.service = card.dataset.service; document.getElementById("serviceModalKicker").textContent = detail.kicker; document.getElementById("serviceModalTitle").textContent = detail.title; document.getElementById("serviceModalSummary").textContent = detail.summary; document.getElementById("serviceModalAbout").textContent = detail.about; document.getElementById("serviceModalPrepare").textContent = detail.prepare; document.getElementById("serviceModalAboutHeading").textContent = isLaboratory ? "About this category" : "About this service"; document.getElementById("serviceModalListHeading").textContent = isLaboratory ? "Available tests" : "What to expect"; document.getElementById("serviceModalDoctor").hidden = isLaboratory; const image = document.getElementById("serviceModalImage"); image.src = isLaboratory ? card.querySelector(".service-photo img").src : "images/generic-doctor.png"; image.alt = isLaboratory ? `Laboratory professional performing ${detail.title.toLowerCase()} testing` : "Dr. James Raphael, handling physician"; document.getElementById("serviceModalVisualLabel").textContent = isLaboratory ? "Brilliant Healthcare · Laboratory services" : "Dr. James Raphael · Handling physician"; const list = document.getElementById("serviceModalExpect"); list.replaceChildren(); detail.expect.forEach(item => { const li = document.createElement("li"); li.textContent = item; list.append(li); }); const action = document.getElementById("serviceModalBook"); action.dataset.service = card.dataset.service; action.dataset.laboratory = String(isLaboratory); action.textContent = isLaboratory ? "Contact the laboratory" : "View schedule & book"; action.href = isLaboratory ? "tel:+639566857606" : "#contact"; serviceModal.hidden = false; document.body.classList.add("modal-open"); modalPanel.focus(); }
-function closeServiceModal(restoreFocus = true) { serviceModal.hidden = true; document.body.classList.remove("modal-open"); if (restoreFocus) modalTrigger?.focus(); }
+// Only the visible laboratory dialog participates; retired dialogs stay unchanged.
+const modalBackground = new Map();
+function isolateLaboratoryDialog(open) {
+    if (!document.body.classList.contains('services-page')) return;
+    if (open) {
+        let branch = serviceModal;
+        while (branch.parentElement) {
+            for (const sibling of branch.parentElement.children) {
+                if (sibling !== branch && !['SCRIPT', 'STYLE', 'LINK'].includes(sibling.tagName)) {
+                    modalBackground.set(sibling, sibling.inert);
+                    sibling.inert = true;
+                }
+            }
+            branch = branch.parentElement;
+            if (branch === document.body) break;
+        }
+    } else {
+        for (const [element, wasInert] of modalBackground) element.inert = wasInert;
+        modalBackground.clear();
+    }
+}
+modalPanel.addEventListener('keydown', event => {
+    if (!document.body.classList.contains('services-page') || event.key !== 'Tab' || serviceModal.hidden) return;
+    const controls = [...modalPanel.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')]
+        .filter(element => !element.disabled && element.tabIndex >= 0 && element.getClientRects().length && !element.closest('[inert]'));
+    const first = controls[0], last = controls[controls.length - 1];
+    if (!first) { event.preventDefault(); modalPanel.focus(); return; }
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === modalPanel)) {
+        event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === modalPanel)) {
+        event.preventDefault(); first.focus();
+    }
+});
+function openServiceModal(card) { const detail = serviceDetails[card.dataset.service]; if (!detail) return; const isLaboratory = detail.laboratory === true; modalTrigger = card; modalPanel.classList.toggle("is-laboratory", isLaboratory); modalPanel.dataset.service = card.dataset.service; document.getElementById("serviceModalKicker").textContent = detail.kicker; document.getElementById("serviceModalTitle").textContent = detail.title; document.getElementById("serviceModalSummary").textContent = detail.summary; document.getElementById("serviceModalAbout").textContent = detail.about; document.getElementById("serviceModalPrepare").textContent = detail.prepare; document.getElementById("serviceModalAboutHeading").textContent = isLaboratory ? "About this category" : "About this service"; document.getElementById("serviceModalListHeading").textContent = isLaboratory ? "Available tests" : "What to expect"; document.getElementById("serviceModalDoctor").hidden = isLaboratory; const image = document.getElementById("serviceModalImage"); image.src = isLaboratory ? card.querySelector(".service-photo img").src : "images/generic-doctor.png"; image.alt = isLaboratory ? `Laboratory professional performing ${detail.title.toLowerCase()} testing` : "Dr. James Raphael, handling physician"; document.getElementById("serviceModalVisualLabel").textContent = isLaboratory ? "Brilliant Healthcare · Laboratory services" : "Dr. James Raphael · Handling physician"; const list = document.getElementById("serviceModalExpect"); list.replaceChildren(); detail.expect.forEach(item => { const li = document.createElement("li"); li.textContent = item; list.append(li); }); const action = document.getElementById("serviceModalBook"); action.dataset.service = card.dataset.service; action.dataset.laboratory = String(isLaboratory); action.textContent = isLaboratory ? "Contact the laboratory" : "View schedule & book"; action.href = isLaboratory ? "tel:+639566857606" : "#contact"; serviceModal.hidden = false; isolateLaboratoryDialog(true); document.body.classList.add("modal-open"); modalPanel.focus(); }
+function closeServiceModal(restoreFocus = true) { serviceModal.hidden = true; isolateLaboratoryDialog(false); document.body.classList.remove("modal-open"); if (restoreFocus) modalTrigger?.focus(); }
 document.querySelectorAll(".service-card[data-service]").forEach(card => { card.addEventListener("click", () => openServiceModal(card)); card.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openServiceModal(card); } }); });
 serviceModal.querySelectorAll("[data-close-modal]").forEach(button => button.addEventListener("click", closeServiceModal)); document.addEventListener("keydown", event => { if (event.key === "Escape" && !serviceModal.hidden) closeServiceModal(); });
 document.getElementById("serviceModalBook").addEventListener("click", function (event) {
@@ -110,6 +148,49 @@ document.getElementById("serviceModalBook").addEventListener("click", function (
     form.classList.remove("booking-highlight");
     requestAnimationFrame(() => { form.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); form.classList.add("booking-highlight"); form.setAttribute("tabindex", "-1"); form.focus({ preventScroll: true }); setTimeout(() => form.classList.remove("booking-highlight"), 1600); });
 });
+
+// Search only the visible laboratory directory using the published modal catalogue.
+const laboratorySearch = document.getElementById('laboratorySearch');
+if (laboratorySearch) {
+    const input = document.getElementById('testSearch');
+    const status = document.getElementById('testSearchStatus');
+    const empty = document.getElementById('testSearchEmpty');
+    const normalize = value => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const entries = [...document.querySelectorAll('#laboratoryCategories .service-card')].map(card => {
+        const details = serviceDetails[card.dataset.service];
+        const matches = document.createElement('p');
+        matches.className = 'laboratory-matches';
+        matches.hidden = true;
+        card.querySelector('.service-card-body').append(matches);
+        return { card, details, matches };
+    });
+    function filterLaboratory() {
+        const terms = normalize(input.value).split(' ').filter(Boolean);
+        const includesTerms = value => terms.every(term => normalize(value).includes(term));
+        let count = 0;
+        entries.forEach(({ card, details, matches }) => {
+            const matchingTests = terms.length ? details.expect.filter(includesTerms) : [];
+            const visible = !terms.length || includesTerms(details.title) || matchingTests.length > 0;
+            card.hidden = !visible;
+            matches.hidden = !visible || !matchingTests.length;
+            matches.textContent = matchingTests.length ? `Matching tests: ${matchingTests.join(', ')}` : '';
+            if (visible) count++;
+        });
+        status.textContent = terms.length
+            ? `${count} ${count === 1 ? 'category matches' : 'categories match'} your search. Select a category for details.`
+            : 'Showing all four laboratory categories.';
+        empty.hidden = count !== 0;
+    }
+    laboratorySearch.hidden = false;
+    input.addEventListener('input', filterLaboratory);
+    laboratorySearch.addEventListener('submit', event => { event.preventDefault(); filterLaboratory(); });
+    laboratorySearch.addEventListener('reset', event => {
+        event.preventDefault();
+        input.value = '';
+        filterLaboratory();
+        input.focus();
+    });
+}
 
 const reveal = document.querySelectorAll(".service-card, .why-us-card, .testimonial-card");
 if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) reveal.forEach(x => x.classList.add("fade-in")); else { const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add("fade-in"); observer.unobserve(entry.target); } }), { threshold: .1 }); reveal.forEach(x => observer.observe(x)); }

@@ -2,6 +2,16 @@
 
 Healthcare website with live appointment availability and separate administrator and doctor access.
 
+## Public-site reliability checks
+
+Run `npm ci` and `npm test` for source checks, operational failure tests, and HTTP checks against an isolated fixture. The fixture does not connect to PostgreSQL, initialize clinical data, or send SMS.
+
+Run `npm run test:browser` for responsive checks at 320, 390, 768, 1024, and 1440 pixels, laboratory test search, mobile navigation, service-dialog keyboard focus, and doctor-directory recovery. It uses headless Edge on Windows by default; set `BROWSER_PATH` to a Chrome or Edge executable on another installation. The check requires local port 3229 (override with `PUBLIC_CHECK_PORT`) and creates a temporary browser profile and screenshots. It explicitly verifies that the existing booking and portal links and forms remain hidden.
+
+Public pages provide telephone assistance while the existing launch visibility rules remain in effect. Directory failures provide a retry option and advise patients to confirm schedules by telephone. A successful empty directory response removes fallback profiles instead of presenting an unpublished physician as available.
+
+The `/health` endpoint returns 503 when its database check fails. Idle database connection errors are handled and logged using a code and correlation ID without database error text. SIGTERM/SIGINT stop new HTTP connections, drain requests, and close the pool; shutdown has a ten-second deadline. Images at mutable filenames revalidate after one hour, and HTML revalidates on each visit.
+
 ## Run locally
 
 Set `DATABASE_URL`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`, then run `npm start`. `DATABASE_URL` should use the Supabase transaction pooler. Open `/portal.html` to manage doctors, schedules, unavailable dates, and appointments.

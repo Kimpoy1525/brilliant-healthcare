@@ -15,17 +15,16 @@
     <link rel="stylesheet" href="hospital-refresh.css">
     <link rel="stylesheet" href="service-photos.css">
     <link rel="stylesheet" href="private-hospital.css">
-    <link rel="stylesheet" href="motion.css?v=20260806-4">
     <link rel="stylesheet" href="launch-visibility.css">
     <link rel="stylesheet" href="production.css?v=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap">
 </head>
-<body class="home-page">
-    <a class="skip-link" href="#home">Skip to main content</a>
+<body class="patient-facing home-page">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="topbar">
         <div class="container">
-            <div><a href="tel:+639566857606">(0956) 685 7606</a><span>Mon–Sat, 8:00 AM–5:00 PM</span><a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" aria-label="View Brilliant Healthcare on Google Maps">View map ↗</a></div>
+            <div><a href="tel:+639566857606">(0956) 685 7606</a><span>Mon–Sat, 8:00 AM–5:00 PM</span><a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener" aria-label="View Brilliant Healthcare on Google Maps">View map</a></div>
         </div>
     </div>
     <!-- Navigation -->
@@ -37,7 +36,7 @@
                 <span class="logo-copy"><strong>Brilliant Healthcare OPC</strong><small>Your Partner in Quality Care</small></span>
             </a>
             <ul class="nav-links" id="navLinks">
-                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html" aria-current="page">Home</a></li>
                 <li><a href="patient-information.html">Patient Information</a></li>
                 <li><a href="services.html">Services</a></li>
                 <li><a href="doctors.html">Doctors</a></li>
@@ -55,30 +54,45 @@
     </header>
 
     <!-- Hero Section -->
-    <main>
+    <main id="main-content" tabindex="-1">
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
                 <span class="badge">Dialysis &amp; Diagnostic Center</span>
-                <h1>Specialist care, made easier to access.</h1>
-                <p>Explore our healthcare services and learn more about our medical team—all in one place.</p>
+                <div class="hero-caption"><h1>Brilliant Healthcare OPC</h1><p>Dialysis and Diagnostic Center</p></div>
                 <div class="hero-buttons">
+                    <a href="tel:+639566857606" class="btn btn-primary clinic-call">Call the clinic</a>
                     <a href="appointments.html" class="btn btn-primary">Book an appointment</a>
                     <a href="doctors.html" class="btn btn-secondary">Find a doctor</a>
-                    <a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" class="btn btn-map" target="_blank" rel="noopener">Get directions <span aria-hidden="true">↗</span></a>
+                    <a href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" class="btn btn-map" target="_blank" rel="noopener">Get directions</a>
                 </div>
             </div>
             <div class="hero-image hero-depth" data-hero-depth>
-                <div class="hero-aurora" aria-hidden="true"></div>
-                <div class="hero-art-ring" aria-hidden="true"></div>
+
+
                 <div class="hero-image-frame" data-depth="4"><img src="images/facility-reception.jpeg?v=1" alt="Brilliant Healthcare reception area and illuminated clinic sign" class="hero-img facility-front" width="1024" height="768" fetchpriority="high"></div>
-                <div class="hero-specialties">
-                    <span>Care in one place</span>
-                    <strong>Dialysis <i></i> Diagnostics <i></i> Imaging</strong>
-                </div>
+                <div class="hero-specialties"><span>Brilliant Healthcare OPC</span><strong>Your partner in quality care</strong></div>
                 <div class="hero-care-card"><span aria-hidden="true">●</span><div><strong>Now accepting appointment requests</strong><small>View live physician availability</small></div></div>
             </div>
         </div>
+    </section>
+
+    <section class="clinic-welcome" aria-label="Welcome to Brilliant Healthcare">
+        <div class="container"><div><p>Looking for dialysis care or diagnostic services?</p><p>Brilliant Healthcare OPC brings clinical services together in one center. Explore our laboratory tests, learn about our physician, and find the information you need for your visit.</p></div><div><p>Speak with our clinic team for help with service enquiries and current physician availability.</p><a class="btn btn-primary" href="tel:+639566857606">Call the clinic</a></div></div>
+    </section>
+    <section class="clinic-introduction" aria-labelledby="clinicIntroductionTitle">
+        <div class="container"><img src="images/patient-visit-preparation.jpg?v=2" width="1254" height="1254" loading="lazy" alt="Patient coordinator reviewing visit documents"><div><h2 id="clinicIntroductionTitle">About Brilliant Healthcare</h2><p>We provide dialysis care and diagnostic services with a focus on clear, compassionate patient support.</p><p>Our team can help you with information about available tests, physician schedules, and the documents to bring. Contact the clinic before your visit to confirm the requirements for your service.</p><a class="btn btn-primary" href="doctors.html">Meet our physician</a></div></div>
+    </section>
+    <section class="clinic-service-photos" aria-label="Laboratory services">
+        <div class="container">
+            <a href="services.html#hematology"><img src="images/service-hematology.jpg?v=2" width="1536" height="1024" loading="lazy" alt="Hematology laboratory equipment"><h2>Hematology</h2></a>
+            <a href="services.html#microscopy"><img src="images/service-microscopy.jpg?v=1" width="1536" height="1024" loading="lazy" alt="Laboratory specimen examination"><h2>Clinical Microscopy</h2></a>
+            <a href="services.html#serology"><img src="images/service-serology.jpg?v=3" width="1536" height="1024" loading="lazy" alt="Serology testing equipment"><h2>Serology</h2></a>
+            <a href="services.html#chemistry"><img src="images/service-chemistry.jpg?v=3" width="1536" height="1024" loading="lazy" alt="Clinical chemistry analyzer"><h2>Clinical Chemistry</h2></a>
+        </div>
+    </section>
+    <section class="clinic-visit" aria-labelledby="clinicVisitTitle">
+        <div class="container"><img src="images/hero-patient-information-temp.jpg?v=1" width="1692" height="930" loading="lazy" alt="Nurse discussing visit information with a patient"><div><h2 id="clinicVisitTitle">Planning your first visit</h2><p>Bring a valid ID, your physician's request or referral, and any previous results relevant to your visit.</p><p>Some laboratory tests require preparation or a specific collection method. Please contact the laboratory for instructions before you arrive.</p><a class="btn btn-primary" href="patient-information.html">Patient information</a></div></div>
     </section>
 
     <!-- About Section -->
@@ -256,7 +270,7 @@
                             <div>
                                 <h4>Address</h4>
                                 <p>Brilliant Health Care OPC</p>
-                                <a class="map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">View on Google Maps <span aria-hidden="true">↗</span></a>
+                                <a class="map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">View on Google Maps</a>
                             </div>
                         </div>
                         <div class="info-item">
@@ -322,7 +336,7 @@
                     <label class="message-label">Questions or scheduling needs<textarea name="message" placeholder="Please do not include sensitive medical information." rows="4"></textarea></label>
                     <label class="consent"><input name="consent" type="checkbox" required> I agree to be contacted about this appointment and acknowledge the <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>. <span>*</span></label>
                     <p class="privacy-note">Your chosen time is reserved after submission, pending clinic confirmation. For emergencies, contact emergency services instead of using this form.</p>
-                    <button type="submit" class="btn btn-primary btn-full">Send Appointment Request <span aria-hidden="true">→</span></button>
+                    <button type="submit" class="btn btn-primary btn-full">Send Appointment Request</button>
                 </form>
             </div>
         </div>
@@ -363,7 +377,7 @@
                     <h4>Clinic assistance</h4>
                     <p>For clinic assistance, call our team during operating hours.</p>
                     <a class="footer-call" href="tel:+639566857606">(0956) 685 7606</a>
-                    <a class="footer-map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Get directions on Google Maps <span aria-hidden="true">↗</span></a>
+                    <a class="footer-map-link" href="https://www.google.com/maps/place/Brillant+Health+Care+OPC/@15.4874883,120.5950731,330m/data=!3m1!1e3!4m6!3m5!1s0x3396c7005a72b513:0x71112005b9c36fab!8m2!3d15.4872914!4d120.5955672!16s%2Fg%2F11zg36_qhy?entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener">Get directions on Google Maps</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -373,6 +387,5 @@
     </footer>
 
     <script src="script.js?v=3"></script>
-    <script src="motion.js"></script>
 </body>
 </html>
