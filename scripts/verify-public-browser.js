@@ -86,7 +86,7 @@ async function main() {
     await until('document.readyState === "complete"');
     await delay(100);
   }
-  for (const width of [320, 375, 430, 768, 1024, 1280, 1440]) {
+  for (const width of [320, 375, 390, 430, 768, 1024, 1280, 1440, 1920]) {
     for (const page of ['index.html', 'services.html', 'doctors.html', 'patient-information.html', 'appointments.html', 'portal.html']) {
       await navigate(page, width);
       if (page === 'portal.html') {
@@ -208,11 +208,21 @@ async function main() {
   await navigate('appointments.html',390);
   assert.equal(await evaluate('document.getElementById("contactForm").hidden'),true);
   assert.deepEqual(exceptions, [], 'Unexpected browser errors after booking checks');
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
+  await navigate('index.html',1440);
+  await until('document.getAnimations().length > 0');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".site-header")).position'),'sticky');
+  await evaluate('scrollTo(0,700)');
+  await until('document.querySelector(".site-header").classList.contains("is-scrolled")');
+  assert.ok(await evaluate('scrollY')>=699,'Native scroll position must be preserved');
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+  await until('document.getAnimations().length === 0');
+  assert.equal(await evaluate('getComputedStyle(document.querySelector(".hero-image img")).transform'),'none');
   await navigate('index.html', 1440);
   const metrics = await send('Page.getLayoutMetrics');
   const screenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: 1440, height: metrics.cssContentSize.height, scale: 1 } });
   await writeFile(path.join(profile, 'homepage.png'), Buffer.from(screenshot.data, 'base64'));
-  console.log('Passed: 42 responsive page checks; server-controlled closed booking; original physician portraits; laboratory search and clear; mobile navigation; skip link; dialog focus; directory failure, retry, empty, malformed and timeout states.');
+  console.log('Passed: 54 responsive page checks; server-controlled closed booking; original physician portraits; laboratory search and clear; mobile navigation; skip link; dialog focus; directory failure, retry, empty, malformed and timeout states.');
   console.log(`Screenshot: ${path.join(profile, 'homepage.png')}`);
   await navigate('services.html', 390);
   const mobile = await send('Page.captureScreenshot', { format: 'png' });
@@ -226,6 +236,16 @@ async function main() {
     const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: 1440, height: layout.cssContentSize.height, scale: 1 } });
     await writeFile(path.join(profile, `${page}.png`), Buffer.from(shot.data, 'base64'));
   }
+  directoryMode='roster';
+  await navigate('doctors.html',390);
+  await until('document.querySelectorAll("#doctorDirectory .physician-profile").length === 4');
+  await evaluate('(()=>{const s=document.getElementById("physicianSpecialty");s.value="Nephrologist";s.dispatchEvent(new Event("input",{bubbles:true}))})()');
+  assert.equal(await evaluate('[...document.querySelectorAll("#doctorDirectory .physician-profile")].filter(c=>!c.hidden).length'),2);
+  await evaluate('(()=>{const s=document.getElementById("physicianSearch");s.value="no-match";s.dispatchEvent(new Event("input",{bubbles:true}))})()');
+  assert.ok(await evaluate('document.getElementById("physicianFilterStatus").textContent.includes("No physicians match")'));
+  await evaluate('document.getElementById("physicianFilters").reset()');
+  await until('[...document.querySelectorAll("#doctorDirectory .physician-profile")].filter(c=>!c.hidden).length === 4');
+  assert.deepEqual(exceptions,[], 'No browser errors after motion and physician filters');
   await send('Browser.close');
 }
 

@@ -7,7 +7,7 @@ const normalize=name=>name.replace(/^Dr\.?\s*/i,'').trim().toLowerCase();
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node}
 function placeholder(name){const box=element('div','physician-placeholder');const initials=normalize(name).split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0].toUpperCase()).join('');box.append(element('strong','',initials||'BH'),element('span','','Photo coming soon'));box.setAttribute('role','img');box.setAttribute('aria-label',`Photo coming soon for ${name}`);return box}
 function renderDoctor(doctor){
- const article=element('article','physician-profile');article.dataset.doctorId=doctor.id;
+ const article=element('article','physician-profile');article.dataset.doctorId=doctor.id;const approvedSlug=normalize(doctor.name).replaceAll(' ','-');article.id=approvedSlug==='james-raphael'?'james-estrada':approvedSlug;
  const photo=element('div','physician-photo');
  const match=approved.find(profile=>profile.aliases.includes(normalize(doctor.name)));
  let source=doctor.photoUrl||'';
@@ -36,8 +36,18 @@ let loading=false;
 async function loadDirectory(){
  if(loading)return;loading=true;directory.setAttribute('aria-busy','true');retry.hidden=true;status.textContent='Checking the latest physician information…';
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);
- try{const response=await fetch('/api/doctors',{signal:controller.signal,cache:'no-store'});if(!response.ok)throw Error('unavailable');const doctors=await response.json();if(!validDirectory(doctors))throw Error('invalid');directory.replaceChildren(...doctors.map(renderDoctor));status.textContent=doctors.length?'Online booking is closed while schedules are confirmed. Call (0956) 685 7606 for physician availability.':'No physician schedules are currently published. Please call (0956) 685 7606 for assistance.'}
+ try{const response=await fetch('/api/doctors',{signal:controller.signal,cache:'no-store'});if(!response.ok)throw Error('unavailable');const doctors=await response.json();if(!validDirectory(doctors))throw Error('invalid');directory.replaceChildren(...doctors.map(renderDoctor));applyPhysicianFilters();const target=document.getElementById(location.hash.slice(1));if(target?.classList.contains('physician-profile')){target.querySelector('details').open=true;target.scrollIntoView({block:'start'});}status.textContent=doctors.length?'Online booking is closed while schedules are confirmed. Call (0956) 685 7606 for physician availability.':'No physician schedules are currently published. Please call (0956) 685 7606 for assistance.'}
  catch{status.textContent='We couldn’t load the latest physician information. Please call (0956) 685 7606 to confirm availability, or try again.';retry.hidden=false}
  finally{clearTimeout(timeout);loading=false;directory.setAttribute('aria-busy','false')}
 }
+applyPhysicianFilters();
 retry.addEventListener('click',loadDirectory);loadDirectory();
+
+function applyPhysicianFilters(){
+ const filters=document.getElementById('physicianFilters');if(!filters)return;filters.hidden=false;
+ const term=document.getElementById('physicianSearch').value.trim().toLowerCase(),specialty=document.getElementById('physicianSpecialty').value;
+ let count=0;for(const card of directory.children){const name=card.querySelector('h3')?.textContent.toLowerCase()||'',field=card.querySelector('.physician-specialty')?.textContent||'';card.hidden=!name.includes(term)||(specialty!==''&&specialty!==field);if(!card.hidden)count++;}
+ document.getElementById('physicianFilterStatus').textContent=count?count+' '+(count===1?'physician':'physicians')+' shown.':'No physicians match. Clear the filters or call the clinic for assistance.';
+}
+const filters=document.getElementById('physicianFilters');
+filters?.addEventListener('input',applyPhysicianFilters);filters?.addEventListener('submit',event=>{event.preventDefault();applyPhysicianFilters()});filters?.addEventListener('reset',()=>setTimeout(()=>{applyPhysicianFilters();document.getElementById('physicianSearch').focus()},0));
