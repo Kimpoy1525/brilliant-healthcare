@@ -1,69 +1,45 @@
 "use strict";
 
-document.body.classList.add("motion-ready");
-
-const reducedMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
-const revealGroups=[
-    [".about-image","motion-from-left"],
-    [".about-content","motion-from-right"],
-    [".section-header",""],
-    [".team-heading",""],
-    [".physician-profile",""],
-    [".why-us-card",""],
-    [".visit-path-intro","motion-from-left"],
-    [".visit-steps article","motion-from-right"],
-    [".contact-info","motion-from-left"],
-    [".contact-form","motion-from-right"],
-    [".footer-content>div",""]
+const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const selectorGroups=[
+    "main > section:not(.hero) > .container > *",
+    ".patient-actions > a",
+    ".service-summary > article",
+    ".category-links > a",
+    ".purpose-photo",
+    ".values-list > div",
+    ".featured-physicians-list > li",
+    ".facility-photo",
+    ".visit-steps > li",
+    ".info-items > .info-item",
+    ".doctor-directory > .physician-profile",
+    ".services-grid > .service-card",
+    ".patient-questions > details",
+    ".footer-content > div"
 ];
+const revealElements=new Set();
 
-const revealElements=[];
-revealGroups.forEach(([selector,direction])=>{
+for(const selector of selectorGroups){
     document.querySelectorAll(selector).forEach((element,index)=>{
         if(element.closest("[hidden]"))return;
         element.classList.add("motion-reveal");
-        if(direction)element.classList.add(direction);
-        if(index%5)element.classList.add(`motion-delay-${index%5}`);
-        revealElements.push(element);
+        if(index)element.style.setProperty("--motion-delay",`${Math.min(index,4)*70}ms`);
+        element.querySelectorAll("img").forEach(image=>image.classList.add("motion-image"));
+        revealElements.add(element);
     });
-});
-
-if(reducedMotion||!("IntersectionObserver" in window)){
-    revealElements.forEach(element=>element.classList.add("is-visible"));
-}else{
-    const observer=new IntersectionObserver(entries=>{
-        entries.forEach(entry=>{
-            if(!entry.isIntersecting)return;
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-        });
-    },{threshold:.12,rootMargin:"0px 0px -40px"});
-    revealElements.forEach(element=>observer.observe(element));
 }
 
-window.addEventListener("pageshow",event=>{
-    if(event.persisted)revealElements.forEach(element=>element.classList.add("is-visible"));
-});
-
-// Lightweight 2.5D hero: pointer depth on desktop, gentle autonomous motion elsewhere.
-const depthScene=document.querySelector("[data-hero-depth]");
-if(depthScene&&!reducedMotion){
-    const depthLayers=[...depthScene.querySelectorAll("[data-depth]")];
-    let frame=0;
-    const renderDepth=(x,y)=>{
-        cancelAnimationFrame(frame);
-        frame=requestAnimationFrame(()=>{
-            depthLayers.forEach(layer=>{
-                const depth=Number(layer.dataset.depth)||0;
-                layer.style.setProperty("--depth-x",`${x*depth}px`);
-                layer.style.setProperty("--depth-y",`${y*depth}px`);
-            });
-        });
-    };
-    depthScene.addEventListener("pointermove",event=>{
-        if(event.pointerType&&event.pointerType!=="mouse")return;
-        const box=depthScene.getBoundingClientRect();
-        renderDepth((event.clientX-box.left)/box.width-.5,(event.clientY-box.top)/box.height-.5);
+if(!reducedMotion&&"IntersectionObserver" in window){
+    document.body.classList.add("motion-ready");
+    const observer=new IntersectionObserver(entries=>{
+        for(const entry of entries){
+            if(!entry.isIntersecting)continue;
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+        }
+    },{threshold:.12,rootMargin:"0px 0px -40px"});
+    revealElements.forEach(element=>observer.observe(element));
+    window.addEventListener("pageshow",event=>{
+        if(event.persisted)revealElements.forEach(element=>element.classList.add("is-visible"));
     });
-    depthScene.addEventListener("pointerleave",()=>renderDepth(0,0));
 }

@@ -1,9 +1,11 @@
-# KFMC design adaptation
+# Patient-first public-site redesign
 
-Reference reviewed on 6 October 2026: https://kfmc.com.au/ (live browser screenshot and computed typography).
+Kingston Foreshore Medical Centre is an information-hierarchy reference only. The redesign prioritizes booking access, physician information, services, opening hours, directions and practical visit preparation without reusing KFMC's branding, text, code or imagery.
 
-The frontend adapts the reference's full-width photographic hero, inset dark navigation, colored headline panel, overlapping introduction, alternating image/text composition, solid service tiles and broad appointment banner. Brilliant Healthcare's existing logo, teal/green palette, original clinic photo, company statements and contact content are retained. KFMC photographs, logo, clinical claims and appointment functionality were not imported.
+The homepage now moves from a concise appointment-led hero and patient-action links through clinical services, an image-led BHCOPC introduction, named physicians, facility photography, visit preparation, appointment assistance and contact details. Existing BHCOPC logo and brand colors are retained; real clinic/building photographs and each physician's distinct approved portrait are used. Physician images keep a 4:5 crop with individual positioning. Missing or duplicate directory photos fall back to branded initials.
 
-Scope: index.html layout; production.css shared public-page presentation; stylesheet cache version in index.html, doctors.html, services.html, patient-information.html, appointments.html and privacy.html. No JavaScript, backend, API, database, credentials, environment or appointment behavior changed. The staff portal retains its current interface. The homepage medical-team section remains removed and the company logo watermark remains in supporting sections. Booking remains closed pending schedule confirmation.
+The booking workflow remains closed until clinic staff confirm schedules. Appointment links lead to the existing telephone-assistance page rather than suggesting that online booking is available. Hours, service descriptions, physician specialties and location/contact links use the information already held by the site.
 
-Verification: 32 automated tests and 54 responsive browser checks across 320, 375, 390, 430, 768, 1024, 1280, 1440 and 1920px. Existing directory, service search/dialog, booking fixture, keyboard, native-scroll and reduced-motion checks passed. Desktop and mobile screenshots reviewed. Official logo hashes unchanged.
+Public pages share the refined production stylesheet and a small IntersectionObserver reveal script. Reveals run once, use native scrolling and are disabled for users who prefer reduced motion. The staff portal and booking/API behavior are unchanged.
+
+Verification: `npm test` passes all 35 tests. `npm run test:browser` passes 54 responsive checks across 320–1920px widths, plus existing booking-state, directory-photo, laboratory search, navigation, keyboard, and reduced-motion checks. Official logo assets are unchanged.

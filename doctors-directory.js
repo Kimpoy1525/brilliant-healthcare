@@ -3,6 +3,7 @@ const directory=document.getElementById('doctorDirectory');
 const status=document.getElementById('directoryStatus');
 const retry=document.getElementById('directoryRetry');
 const approved=[...directory.querySelectorAll('[data-profile-aliases]')].map(card=>({aliases:JSON.parse(card.dataset.profileAliases),photo:card.dataset.profilePhoto}));
+const usedPhotoSources=new Set();
 const normalize=name=>name.replace(/^Dr\.?\s*/i,'').trim().toLowerCase();
 function element(tag,className,text){const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node}
 function placeholder(name){const box=element('div','physician-placeholder');const initials=normalize(name).split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0].toUpperCase()).join('');box.append(element('strong','',initials||'BH'),element('span','','Photo coming soon'));box.setAttribute('role','img');box.setAttribute('aria-label',`Photo coming soon for ${name}`);return box}
@@ -15,8 +16,10 @@ function renderDoctor(doctor){
  // Never assign another approved physician's image to an unrelated identity.
  const owner=approved.find(profile=>source===profile.photo||source===profile.photo.replace('.jpg','.png'));
  if(owner&&owner!==match)source='';
+ if(usedPhotoSources.has(source))source=match&&!usedPhotoSources.has(match.photo)?match.photo:'';
  if(source.includes('generic-doctor'))source='';
  if(source&&(/^(?:\/)?images\//.test(source)||/^https:\/\//.test(source))){
+  usedPhotoSources.add(source);
   const image=document.createElement('img');image.src=source;image.alt=doctor.name;image.width=640;image.height=800;image.loading='lazy';image.referrerPolicy='no-referrer';image.onerror=()=>photo.replaceChildren(placeholder(doctor.name));photo.append(image);
  }else photo.append(placeholder(doctor.name));
  const details=element('div','physician-details');details.append(element('h3','',doctor.name));
@@ -36,7 +39,7 @@ let loading=false;
 async function loadDirectory(){
  if(loading)return;loading=true;directory.setAttribute('aria-busy','true');retry.hidden=true;status.textContent='Checking the latest physician information…';
  const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),8000);
- try{const response=await fetch('/api/doctors',{signal:controller.signal,cache:'no-store'});if(!response.ok)throw Error('unavailable');const doctors=await response.json();if(!validDirectory(doctors))throw Error('invalid');directory.replaceChildren(...doctors.map(renderDoctor));applyPhysicianFilters();const target=document.getElementById(location.hash.slice(1));if(target?.classList.contains('physician-profile')){target.querySelector('details').open=true;target.scrollIntoView({block:'start'});}status.textContent=doctors.length?'Online booking is closed while schedules are confirmed. Call (0956) 685 7606 for physician availability.':'No physician schedules are currently published. Please call (0956) 685 7606 for assistance.'}
+ try{const response=await fetch('/api/doctors',{signal:controller.signal,cache:'no-store'});if(!response.ok)throw Error('unavailable');const doctors=await response.json();if(!validDirectory(doctors))throw Error('invalid');usedPhotoSources.clear();directory.replaceChildren(...doctors.map(renderDoctor));applyPhysicianFilters();const target=document.getElementById(location.hash.slice(1));if(target?.classList.contains('physician-profile')){target.querySelector('details').open=true;target.scrollIntoView({block:'start'});}status.textContent=doctors.length?'Online booking is closed while schedules are confirmed. Call (0956) 685 7606 for physician availability.':'No physician schedules are currently published. Please call (0956) 685 7606 for assistance.'}
  catch{status.textContent='We couldn’t load the latest physician information. Please call (0956) 685 7606 to confirm availability, or try again.';retry.hidden=false}
  finally{clearTimeout(timeout);loading=false;directory.setAttribute('aria-busy','false')}
 }

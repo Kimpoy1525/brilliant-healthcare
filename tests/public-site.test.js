@@ -26,6 +26,27 @@ test('public pages retain essential document structure and the production design
   }
 });
 
+test('homepage follows the patient-first clinic information hierarchy', () => {
+  const html = read('index.html');
+  const sections = [
+    '<section class="hero"',
+    '<nav class="patient-actions',
+    '<section class="core-services"',
+    '<section class="company-purpose"',
+    '<section class="featured-physicians"',
+    '<section class="facility-section"',
+    '<section class="visit-preparation"',
+    '<section class="appointment-banner"',
+    '<section class="contact"'
+  ];
+  const positions = sections.map(section => html.indexOf(section));
+  assert.ok(positions.every(position => position >= 0), 'homepage is missing a patient-first section');
+  assert.deepEqual([...positions].sort((a, b) => a - b), positions, 'homepage sections are out of order');
+  assert.match(html, /class="btn btn-primary">Book an appointment<\/a>/);
+  assert.match(html, /class="btn btn-secondary">Find a doctor<\/a>/);
+  assert.match(html, /Monday–Saturday: 8:00 AM–5:00 PM<br>Sunday: Closed/);
+});
+
 test('public pages do not present a non-functional newsletter form', () => {
   for (const page of publicPages) {
     const html = read(page);
@@ -38,6 +59,31 @@ test('physician profiles are structurally located on the Doctors page only', () 
   assert.match(read('doctors.html'), /<section class="medical-team"/);
   assert.match(read('doctors.html'), /data-doctor-fallback/);
   assert.match(read('doctors.html'), /images\/doctors\/james-estrada\.jpg/);
+});
+
+test('physician directory uses unique approved portraits and individual 4:5 crops', () => {
+  const html = read('doctors.html');
+  const photos = [...html.matchAll(/data-doctor-fallback[^>]*data-profile-photo="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(photos.length, 4);
+  assert.equal(new Set(photos).size, photos.length);
+  for (const photo of photos) assert.equal(fs.existsSync(path.join(root, photo)), true, `${photo} is not an approved local portrait`);
+  const styles = read('production.css');
+  assert.match(styles, /\.physician-photo\s*\{\s*aspect-ratio:4\/5/);
+  assert.match(styles, /\.physician-photo img\s*\{[^}]*object-fit:cover/);
+  for (const slug of ['james-estrada', 'emerlinda-dijamco', 'christian-cheng', 'mae-tapispisan']) {
+    assert.match(styles, new RegExp(`#${slug} \\.physician-photo img\\s*\\{\\s*object-position:`));
+  }
+  assert.match(read('doctors-directory.js'), /usedPhotoSources\.has\(source\)/);
+});
+
+test('public pages enable progressive, reduced-motion-aware scroll reveals', () => {
+  for (const page of publicPages) assert.match(read(page), /src="motion\.js\?v=\d+"/, `${page} does not load public-site motion`);
+  const motion = read('motion.js');
+  const styles = read('production.css');
+  assert.match(motion, /IntersectionObserver/);
+  assert.match(motion, /observer\.unobserve/);
+  assert.match(styles, /translate3d\(0,24px,0\)/);
+  assert.match(styles, /prefers-reduced-motion:reduce/);
 });
 
 test('public pages do not contain duplicate element ids', () => {

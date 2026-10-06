@@ -458,3 +458,264 @@ h1,h2,h3,h4 { font-weight:600;letter-spacing:-.025em; }
  .home-page h1 { font-size:32px; }.home-page .hero-content { padding:24px 20px; }
  .hero-buttons { flex-direction:column; }.logo-copy strong { font-size:16px; }.category-links a { padding:14px; }
 }
+
+/* BHCOPC editorial system: restrained brand color, real clinic imagery and clear patient routes. */
+:root {
+  --radius:8px;
+  --provider-radius:8px;
+  --font-body:Arial,Helvetica,sans-serif;
+  --font-display:Georgia,"Times New Roman",serif;
+  --page:#f6f8f7;
+  --line:#d9e2e2;
+}
+html { scroll-padding-top:100px; }
+body { font-family:var(--font-body);font-size:16px;line-height:1.65; }
+h1,h2,h3,h4 { font-family:var(--font-display);font-weight:500;letter-spacing:-.025em; }
+h2 { font-size:clamp(30px,3vw,36px);line-height:1.18; }
+h3 { font-size:22px;line-height:1.3; }
+.container { width:min(calc(100% - 48px),1200px); }
+.topbar { background:#fff;border-bottom:1px solid var(--line);font-size:14px; }
+.topbar .container { min-height:38px; }
+.site-header { position:sticky;top:0;z-index:12;width:100%;margin:0;background:#fff;border-bottom:1px solid var(--line); }
+.navbar .container { width:min(calc(100% - 48px),1200px);min-height:82px;padding-inline:0;gap:24px; }
+.logo-mark { width:48px;height:48px;background:transparent; }
+.logo-copy strong { color:var(--ink);font-family:var(--font-body);font-size:17px; }
+.logo-copy small { color:var(--muted); }
+.nav-links { position:static;display:flex;align-items:center;margin-left:auto;padding:0;background:transparent;border:0;gap:24px; }
+.nav-links li { display:flex;width:auto; }
+.nav-links a { width:auto;min-height:44px;padding:8px 0;color:var(--ink);border:0;border-bottom:2px solid transparent; }
+.nav-links a[aria-current],.nav-links a:hover { color:var(--brand-teal-dark);background:transparent;border-color:var(--brand-teal); }
+.nav-cta { width:auto;margin:0;padding:10px 16px;color:#fff;background:var(--brand-teal-dark);border:1px solid var(--brand-teal-dark);border-radius:6px; }
+.nav-cta:hover { color:#fff;background:var(--brand-ink); }
+.hamburger { display:none;background:#fff;border:1px solid var(--line);border-radius:6px; }
+.hamburger span { background:var(--ink); }
+.btn { min-height:48px;padding:11px 20px;border-radius:6px;font-family:var(--font-body);font-size:15px;font-weight:600;transition:background 180ms ease,border-color 180ms ease,transform 180ms ease; }
+.btn-primary { color:#fff;background:var(--brand-teal-dark); }
+.btn-secondary { color:var(--brand-teal-dark);background:transparent;border-color:#8daeb0; }
+.btn:hover { transform:translateY(-1px); }
+.eyebrow { margin-bottom:12px;color:var(--brand-teal-dark);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase; }
+.home-page .site-header { margin-bottom:0; }
+.home-page .hero { min-height:0;background:#f6f8f7;border:0; }
+.home-page .hero::before,.patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before { display:none;content:none; }
+.home-page .hero .container { display:grid;grid-template-columns:.92fr 1.08fr;gap:64px;align-items:center;min-height:0;padding-block:72px; }
+.home-page .hero-content { max-width:570px;padding:0;background:transparent;color:var(--ink); }
+.home-page .hero-image { position:static;inset:auto;z-index:auto;align-self:stretch; }
+.home-page .hero-content .eyebrow { color:var(--brand-teal-dark);font-size:14px; }
+.home-page h1 { max-width:12ch;color:var(--ink);font-size:clamp(52px,4.3vw,60px);line-height:1.06;letter-spacing:-.04em; }
+.home-page h1 span { display:inline;color:var(--brand-teal-dark);font-size:inherit;font-weight:inherit; }
+.hero-content > p:not(.eyebrow) { max-width:48ch;margin-top:20px;color:var(--muted);font-size:18px; }
+.hero-content .hero-note { max-width:48ch;margin-top:18px;color:var(--muted);font-size:14px; }
+.hero-buttons { align-items:center;gap:12px;margin-top:28px; }
+.hero-buttons .btn-primary { color:#fff;background:var(--brand-teal-dark);border-color:var(--brand-teal-dark); }
+.hero-buttons .btn-secondary { color:var(--brand-teal-dark);background:transparent;border-color:#8daeb0; }
+.hero-buttons .btn:hover { color:#fff;background:var(--brand-ink);border-color:var(--brand-ink); }
+.hero-image { position:static;overflow:hidden;border-radius:6px; }
+.home-page .hero-image img { display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:center;border-radius:0; }
+.patient-actions { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:0;padding-block:12px;border-top:1px solid var(--line);border-bottom:1px solid var(--line); }
+.patient-actions a,.patient-actions a:first-child { min-height:94px;padding:16px 20px;border-right:1px solid var(--line);text-decoration:none; }
+.patient-actions a:first-child { padding-left:0; }
+.patient-actions a:last-child { border-right:0; }
+.patient-actions span { display:block;margin-bottom:4px;color:var(--brand-teal-dark);font-size:12px;font-variant-numeric:tabular-nums; }
+.patient-actions strong { font-size:17px;line-height:1.35; }
+.patient-actions small { margin-top:5px;color:var(--muted);font-size:14px; }
+.patient-actions a:hover strong { color:var(--brand-teal-dark);text-decoration:underline;text-underline-offset:4px; }
+.core-services,.company-purpose,.featured-physicians,.facility-section,.visit-preparation,.contact { padding-block:88px; }
+.core-services { background:#fff; }
+.section-heading { align-items:end;margin-bottom:32px; }
+.section-heading h2 { margin:0; }
+.section-heading > a { flex-shrink:0; }
+.service-summary { grid-template-columns:1fr 1fr;gap:0;border-top:1px solid var(--line); }
+.service-summary > article,.service-summary > div { min-width:0;padding:28px 40px 28px 0; }
+.service-summary > article+article,.service-summary > div+div { padding-left:40px;border-left:1px solid var(--line); }
+.service-index { margin:0 0 10px;color:var(--brand-teal-dark);font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase; }
+.service-summary h3 { font-size:25px; }
+.service-summary p:not(.service-index) { max-width:55ch;margin-block:12px 18px;color:var(--muted);font-size:16px; }
+.category-links { grid-template-columns:repeat(4,minmax(0,1fr));gap:20px; }
+.category-links a { min-height:0;padding:16px 0 12px;background:transparent;color:var(--ink);border-top:1px solid var(--line);font-size:15px;font-weight:600; }
+.category-links a:hover { color:var(--brand-teal-dark);background:transparent;border-color:var(--brand-teal-dark); }
+.category-links a span { color:var(--brand-teal-dark); }
+.company-purpose { background:var(--page); }
+.about-story { display:grid;grid-template-columns:1.02fr .98fr;gap:72px;align-items:center; }
+.purpose-photo { overflow:hidden;margin:0;border-radius:6px; }
+.purpose-photo img { display:block;width:100%;height:480px;object-fit:cover;object-position:center; }
+.purpose-content { max-width:520px; }
+.purpose-content h2 { max-width:14ch;font-size:clamp(34px,3.4vw,44px); }
+.purpose-content > p:not(.eyebrow) { margin-top:18px;color:var(--muted);font-size:17px; }
+.purpose-content .text-link { display:inline-block;margin-top:24px; }
+.values-layout { grid-template-columns:.7fr 1.3fr;gap:64px;margin-top:72px;padding-top:40px;border-top:1px solid var(--line); }
+.values-heading h3 { font-size:30px; }
+.values-list { border-top:1px solid #bdcece; }
+.values-list > div { grid-template-columns:minmax(165px,.8fr) 1.2fr;gap:24px;padding-block:15px;border-bottom:1px solid #bdcece; }
+.values-list dt { display:block;font-family:var(--font-body);font-size:16px;font-weight:600; }
+.values-list dt span { display:none; }
+.values-list dd { color:var(--muted);font-size:15px; }
+.featured-physicians { background:#fff; }
+.featured-physicians-list { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;list-style:none;padding:0; }
+.featured-physicians-list li { min-width:0; }
+.featured-physician-photo { display:block;overflow:hidden;aspect-ratio:4/5;background:var(--page);border-radius:6px; }
+.featured-physician-photo img { display:block;width:100%;height:100%;object-fit:cover; }
+.featured-physicians-list h3 { margin-top:16px;font-family:var(--font-body);font-size:19px;font-weight:600;letter-spacing:-.01em; }
+.featured-physicians-list h3 a { color:var(--ink);text-decoration:none; }
+.featured-physicians-list h3 a:hover { color:var(--brand-teal-dark);text-decoration:underline; }
+.featured-physicians-list li > p { margin-top:4px;color:var(--muted);font-size:15px; }
+.directory-note { margin-top:24px;color:var(--muted);font-size:14px; }
+.facility-section { background:var(--page); }
+.facility-layout { display:grid;grid-template-columns:1.05fr .95fr;gap:72px;align-items:center; }
+.facility-photo { height:480px;overflow:hidden;border-radius:6px; }
+.facility-photo img { width:100%;height:100%;object-fit:cover;object-position:center 45%; }
+.facility-copy { max-width:460px; }
+.facility-copy h2 { max-width:13ch;font-size:clamp(32px,3.2vw,40px); }
+.facility-copy > p:not(.eyebrow) { margin-top:18px;color:var(--muted);font-size:17px; }
+.facility-copy .text-link { display:inline-block;margin-top:24px; }
+.visit-preparation { background:#fff; }
+.visit-preparation .container { grid-template-columns:.8fr 1.2fr;gap:72px; }
+.visit-intro h2 { max-width:12ch; }
+.visit-intro > p:not(.eyebrow) { margin-top:16px;color:var(--muted);font-size:17px; }
+.visit-intro .text-link { display:inline-block;margin-top:20px; }
+.visit-steps { list-style:none;counter-reset:visit;gap:0; }
+.visit-steps li { min-height:100px;padding:22px 0 20px 50px;border-top:1px solid var(--line); }
+.visit-steps li:last-child { border-bottom:1px solid var(--line); }
+.visit-steps li::before { top:17px;color:var(--brand-teal-dark);font-size:16px; }
+.visit-steps li strong { font-family:var(--font-body);font-size:17px;font-weight:600; }
+.visit-steps li p { margin-top:4px;color:var(--muted);font-size:15px; }
+.appointment-banner { padding-block:64px;background:var(--brand-ink);color:#fff;text-align:center; }
+.appointment-banner .container { max-width:760px; }
+.appointment-banner .eyebrow { color:#b9e0d8; }
+.appointment-banner h2 { font-size:clamp(32px,3.2vw,40px); }
+.appointment-banner p:not(.eyebrow) { max-width:60ch;margin:14px auto 24px;color:#e2eeed;font-size:16px; }
+.appointment-banner .btn-secondary { color:var(--brand-ink);background:#fff;border-color:#fff; }
+.appointment-banner .btn-secondary:hover { color:#fff;background:transparent; }
+.contact { background:#f6f8f7;border-top:1px solid var(--line); }
+.contact-layout { display:grid;grid-template-columns:.8fr 1.2fr;gap:72px;align-items:start; }
+.contact-intro h2 { max-width:12ch; }
+.contact-intro > p:not(.eyebrow) { max-width:42ch;margin-top:16px;color:var(--muted);font-size:17px; }
+.contact-intro .btn { margin-top:24px; }
+.info-items { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-column:auto;grid-row:auto;gap:0 32px; }
+.info-item { padding:18px 0;border-top:1px solid #bdcece; }
+.info-item dt { color:var(--muted);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase; }
+.info-item dd { margin-top:5px;font-size:16px; }
+.info-item a { overflow-wrap:anywhere; }
+.footer { padding-block:52px 22px;background:var(--brand-ink); }
+.footer-content { grid-template-columns:1.4fr 1fr 1fr 1fr;gap:36px; }
+.footer-brand .logo-img { display:block;width:min(100%,260px);height:auto;object-fit:contain; }
+.footer-brand > p,.footer-assistance > p { max-width:34ch;margin-top:16px;color:#d2e1df;font-size:14px; }
+.footer-assistance > a { display:inline-block;margin-top:12px;color:#fff;font-weight:600; }
+.footer h4 { color:#d4e9e5;font-family:var(--font-body);font-size:14px;font-weight:600; }
+.footer-links ul { margin-top:14px; }
+.footer-links li+li { margin-top:8px; }
+.footer a { color:#fff; }
+.footer-bottom { margin-top:36px;padding-top:18px;border-top:1px solid #ffffff30; }
+.footer-bottom p { color:#d2e1df;font-size:13px; }
+.page-intro { margin-top:0;padding-block:48px;background:var(--page);border:0; }
+.page-intro h1 { font-size:clamp(36px,4vw,48px); }
+.page-intro .container > p:last-child { font-size:17px; }
+.services-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:0 28px; }
+.service-card { padding:24px 8px 28px 0;background:transparent;border:0;border-top:1px solid var(--line);border-radius:0; }
+.service-card:hover { border-color:var(--brand-teal-dark); }
+.service-card h3 { font-size:22px; }
+.service-card::after { margin-top:18px; }
+.physician-profile { border:1px solid var(--line);border-radius:6px;background:#fff; }
+.physician-profile:hover { border-color:#a6c2c1; }
+.physician-photo { aspect-ratio:4/5;background:var(--page); }
+.physician-photo img { object-fit:cover; }
+#james-estrada .physician-photo img { object-position:50% 32%; }
+#emerlinda-dijamco .physician-photo img { object-position:50% 30%; }
+#christian-cheng .physician-photo img { object-position:50% 27%; }
+#mae-tapispisan .physician-photo img { object-position:50% 29%; }
+.physician-details { padding:20px; }
+.physician-details h3 { font-family:var(--font-body);font-size:20px;letter-spacing:-.01em; }
+.physician-specialty { font-size:15px; }
+.physician-call { text-underline-offset:4px; }
+.physician-filters input,.physician-filters select { border-radius:6px; }
+input:not([type=checkbox]):not([type=hidden]),select,textarea,fieldset,.service-modal-panel { border-radius:6px; }
+.motion-ready .motion-reveal { opacity:0;transform:translate3d(0,24px,0);transition:opacity 650ms cubic-bezier(.22,1,.36,1),transform 650ms cubic-bezier(.22,1,.36,1);transition-delay:var(--motion-delay,0ms); }
+.motion-ready .motion-reveal.is-visible { opacity:1;transform:translate3d(0,0,0); }
+.motion-ready .motion-image { transform:scale(1.025);transition:transform 700ms cubic-bezier(.22,1,.36,1); }
+.motion-ready .is-visible .motion-image { transform:scale(1); }
+@media(max-width:1100px) {
+  .navbar .container { min-height:76px; }
+  .nav-links { display:none;position:absolute;top:100%;left:0;right:0;z-index:10;padding:12px 20px;background:#fff;border:1px solid var(--line); }
+  .nav-links.active { display:grid; }
+  .nav-links li,.nav-links a { width:100%; }
+  .nav-links a { min-height:46px; }
+  .hamburger { display:block; }
+  .home-page .hero .container { gap:36px; }
+  .home-page .hero-image img { aspect-ratio:4/3; }
+  .about-story,.facility-layout,.visit-preparation .container,.contact-layout { gap:44px; }
+  .featured-physicians-list { gap:18px; }
+  .footer-content { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:768px) {
+  html { scroll-padding-top:142px; }
+  .container,.navbar .container { width:calc(100% - 32px); }
+  .topbar .container { flex-wrap:wrap;justify-content:center;gap:4px 16px;padding-block:7px; }
+  .topbar span { display:none; }
+  .navbar .container { flex-wrap:wrap;gap:8px;padding-block:10px; }
+  .logo { max-width:calc(100% - 54px); }
+  .logo-mark { width:42px;height:42px;flex-shrink:0; }
+  .logo-copy strong { font-size:15px; }
+  .logo-copy small { font-size:10px; }
+  .hamburger { order:2;margin-left:auto; }
+  .nav-cta { order:3;width:100%;margin-top:4px; }
+  .nav-links { left:-16px;right:-16px;padding-inline:16px; }
+  .home-page .hero .container { grid-template-columns:1fr;gap:30px;padding-block:44px; }
+  .home-page .hero-content { max-width:620px; }
+  .home-page h1 { max-width:13ch;font-size:44px; }
+  .hero-content > p:not(.eyebrow) { font-size:17px; }
+  .home-page .hero-image img { aspect-ratio:1.5/1; }
+  .hero-buttons { flex-wrap:wrap; }
+  .patient-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .patient-actions a,.patient-actions a:first-child { padding:14px 16px; }
+  .patient-actions a:nth-child(2) { border-right:0; }
+  .patient-actions a:nth-child(-n+2) { border-bottom:1px solid var(--line); }
+  .core-services,.company-purpose,.featured-physicians,.facility-section,.visit-preparation,.contact { padding-block:60px; }
+  .section-heading { display:flex;align-items:start;gap:16px; }
+  .section-heading > a { margin-top:4px; }
+  .service-summary { grid-template-columns:1fr; }
+  .service-summary > article,.service-summary > div { padding:22px 0; }
+  .service-summary > article+article,.service-summary > div+div { padding-left:0;border-left:0;border-top:1px solid var(--line); }
+  .category-links { grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px; }
+  .about-story,.facility-layout,.visit-preparation .container,.contact-layout { grid-template-columns:1fr;gap:32px; }
+  .purpose-photo img { height:360px; }
+  .purpose-content { max-width:650px; }
+  .purpose-content h2 { max-width:17ch; }
+  .values-layout { grid-template-columns:1fr;gap:24px;margin-top:48px;padding-top:28px; }
+  .values-list > div { grid-template-columns:minmax(150px,.8fr) 1.2fr; }
+  .featured-physicians-list { grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 20px; }
+  .facility-photo { height:380px; }
+  .visit-preparation .container { gap:28px; }
+  .appointment-banner { padding-block:48px; }
+  .appointment-banner .container { width:calc(100% - 40px); }
+  .info-items { grid-column:1;grid-row:auto; }
+  .page-intro { padding-block:34px; }
+  .page-intro h1 { font-size:36px; }
+  .doctor-directory { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .services-grid { grid-template-columns:1fr; }
+  .footer-content { gap:30px; }
+}
+@media(max-width:520px) {
+  .section-heading { display:block; }
+  .section-heading > a { display:inline-block;margin-top:14px; }
+  .home-page h1 { font-size:40px; }
+  .hero-buttons { align-items:stretch; }
+  .hero-buttons .btn { flex:1 1 100%; }
+  .patient-actions a,.patient-actions a:first-child { min-height:100px;padding:12px 10px; }
+  .patient-actions strong { font-size:15px; }
+  .patient-actions small { font-size:13px; }
+  .purpose-photo img { height:290px; }
+  .values-list > div { grid-template-columns:1fr;gap:4px; }
+  .featured-physicians-list { gap:24px 14px; }
+  .featured-physicians-list h3 { font-size:17px; }
+  .facility-photo { height:320px; }
+  .info-items { grid-template-columns:1fr; }
+  .footer-content { grid-template-columns:1fr; }
+  .doctor-directory { grid-template-columns:1fr; }
+  .physician-filters { grid-template-columns:1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .motion-ready .motion-reveal,.motion-ready .motion-image { opacity:1;transform:none;transition:none; }
+}
+@media print {
+  .patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before { display:none; }
+  .motion-ready .motion-reveal { opacity:1;transform:none; }
+}
