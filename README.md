@@ -39,3 +39,9 @@ Supabase Auth MFA and physician-photo uploads through Supabase Storage require p
 Set `SEMAPHORE_API_KEY` in Railway to enable automatic reminders through Semaphore. Set `SEMAPHORE_SENDER_NAME` after the clinic's sender name is approved; if omitted, Semaphore uses the account default. The server checks every 15 minutes for active, consented appointments scheduled for the following day in the `Asia/Manila` time zone. Each reminder is recorded in PostgreSQL before it can be considered complete, and an advisory lock prevents overlapping deployments from sending duplicates.
 
 The SMS does not contain the requested service, diagnosis, patient question, or other clinical details. Delivery credits and an active Semaphore account are required.
+
+## Production redesign and booking closure
+
+See [production redesign report](docs/production-redesign-report.md) for the audit, approved physician mappings, verification and deployment requirements. Public pages use production.css; the staff portal retains its separate styles. No framework migration is required.
+
+PUBLIC_BOOKING_ENABLED defaults to false. Keep it false until clinic staff verify every physician's schedule. The public page offers telephone assistance and the appointment API rejects submissions with HTTP 503 while closed. After schedules are confirmed, set it to true in the correct Railway service and redeploy. Tests use isolated fixture users and appointments, never live patient data.
