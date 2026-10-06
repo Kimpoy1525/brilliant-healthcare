@@ -342,3 +342,17 @@ input:focus,select:focus,textarea:focus { border-color:var(--brand-teal-dark); }
  .values-layout { margin-top:40px; }.values-list > div { grid-template-columns:1fr;gap:10px;padding-block:22px; }
  .values-list dd { padding-left:34px; }.values-list dt { font-size:18px; }
 }
+
+/* Owner-supplied logo watermark; decoration never covers controls or content. */
+.patient-facing :is(.hero,.page-intro,.company-purpose,.contact) { position:relative;isolation:isolate; }
+.patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before {
+ content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:url('images/brand-background.jpeg') no-repeat right 24px center / 560px auto;
+ opacity:.065;mix-blend-mode:multiply;
+}
+.patient-facing .hero::before { background-position:-100px center;background-size:640px auto; }
+.patient-facing .company-purpose::before { background-position:right 24px top 24px; }
+@media(max-width:768px) {
+ .patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before { background-size:360px auto;background-position:right -90px top 20px;opacity:.05; }
+}
+@media print { .patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before { display:none; } }
