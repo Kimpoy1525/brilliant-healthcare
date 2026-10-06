@@ -219,12 +219,15 @@ async function main() {
   await until('document.getAnimations().length === 0');
   assert.equal(await evaluate('getComputedStyle(document.querySelector(".hero-image img")).transform'),'none');
   await navigate('index.html', 1440);
+  assert.equal(await evaluate('document.querySelectorAll(".featured-providers,.provider-teaser").length'),0);
+  assert.equal(await evaluate('document.querySelectorAll(".values-list > div").length'),5);
+  assert.ok(await evaluate('document.getElementById("about").textContent.includes("optimal health outcomes")'));
   const metrics = await send('Page.getLayoutMetrics');
   const screenshot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip: { x: 0, y: 0, width: 1440, height: metrics.cssContentSize.height, scale: 1 } });
   await writeFile(path.join(profile, 'homepage.png'), Buffer.from(screenshot.data, 'base64'));
   console.log('Passed: 54 responsive page checks; server-controlled closed booking; original physician portraits; laboratory search and clear; mobile navigation; skip link; dialog focus; directory failure, retry, empty, malformed and timeout states.');
   console.log(`Screenshot: ${path.join(profile, 'homepage.png')}`);
-  await navigate('services.html', 390);
+  await navigate('index.html', 390);
   const mobile = await send('Page.captureScreenshot', { format: 'png' });
   await writeFile(path.join(profile, 'mobile.png'), Buffer.from(mobile.data, 'base64'));
   console.log(`Mobile: ${path.join(profile, 'mobile.png')}`);

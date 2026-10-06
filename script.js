@@ -97,27 +97,44 @@ if (laboratorySearch) {
     });
 }
 
-// Progressive enhancement: content stays visible without JavaScript or motion support.
+// Progressive enhancement: native scrolling and visible content without JavaScript.
 (() => {
  const preference=matchMedia('(prefers-reduced-motion: reduce)');
  const header=document.querySelector('.site-header');
- const onScroll=()=>header?.classList.toggle('is-scrolled',scrollY>40);
- addEventListener('scroll',onScroll,{passive:true});onScroll();
- if(!('IntersectionObserver' in window)||!('animate' in Element.prototype)||preference.matches)return;
- const seen=new WeakSet(),animations=new Set();
+ let frame=0;
+ const syncHeader=()=>{header?.classList.toggle('is-scrolled',scrollY>40);frame=0;};
+ addEventListener('scroll',()=>{if(!frame)frame=requestAnimationFrame(syncHeader);},{passive:true});syncHeader();
+ if(!('IntersectionObserver' in window)||!('animate' in Element.prototype))return;
+ const registered=new WeakSet(),seen=new WeakSet(),animations=new Map();
  const observer=new IntersectionObserver(entries=>{
-  for(const entry of entries){if(!entry.isIntersecting)continue;observer.unobserve(entry.target);
-   if(preference.matches||seen.has(entry.target))continue;seen.add(entry.target);
-   const delay=Number(entry.target.dataset.revealDelay||0);
-   const animation=entry.target.animate([{opacity:0,transform:'translateY(24px)'},{opacity:1,transform:'translateY(0)'}],{duration:620,delay,easing:'cubic-bezier(.22,1,.36,1)',fill:'none'});
-   animations.add(animation);animation.finished.catch(()=>{}).finally(()=>animations.delete(animation));
+  for(const entry of entries){
+   if(!entry.isIntersecting)continue;
+   const element=entry.target;observer.unobserve(element);
+   if(preference.matches||seen.has(element))continue;seen.add(element);
+   if(element.contains(document.activeElement))continue;
+   const animation=element.animate([
+    {opacity:0,transform:'translateY(16px)'},
+    {opacity:1,transform:'translateY(0)'}
+   ],{duration:560,delay:Number(element.dataset.revealDelay||0),easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'});
+   animations.set(element,animation);
+   animation.finished.catch(()=>{}).finally(()=>{if(animations.get(element)===animation)animations.delete(element);});
   }
- },{threshold:.12});
- const register=root=>root.querySelectorAll('.hero-content,.hero-image,.patient-actions a,.section-heading,.service-summary > div,.provider-teaser,.physician-profile,.clinic-confidence .container > div,.visit-preparation .container > div,.contact-info,.service-card').forEach(element=>{
-  if(seen.has(element))return;const siblings=[...element.parentElement.children];element.dataset.revealDelay=String(Math.min(siblings.indexOf(element),2)*70);observer.observe(element);
+ },{threshold:.08});
+ const register=root=>root.querySelectorAll('.hero-content,.hero-image,.patient-actions a,.section-heading,.service-summary > div,.physician-profile,.purpose-heading,.purpose-statements article,.values-heading,.values-list > div,.visit-preparation .container > div,.contact-info,.service-card').forEach(element=>{
+  if(registered.has(element)||preference.matches)return;
+  registered.add(element);
+  element.dataset.revealDelay=String(Math.min([...element.parentElement.children].indexOf(element),2)*50);
+  observer.observe(element);
  });
  register(document);
  const directory=document.getElementById('doctorDirectory');
  if(directory)new MutationObserver(()=>register(directory)).observe(directory,{childList:true});
- preference.addEventListener('change',event=>{if(event.matches){observer.disconnect();for(const animation of animations)animation.cancel();}});
+ // Keyboard/pointer interaction is immediate, even during a reveal.
+ const finishInteraction=event=>{for(const [element,animation] of animations)if(element.contains(event.target))animation.finish();};
+ document.addEventListener('focusin',finishInteraction);
+ document.addEventListener('pointerdown',finishInteraction,{passive:true});
+ preference.addEventListener('change',event=>{
+  if(event.matches){for(const animation of document.getAnimations())animation.cancel();}
+  else register(document);
+ });
 })();
