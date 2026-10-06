@@ -8,7 +8,7 @@
     ],
     "specialty": "Diabetologist",
     "bio": "Specialized care for diabetes health.",
-    "photoUrl": "/images/doctors/james-estrada.png"
+    "photoUrl": "/images/doctors/james-estrada.jpg"
   },
   {
     "name": "Dr. Emerlinda Dijamco",
@@ -17,7 +17,7 @@
     ],
     "specialty": "General Physician",
     "bio": "Comprehensive care for general health.",
-    "photoUrl": "/images/doctors/emerlinda-dijamco.png"
+    "photoUrl": "/images/doctors/emerlinda-dijamco.jpg"
   },
   {
     "name": "Dr. Christian Cheng",
@@ -26,7 +26,7 @@
     ],
     "specialty": "Nephrologist",
     "bio": "Specialized care for kidney health.",
-    "photoUrl": "/images/doctors/christian-cheng.png"
+    "photoUrl": "/images/doctors/christian-cheng.jpg"
   },
   {
     "name": "Dr. Mae Tapispisan",
@@ -35,6 +35,6 @@
     ],
     "specialty": "Nephrologist",
     "bio": "Specialized care for kidney health.",
-    "photoUrl": "/images/doctors/mae-tapispisan.png"
+    "photoUrl": "/images/doctors/mae-tapispisan.jpg"
   }
 ]

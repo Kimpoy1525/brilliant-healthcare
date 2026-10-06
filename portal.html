@@ -7,9 +7,7 @@
     <title>Clinic Administration | Brilliant Healthcare</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="portal.css">
-    <link rel="stylesheet" href="admin.css?v=3">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin.css?v=4">
 </head>
 <body class="portal-body">
     <header class="portal-header">
@@ -89,16 +87,16 @@
             <section id="adminTools" class="panel" hidden>
                 <div class="panel-title">
                     <div><p class="eyebrow">Physician management</p><h2 id="doctorFormTitle">Add a doctor and schedule</h2><p>Enter physician details and publish the times patients may request.</p></div>
-                    <div class="profile-form-actions"><button id="loadDoctorTemplate" class="btn btn-secondary" type="button">Use nephrologist example</button><button id="cancelDoctorEdit" class="button-link admin-link" type="button" hidden>Cancel editing</button></div>
+                    <div class="profile-form-actions"><button id="cancelDoctorEdit" class="button-link admin-link" type="button" hidden>Cancel editing</button></div>
                 </div>
                 <form id="doctorForm">
                     <input name="doctorId" type="hidden">
-                    <p class="template-note">Create the public physician profile below. The example button fills a sample template only—verify every detail before publishing.</p>
+                    <p class="template-note">Publish verified information only. Leave unknown credentials and schedules blank.</p>
                     <div class="doctor-details"><label>Doctor name<input name="name" placeholder="e.g. Dr. James Estrada" required></label><label>Specialty<input name="specialty" placeholder="e.g. Nephrology" required></label><label>Credentials<input name="credentials" placeholder="e.g. MD, FPCP, FPSN"></label><label>Languages spoken<input name="languages" placeholder="e.g. English, Filipino"></label></div>
                     <label class="profile-wide-field">Professional biography <small>Keep this factual and concise. Maximum 800 characters.</small><textarea name="bio" rows="4" maxlength="800" placeholder="Summarize the physician’s clinical focus, experience, and approach to patient care."></textarea></label>
                     <div class="photo-profile-row">
-                        <label>Professional photo URL <small>Use an approved, securely hosted HTTPS portrait.</small><input name="photoUrl" type="url" placeholder="https://example.com/dr-estrada.jpg"></label>
-                        <div class="doctor-photo-preview"><img id="doctorPhotoPreview" src="images/generic-doctor.png" alt="Doctor profile photo preview" referrerpolicy="no-referrer"><span>Photo preview</span></div>
+                        <label>Professional photo URL <small>Use an approved /images/ path or an HTTPS portrait URL.</small><input name="photoUrl" type="text" placeholder="https://example.com/dr-estrada.jpg"></label>
+                        <div class="doctor-photo-preview"><img id="doctorPhotoPreview" src="images/brand-mark-official.jpg" alt="Doctor profile photo preview" referrerpolicy="no-referrer"><span>Photo preview</span></div>
                     </div>
                     <label class="profile-checkbox"><input name="acceptingNewPatients" type="checkbox" checked> Accepting new patients</label>
                     <h3 class="form-section-title">Weekly working schedule</h3>
@@ -122,6 +120,6 @@
         </div>
     </div>
     <div id="portalNotice" class="portal-notice" role="status"></div>
-    <script src="portal.js?v=4"></script>
+    <script src="portal.js?v=5"></script>
 </body>
 </html>

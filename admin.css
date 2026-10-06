@@ -69,3 +69,25 @@ input,select,textarea,button{max-width:100%}
   .day-row>*{grid-column:1!important}
   .portal-brand span{font-size:.75rem}
 }
+/* Operational screens: readable labels, restrained surfaces, no decorative blocking layer. */
+.portal-body { font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.55; }
+.portal-header { background:#173f43;border-bottom:3px solid #55a546; }
+.portal-brand img { transform:none;object-fit:contain; }
+.portal-brand small { font-size:13px;letter-spacing:0;text-transform:none; }
+.panel { box-shadow:none;border-radius:6px; }
+.panel h1,.dashboard-heading h1 { font-size:30px; }
+.panel h2 { font-size:24px; }
+.panel label,.panel>p,.panel-title p,.login-panel>p,.dashboard-subtitle { font-size:15px; }
+.panel input,.panel select,.panel textarea { font-size:16px; }
+.panel .form-hint,.panel label small,.template-note,.patient-field small,.patient-field span,.patient-field a,.appointment-reference,.appointment-time>span:not(.status-pill) { font-size:14px; }
+.patient-name { font-size:20px; }.patient-question p { font-size:15px; }
+.portal-body .btn { font-size:15px;min-height:44px; }
+.portal-body :focus-visible { outline:3px solid #006f83;outline-offset:3px; }
+.portal-loading { position:fixed;inset:auto 16px 16px auto;width:auto;max-width:calc(100% - 32px);background:none;backdrop-filter:none;pointer-events:none; }
+.portal-loading-card { min-width:0;padding:16px 20px;border:1px solid #d6e5e3;border-radius:6px;box-shadow:none;background:#fff; }
+.secure-loader-mark,.secure-loader-bar,.portal-loading-card small { display:none; }
+.portal-body .status-pill { border-radius:4px;font-size:13px; }
+.portal-body .dashboard-metrics span { font-size:14px; }
+.portal-body .button-link { min-height:44px;padding:8px 0;font-size:14px; }
+@media(max-width:768px){.portal-header { flex-wrap:wrap;gap:12px;padding:16px; }.portal-main { width:calc(100% - 32px); }.panel { padding:20px; }.appointment-filters,.staff-form,.doctor-details,.photo-profile-row,.patient-grid { grid-template-columns:1fr; }.appointment-card { grid-template-columns:1fr;padding:20px;gap:20px; }.day-row { grid-template-columns:1fr 1fr; }.dashboard-heading,.panel-title { flex-wrap:wrap; }.doctor-row { grid-template-columns:1fr; }.doctor-buttons,.staff-controls { flex-wrap:wrap; }.dashboard-metrics { grid-template-columns:1fr 1fr; }.portal-brand { min-width:0; }.portal-brand>span:last-child { overflow-wrap:anywhere; }.panel input,.panel select,.panel textarea { min-width:0; }.panel table { display:block;max-width:100%;overflow-x:auto; }}
+@media(prefers-reduced-motion:reduce){.portal-body * { animation:none!important;transition:none!important; }}

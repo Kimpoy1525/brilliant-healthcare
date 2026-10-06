@@ -27,7 +27,7 @@ test('doctor refresh retains legacy IDs and schedules and creates missing physic
  assert.equal(rows.length,4);
  assert.equal(rows[0].id,'legacy-james');
  assert.equal(rows[0].specialty,'Diabetologist');
- assert.equal(rows[0].photo,'/images/doctors/james-estrada.png');
+ assert.equal(rows[0].photo,'/images/doctors/james-estrada.jpg');
  assert.ok(rows.every(row=>profiles.some(p=>p.name===row.name && p.specialty===row.specialty)));
  assert.ok(!statements.some(sql=>/^(INSERT INTO|UPDATE|DELETE FROM) (doctor_schedules|doctor_unavailable_dates|appointments)\b/.test(sql)));
 });

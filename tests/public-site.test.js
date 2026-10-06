@@ -37,7 +37,7 @@ test('physician profiles are structurally located on the Doctors page only', () 
   assert.doesNotMatch(read('index.html'), /<section class="medical-team"/);
   assert.match(read('doctors.html'), /<section class="medical-team"/);
   assert.match(read('doctors.html'), /data-doctor-fallback/);
-  assert.match(read('doctors.html'), /images\/doctors\/james-estrada\.png/);
+  assert.match(read('doctors.html'), /images\/doctors\/james-estrada\.jpg/);
 });
 
 test('public pages do not contain duplicate element ids', () => {

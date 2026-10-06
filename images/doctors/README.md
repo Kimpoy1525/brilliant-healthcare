@@ -1,16 +1,14 @@
-﻿# Doctor portrait update
+# Approved physician portraits
 
-Source: user-supplied Dr. James.jpg, Dr. Emerlinda.jpg, Dr. Christian.jpg and Dr. Mae.jpg.
-Edited with the built-in image_gen tool. Each image used its corresponding supplied photo as the edit target.
+Production uses the original user-supplied photographs, with deterministic cropping and JPEG compression only. No faces were generated, retouched or replaced.
 
-Prompt set: preserve the original face, hair, expression, skin and clothing without beautification; change only the background to pale off-white with a subtle teal (#087f8c) wash; use consistent 4:5 framing; remove the existing poster lettering through cropping; no text, logos or specialty props. Specialty is accessible HTML text beside the portrait.
+| Supplied file | Approved name | Specialty | Production file |
+| --- | --- | --- | --- |
+| Dr. James.jpg | Dr. James Estrada | Diabetologist | james-estrada.jpg |
+| Dr. Emerlinda.jpg | Dr. Emerlinda Dijamco | General Physician | emerlinda-dijamco.jpg |
+| Dr. Christian.jpg | Dr. Christian Cheng | Nephrologist | christian-cheng.jpg |
+| Dr. Mae.jpg | Dr. Mae Tapispisan | Nephrologist | mae-tapispisan.jpg |
 
-Final assets:
-- images/doctors/james-estrada.png
-- images/doctors/emerlinda-dijamco.png
-- images/doctors/christian-cheng.png
-- images/doctors/mae-tapispisan.png
+Unmodified originals are archived in assets/physicians/originals and are not publicly served. Each 1638x2048 source is cropped at x=299,y=0,width=1040,height=1300, above the poster lettering, and resized to 640x800 at JPEG quality 88. The clinical background remains authentic; the surrounding website supplies the consistent brand background. Specialty is accessible HTML text.
 
-The former images/james-raphael.jpg was removed. physician-profiles.json contains the supplied names and specialties. Startup updates matching legacy records while retaining their IDs, appointments and existing schedules; missing physicians are created without invented schedules. Inactive existing physicians remain inactive.
-
-These changes are local until committed, pushed and successfully deployed to the authorized Railway service. The live database was not accessed or modified during preparation.
+Previous PNG derivatives remain archived but are not referenced by production profiles. James Raphael is a legacy alias of James Estrada, not a separate physician. Staff modifications and record IDs are preserved; known legacy PNG paths migrate to the approved JPEG once.
