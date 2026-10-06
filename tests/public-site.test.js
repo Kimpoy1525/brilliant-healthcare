@@ -22,7 +22,7 @@ test('public pages retain essential document structure and the production design
     assert.equal((html.match(/<h1\b/g) || []).length, 1, `${page} must have one h1`);
     assert.equal((html.match(/<main\b/g) || []).length, 1, `${page} must have one main landmark`);
     assert.match(html, /<meta name="viewport"/);
-    assert.match(html, /production\.css\?v=1/);
+    assert.match(html, /production\.css\?v=\d+/);
   }
 });
 
@@ -37,7 +37,7 @@ test('physician profiles are structurally located on the Doctors page only', () 
   assert.doesNotMatch(read('index.html'), /<section class="medical-team"/);
   assert.match(read('doctors.html'), /<section class="medical-team"/);
   assert.match(read('doctors.html'), /data-doctor-fallback/);
-  assert.match(read('doctors.html'), /images\/james-raphael\.jpg/);
+  assert.match(read('doctors.html'), /images\/doctors\/james-estrada\.png/);
 });
 
 test('public pages do not contain duplicate element ids', () => {

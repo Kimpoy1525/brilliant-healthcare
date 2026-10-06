@@ -1,0 +1,40 @@
+[
+  {
+    "name": "Dr. James Estrada",
+    "aliases": [
+      "james raphael",
+      "james estrada",
+      "james raphael estrada"
+    ],
+    "specialty": "Diabetologist",
+    "bio": "Specialized care for diabetes health.",
+    "photoUrl": "/images/doctors/james-estrada.png"
+  },
+  {
+    "name": "Dr. Emerlinda Dijamco",
+    "aliases": [
+      "emerlinda dijamco"
+    ],
+    "specialty": "General Physician",
+    "bio": "Comprehensive care for general health.",
+    "photoUrl": "/images/doctors/emerlinda-dijamco.png"
+  },
+  {
+    "name": "Dr. Christian Cheng",
+    "aliases": [
+      "christian cheng"
+    ],
+    "specialty": "Nephrologist",
+    "bio": "Specialized care for kidney health.",
+    "photoUrl": "/images/doctors/christian-cheng.png"
+  },
+  {
+    "name": "Dr. Mae Tapispisan",
+    "aliases": [
+      "mae tapispisan"
+    ],
+    "specialty": "Nephrologist",
+    "bio": "Specialized care for kidney health.",
+    "photoUrl": "/images/doctors/mae-tapispisan.png"
+  }
+]

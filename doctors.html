@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="service-photos.css">
     <link rel="stylesheet" href="private-hospital.css">
     <link rel="stylesheet" href="launch-visibility.css">
-    <link rel="stylesheet" href="production.css?v=1">
+    <link rel="stylesheet" href="production.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Muli:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap">
 </head>
@@ -61,14 +61,14 @@
                 <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Doctors</span></nav>
                 <span class="badge">Our doctors</span>
                 <h1>Our medical team</h1>
-                <p>Learn about our physician&#8217;s area of practice and published clinic hours. Please call to confirm availability before your visit.</p>
+                <p>Learn about our physicians&#8217; areas of practice and published clinic hours. Please call to confirm availability before your visit.</p>
                 <div class="hero-buttons">
                     <a href="tel:+639566857606" class="btn btn-primary clinic-call">Call the clinic</a>
                     <a href="appointments.html" class="btn btn-primary">Book an appointment</a>
                 </div>
             </div>
             <div class="hero-image inner-hero-art hero-depth" data-hero-depth>
-                <div class="hero-image-frame"><img src="images/hero-doctors-temp.jpg?v=1" alt="Clinical team of hospital physicians" class="hero-img" width="1717" height="916" fetchpriority="high"></div>
+                <div class="hero-image-frame physician-hero-grid"><img src="/images/doctors/james-estrada.png" alt="Dr. James Estrada, Diabetologist" width="1122" height="1402"><img src="/images/doctors/emerlinda-dijamco.png" alt="Dr. Emerlinda Dijamco, General Physician" width="1122" height="1402"><img src="/images/doctors/christian-cheng.png" alt="Dr. Christian Cheng, Nephrologist" width="1122" height="1402"><img src="/images/doctors/mae-tapispisan.png" alt="Dr. Mae Tapispisan, Nephrologist" width="1122" height="1402"></div>
             </div>
         </div>
     </section>
@@ -155,19 +155,50 @@
     <section class="medical-team" id="medical-team" aria-labelledby="medicalTeamTitle">
         <div class="container">
             <div class="team-heading">
-                <div><span class="badge">Medical team</span><h2 id="medicalTeamTitle">Meet your physician</h2></div>
-                <p>Learn more about the physician handling these services.</p>
+                <div><span class="badge">Medical team</span><h2 id="medicalTeamTitle">Meet our doctors</h2></div>
+                <p>Find care by specialty: diabetes, kidney health, and general health.</p>
             </div>
             <p class="directory-status" id="directoryStatus" role="status" aria-live="polite">Call the clinic to confirm the latest physician schedule before travelling.</p>
             <button type="button" class="btn btn-secondary directory-retry" id="directoryRetry" hidden>Try loading schedules again</button>
             <div id="doctorDirectory" class="doctor-directory" aria-live="polite">
                 <article class="physician-profile" data-doctor-fallback>
-                    <div class="physician-photo"><img src="images/james-raphael.jpg" alt="Dr. James Raphael" loading="lazy" width="1122" height="1402"></div>
+                    <div class="physician-photo"><img src="/images/doctors/james-estrada.png" alt="Dr. James Estrada, Diabetologist" loading="lazy" width="1122" height="1402"></div>
                     <div class="physician-details">
-                        <span>Nephrology &amp; Internal Medicine</span>
-                        <h3>Dr. James Raphael</h3>
-                        <p>Handling physician for dialysis-related consultations and selected internal medicine appointments.</p>
-                        <dl><div><dt>Clinic schedule</dt><dd>Contact the clinic for current availability</dd></div><div><dt>Appointment type</dt><dd>Clinic-administered request and confirmation</dd></div></dl>
+                        <span class="physician-specialty">Diabetologist</span>
+                        <h3>Dr. James Estrada</h3>
+                        <p>Specialized care for diabetes health.</p>
+                        <dl><div><dt>Clinic schedule</dt><dd>Contact the clinic for current availability</dd></div></dl>
+                        <a class="physician-call" href="tel:+639566857606">Call to confirm availability</a>
+                    </div>
+                </article>
+                <article class="physician-profile" data-doctor-fallback>
+                    <div class="physician-photo"><img src="/images/doctors/emerlinda-dijamco.png" alt="Dr. Emerlinda Dijamco, General Physician" loading="lazy" width="1122" height="1402"></div>
+                    <div class="physician-details">
+                        <span class="physician-specialty">General Physician</span>
+                        <h3>Dr. Emerlinda Dijamco</h3>
+                        <p>Comprehensive care for general health.</p>
+                        <dl><div><dt>Clinic schedule</dt><dd>Contact the clinic for current availability</dd></div></dl>
+                        <a class="physician-call" href="tel:+639566857606">Call to confirm availability</a>
+                    </div>
+                </article>
+                <article class="physician-profile" data-doctor-fallback>
+                    <div class="physician-photo"><img src="/images/doctors/christian-cheng.png" alt="Dr. Christian Cheng, Nephrologist" loading="lazy" width="1122" height="1402"></div>
+                    <div class="physician-details">
+                        <span class="physician-specialty">Nephrologist</span>
+                        <h3>Dr. Christian Cheng</h3>
+                        <p>Specialized care for kidney health.</p>
+                        <dl><div><dt>Clinic schedule</dt><dd>Contact the clinic for current availability</dd></div></dl>
+                        <a class="physician-call" href="tel:+639566857606">Call to confirm availability</a>
+                    </div>
+                </article>
+                <article class="physician-profile" data-doctor-fallback>
+                    <div class="physician-photo"><img src="/images/doctors/mae-tapispisan.png" alt="Dr. Mae Tapispisan, Nephrologist" loading="lazy" width="1122" height="1402"></div>
+                    <div class="physician-details">
+                        <span class="physician-specialty">Nephrologist</span>
+                        <h3>Dr. Mae Tapispisan</h3>
+                        <p>Specialized care for kidney health.</p>
+                        <dl><div><dt>Clinic schedule</dt><dd>Contact the clinic for current availability</dd></div></dl>
+                        <a class="physician-call" href="tel:+639566857606">Call to confirm availability</a>
                     </div>
                 </article>
             </div>
@@ -179,7 +210,7 @@
         <section class="service-modal-panel" role="dialog" aria-modal="true" aria-labelledby="serviceModalTitle" tabindex="-1">
             <button class="service-modal-close" type="button" data-close-modal aria-label="Close service details">×</button>
             <div class="service-modal-visual"><img src="images/generic-doctor.png" alt="Generic temporary doctor portrait"><span>Temporary clinician photo</span></div>
-            <div class="service-modal-content"><p class="modal-kicker" id="serviceModalKicker"></p><h2 id="serviceModalTitle"></h2><p class="modal-summary" id="serviceModalSummary"></p><div class="modal-doctor"><small>Handling physician</small><strong>Dr. James Raphael</strong><span>Nephrology &amp; Internal Medicine</span></div><div class="modal-sections"><div><h3>About this service</h3><p id="serviceModalAbout"></p></div><div><h3>What to expect</h3><ul id="serviceModalExpect"></ul></div><div><h3>Before your visit</h3><p id="serviceModalPrepare"></p></div></div><p class="modal-disclaimer">General information only. Your clinician will determine whether this service is appropriate for you.</p><a href="#contact" class="btn btn-primary" id="serviceModalBook">View schedule &amp; book</a></div>
+            <div class="service-modal-content"><p class="modal-kicker" id="serviceModalKicker"></p><h2 id="serviceModalTitle"></h2><p class="modal-summary" id="serviceModalSummary"></p><div class="modal-doctor"><small>Handling physician</small><strong>Brilliant Healthcare medical team</strong><span>Call the clinic to confirm the appropriate physician</span></div><div class="modal-sections"><div><h3>About this service</h3><p id="serviceModalAbout"></p></div><div><h3>What to expect</h3><ul id="serviceModalExpect"></ul></div><div><h3>Before your visit</h3><p id="serviceModalPrepare"></p></div></div><p class="modal-disclaimer">General information only. Your clinician will determine whether this service is appropriate for you.</p><a href="#contact" class="btn btn-primary" id="serviceModalBook">View schedule &amp; book</a></div>
         </section>
     </div>
 
@@ -387,6 +418,6 @@
     </footer>
 
     <script src="script.js?v=3"></script>
-    <script src="doctors-directory.js"></script>
+    <script src="doctors-directory.js?v=2"></script>
 </body>
 </html>

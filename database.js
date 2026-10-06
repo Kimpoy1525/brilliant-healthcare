@@ -148,20 +148,18 @@ async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
     await pool.query('INSERT INTO admins(id,name,email,password_hash) VALUES($1,$2,$3,$4)',
       [crypto.randomUUID(), adminName, adminEmail, adminPasswordHash]);
   }
-  const james = await pool.query("SELECT id FROM doctors WHERE lower(name) LIKE '%james raphael%' LIMIT 1");
-  let doctorId = james.rows[0]?.id;
-  if (!doctorId) {
-    doctorId = crypto.randomUUID();
-    await pool.query('INSERT INTO doctors(id,name,specialty) VALUES($1,$2,$3)',
-      [doctorId, 'Dr. James Raphael', 'Nephrology & Internal Medicine']);
-  }
-  await pool.query(`UPDATE doctors SET credentials=CASE WHEN credentials='' THEN 'MD' ELSE credentials END,
-    bio=CASE WHEN bio='' THEN 'Provides kidney-care consultations and selected internal medicine appointments.' ELSE bio END,
-    languages=CASE WHEN languages='' THEN 'English, Filipino' ELSE languages END WHERE id=$1`, [doctorId]);
-  const count = await pool.query('SELECT count(*)::int AS count FROM doctor_schedules WHERE doctor_id=$1', [doctorId]);
-  if (!count.rows[0].count) {
-    for (const day of [1,2,3,4,5]) await pool.query('INSERT INTO doctor_schedules VALUES($1,$2,$3,$4,$5)', [doctorId, day, '09:00', '17:00', 30]);
-    await pool.query('INSERT INTO doctor_schedules VALUES($1,$2,$3,$4,$5)', [doctorId, 6, '09:00', '13:00', 30]);
+  // Preserve existing physician IDs, appointments and published schedules.
+  for (const profile of require('./physician-profiles.json')) {
+    const existing = await pool.query(
+      "SELECT id FROM doctors WHERE lower(regexp_replace(name, '^Dr[.]?\\s*', '', 'i')) = ANY($1::text[]) ORDER BY created_at LIMIT 1",
+      [profile.aliases]);
+    if (existing.rows.length) {
+      await pool.query('UPDATE doctors SET name=$1,specialty=$2,bio=$3,photo_url=$4,updated_at=now() WHERE id=$5',
+        [profile.name, profile.specialty, profile.bio, profile.photoUrl, existing.rows[0].id]);
+    } else {
+      await pool.query('INSERT INTO doctors(id,name,specialty,bio,photo_url) VALUES($1,$2,$3,$4,$5)',
+        [crypto.randomUUID(), profile.name, profile.specialty, profile.bio, profile.photoUrl]);
+    }
   }
   await pool.query('DELETE FROM admin_sessions WHERE expires_at < now()');
   await pool.query("DELETE FROM login_attempts WHERE attempted_at < now() - interval '24 hours'");

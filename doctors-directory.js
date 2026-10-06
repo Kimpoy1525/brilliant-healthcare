@@ -22,8 +22,14 @@ function renderDoctor(doctor){
     const article=element("article","physician-profile");
     const photo=element("div","physician-photo");
     const image=document.createElement("img");
-    const defaultPhoto=doctor.name.includes("James Raphael")?"images/james-raphael.jpg":"images/generic-doctor.png";
-    image.src=doctor.photoUrl||defaultPhoto;
+    const knownPortraits = [
+        [/james.*(?:raphael|estrada)/i, "/images/doctors/james-estrada.png"],
+        [/emerlinda.*dijamco/i, "/images/doctors/emerlinda-dijamco.png"],
+        [/christian.*cheng/i, "/images/doctors/christian-cheng.png"],
+        [/mae.*tapispisan/i, "/images/doctors/mae-tapispisan.png"]
+    ];
+    const defaultPhoto=knownPortraits.find(([pattern])=>pattern.test(doctor.name))?.[1] || "images/generic-doctor.png";
+    image.src=defaultPhoto !== "images/generic-doctor.png" ? defaultPhoto : (doctor.photoUrl||defaultPhoto);
     image.alt=`${doctor.name}, ${doctor.specialty}`;
     image.loading="lazy";
     image.referrerPolicy="no-referrer";
@@ -31,7 +37,7 @@ function renderDoctor(doctor){
     photo.append(image);
 
     const details=element("div","physician-details");
-    const specialty=element("span","",doctor.specialty);
+    const specialty=element("span","physician-specialty",doctor.specialty);
     if(doctor.credentials)specialty.append(element("small","physician-credentials",doctor.credentials));
     const name=element("h3","",doctor.name);
     const availability=element("span",`physician-availability${doctor.acceptingNewPatients?"":" closed"}`,doctor.acceptingNewPatients?"Accepting new patients":"Not currently accepting new patients");

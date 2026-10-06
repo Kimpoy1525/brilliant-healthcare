@@ -119,6 +119,14 @@ async function main() {
   await navigate('doctors.html', 390);
   await until('!document.getElementById("directoryRetry").hidden');
   assert.match(await evaluate('document.getElementById("directoryStatus").textContent'), /couldn’t load/);
+  assert.equal(await evaluate('document.querySelectorAll("[data-doctor-fallback]").length'), 4);
+  for (let portrait = 0; portrait < 4; portrait++) {
+    await evaluate('document.querySelectorAll("[data-doctor-fallback] img")['+portrait+'].scrollIntoView()');
+    await until('document.querySelectorAll("[data-doctor-fallback] img")['+portrait+'].complete && document.querySelectorAll("[data-doctor-fallback] img")['+portrait+'].naturalWidth>0');
+  }
+  assert.match(await evaluate('document.getElementById("doctorDirectory").textContent'), /Diabetologist/);
+  assert.match(await evaluate('document.getElementById("doctorDirectory").textContent'), /General Physician/);
+  assert.match(await evaluate('document.getElementById("doctorDirectory").textContent'), /Nephrologist/);
   directoryMode = 'success';
   await evaluate('document.getElementById("directoryRetry").click()');
   await until('document.getElementById("doctorDirectory").textContent.includes("Fixture physician")');
@@ -150,6 +158,7 @@ async function main() {
   await writeFile(path.join(profile, 'mobile.png'), Buffer.from(mobile.data, 'base64'));
   console.log(`Mobile: ${path.join(profile, 'mobile.png')}`);
   for (const page of ['services.html', 'doctors.html', 'patient-information.html']) {
+    directoryMode = page === 'doctors.html' ? 'error' : 'success';
     await navigate(page, 1440);
     const layout = await send('Page.getLayoutMetrics');
     console.log(`Capturing ${page}: ${layout.cssContentSize.width} x ${layout.cssContentSize.height}`);

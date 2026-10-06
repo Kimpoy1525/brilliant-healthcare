@@ -646,3 +646,15 @@ body {
     .patient-facing .laboratory-search-controls { flex-direction:column; align-items:stretch; }
     .patient-facing .laboratory-search .btn { align-self:flex-start; }
 }
+/* Consistent physician portraits and prominent specialties. */
+.doctors-page .doctor-directory { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px; }
+.doctors-page .doctor-directory .physician-profile { display:flex;flex-direction:column;border:1px solid #e2e9e9;border-top:4px solid #087f8c;background:#fff; }
+.doctors-page .doctor-directory .physician-photo { width:100%;height:auto;min-height:0;max-height:none;aspect-ratio:4/5;background:#eef8f8;overflow:hidden; }
+.doctors-page .doctor-directory .physician-photo img { display:block;width:100%;height:100%;object-fit:cover;object-position:center; }
+.doctors-page .physician-details { padding:26px; }
+.doctors-page .physician-details .physician-specialty { display:inline-block;color:#087f8c;font-size:1rem;font-weight:700; }
+.doctors-page .physician-details h3 { margin-top:10px;font-size:1.5rem; }
+.doctors-page .physician-call { display:inline-block;margin-top:18px;color:#087f8c;font-weight:700;text-decoration:underline;text-underline-offset:4px; }
+@media(max-width:680px) { .doctors-page .doctor-directory { grid-template-columns:1fr;gap:24px; } }
+.doctors-page .physician-hero-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;aspect-ratio:3/2;overflow:hidden;background:#edf7f7; }
+.doctors-page .physician-hero-grid img { display:block;width:100%;height:100%;min-height:0;object-fit:cover;object-position:center 22%; }
