@@ -22,6 +22,8 @@ The database schema is created automatically on startup with Row Level Security 
 
 ## Railway
 
+The production custom domain is https://bhcopc.com/ only. Attach this domain to the brilliant-healthcare service in the fabulous-smile project, production environment, with target port 8080. Domain attachments are managed in Railway; repository commits do not create or remove them.
+
 Set `DATABASE_URL`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` in Railway. Appointments, doctors, schedules, and administrator sessions are stored in Supabase PostgreSQL. `railway.toml` configures the start command and database-aware health check.
 
 Set a separate random `SECURITY_PEPPER` of at least 32 bytes. When Supabase's CA certificate is available, set `DATABASE_CA_CERT` with the PEM certificate (newlines may be written as `\n`) to enable strict PostgreSQL certificate verification.
