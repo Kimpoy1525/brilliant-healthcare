@@ -1,3 +1,4 @@
+const { reportOperationalError } = require('./public-runtime');
 const { pool } = require('./database');
 
 const MANILA_TIME_ZONE = 'Asia/Manila';
@@ -66,10 +67,11 @@ async function sendSemaphoreSms({ number, message }) {
 async function processAppointmentReminders({ targetDate = manilaDate(1) } = {}) {
   if (running) return { skipped: true, reason: 'already-running' };
   running = true;
-  const client = await pool.connect();
+  let client;
   let locked = false;
   const result = { targetDate, sent: 0, failed: 0, skipped: 0 };
   try {
+    client = await pool.connect();
     const lock = await client.query('SELECT pg_try_advisory_lock($1) AS locked', [LOCK_ID]);
     locked = lock.rows[0].locked;
     if (!locked) return { ...result, skipped: true, reason: 'another-worker-running' };
@@ -106,7 +108,7 @@ async function processAppointmentReminders({ targetDate = manilaDate(1) } = {}) 
     return result;
   } finally {
     if (locked) await client.query('SELECT pg_advisory_unlock($1)', [LOCK_ID]).catch(() => {});
-    client.release();
+    client?.release();
     running = false;
   }
 }
@@ -119,7 +121,7 @@ function startReminderScheduler() {
   }
   const run = () => processAppointmentReminders().then(result => {
     if (result.sent || result.failed) console.log('SMS reminder run:', JSON.stringify(result));
-  }).catch(error => console.error('SMS reminder run failed:', error.message));
+  }).catch(error => reportOperationalError('sms_reminder_run_failed',error));
   setTimeout(run, 5000);
   timer = setInterval(run, REMINDER_INTERVAL_MS);
   timer.unref();

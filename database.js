@@ -154,8 +154,14 @@ async function initDatabase({ adminEmail, adminName, adminPasswordHash }) {
       "SELECT id FROM doctors WHERE lower(regexp_replace(name, '^Dr[.]?\\s*', '', 'i')) = ANY($1::text[]) ORDER BY created_at LIMIT 1",
       [profile.aliases]);
     if (existing.rows.length) {
-      await pool.query('UPDATE doctors SET name=$1,specialty=$2,bio=$3,photo_url=$4,updated_at=now() WHERE id=$5',
-        [profile.name, profile.specialty, profile.bio, profile.photoUrl, existing.rows[0].id]);
+      await pool.query(`UPDATE doctors SET
+        name=CASE WHEN name='Dr. James Raphael' THEN $1 ELSE name END,
+        specialty=CASE WHEN name='Dr. James Raphael' THEN $2 ELSE specialty END,
+        bio=CASE WHEN bio='' THEN $3 ELSE bio END,
+        photo_url=CASE WHEN photo_url='' OR photo_url=$6 THEN $4 ELSE photo_url END,
+        updated_at=now()
+        WHERE id=$5 AND (name='Dr. James Raphael' OR bio='' OR photo_url='' OR photo_url=$6)`,
+        [profile.name, profile.specialty, profile.bio, profile.photoUrl, existing.rows[0].id, profile.photoUrl.replace(/\.jpg$/, ".png")]);
     } else {
       await pool.query('INSERT INTO doctors(id,name,specialty,bio,photo_url) VALUES($1,$2,$3,$4,$5)',
         [crypto.randomUUID(), profile.name, profile.specialty, profile.bio, profile.photoUrl]);

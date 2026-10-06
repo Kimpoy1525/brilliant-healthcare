@@ -3,6 +3,7 @@ const { EventEmitter } = require('node:events');
 process.env.DATABASE_URL = 'postgresql://fixture:fixture@127.0.0.1/fixture';
 process.env.NODE_ENV = 'test';
 delete process.env.RAILWAY_ENVIRONMENT;
+delete process.env.PUBLIC_BOOKING_ENABLED;
 delete process.env.SEMAPHORE_API_KEY;
 const pool = new EventEmitter();
 pool.query = async () => ({ rows: [] });

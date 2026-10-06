@@ -60,3 +60,14 @@ test('oversized requests get a useful client error', async () => {
   assert.equal(response.status, 413);
   assert.deepEqual(await response.json(), { error: 'The request is too large.' });
 });
+
+ test('closed booking is enforced by the API without creating an appointment',async()=>{
+ const status=await fetch(base+'/api/booking-status');assert.deepEqual(await status.json(),{enabled:false,smsEnabled:false});
+ const response=await fetch(base+'/api/appointments',{method:'POST',headers:{'Content-Type':'application/json',Origin:base},body:JSON.stringify({})});assert.equal(response.status,503);assert.match((await response.json()).error,/Online booking is closed/);
+ });
+ test('all protected reads reject unauthenticated requests',async()=>{
+ for(const route of ['/api/me','/api/admin/appointments','/api/admin/doctors','/api/admin/staff','/api/admin/audit-events','/api/appointments']){const response=await fetch(base+route);assert.equal(response.status,401,route);assert.deepEqual(await response.json(),{error:'Please sign in.'})}
+ });
+ test('protected mutations reject unauthenticated requests',async()=>{
+ for(const [method,route] of [['POST','/api/admin/doctors'],['PATCH','/api/admin/doctors/00000000-0000-4000-8000-000000000001'],['POST','/api/admin/staff'],['PATCH','/api/admin/appointments/00000000-0000-4000-8000-000000000001/archive'],['PATCH','/api/appointments/00000000-0000-4000-8000-000000000001'],['POST','/api/admin/reminders/run']]){const response=await fetch(base+route,{method,headers:{'Content-Type':'application/json',Origin:base},body:'{}'});assert.equal(response.status,401,route)}
+ });
