@@ -739,3 +739,60 @@ input:not([type=checkbox]):not([type=hidden]),select,textarea,fieldset,.service-
   .patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before { display:none; }
   .motion-ready .motion-reveal { opacity:1;transform:none; }
 }
+
+/* Keep the BHCOPC brand mark visibly present across the public site. */
+.patient-facing :is(.hero,.page-intro,.company-purpose,.contact) {
+  position:relative;
+  isolation:isolate;
+}
+.patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before {
+  position:absolute;
+  inset:0;
+  z-index:0;
+  display:block;
+  content:"";
+  pointer-events:none;
+  background-image:url("images/brand-background.jpeg");
+  background-repeat:no-repeat;
+  background-position:right 5% center;
+  background-size:min(42vw,560px) auto;
+  opacity:.06;
+  mix-blend-mode:multiply;
+}
+.patient-facing :is(.hero,.page-intro,.company-purpose,.contact) > .container {
+  position:relative;
+  z-index:1;
+}
+.patient-facing.home-page .hero::before { background-position:left 6% center; }
+.patient-facing .company-purpose::before { background-position:right 5% bottom 18px; }
+.patient-facing .contact::before { background-position:right 5% bottom 16px; }
+.privacy-page .privacy-content { position:relative;isolation:isolate; }
+.privacy-page .privacy-content::before {
+  position:absolute;
+  top:0;
+  right:-150px;
+  z-index:-1;
+  width:min(48vw,560px);
+  aspect-ratio:1;
+  content:"";
+  pointer-events:none;
+  background:url("images/brand-background.jpeg") no-repeat center / contain;
+  opacity:.06;
+}
+@media(max-width:768px) {
+  .patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before {
+    background-position:right -48px center;
+    background-size:320px auto;
+    opacity:.05;
+  }
+  .patient-facing.home-page .hero::before { background-position:left -74px center; }
+  .patient-facing .company-purpose::before { background-position:right -36px bottom 14px; }
+  .privacy-page .privacy-content { padding-bottom:220px; }
+  .privacy-page .privacy-content::before {
+    top:auto;
+    right:-12px;
+    bottom:0;
+    display:block;
+    width:190px;
+  }
+}

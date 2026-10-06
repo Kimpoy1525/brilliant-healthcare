@@ -86,6 +86,16 @@ test('public pages enable progressive, reduced-motion-aware scroll reveals', () 
   assert.match(styles, /prefers-reduced-motion:reduce/);
 });
 
+test('BHCOPC logo watermark appears on every public page', () => {
+  const styles = read('production.css');
+  assert.match(styles, /background-image:url\("images\/brand-background\.jpeg"\)/);
+  assert.match(styles, /\.patient-facing :is\(\.hero,\.page-intro,\.company-purpose,\.contact\)::before/);
+  assert.match(styles, /\.privacy-page \.privacy-content::before/);
+  for (const page of publicPages) {
+    assert.match(read(page), /production\.css\?v=10/, `${page} may retain a cached stylesheet without the watermark`);
+  }
+});
+
 test('public pages do not contain duplicate element ids', () => {
   for (const page of publicPages) {
     const ids = [...read(page).matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
