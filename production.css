@@ -356,3 +356,105 @@ input:focus,select:focus,textarea:focus { border-color:var(--brand-teal-dark); }
  .patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before { background-size:360px auto;background-position:right -90px top 20px;opacity:.05; }
 }
 @media print { .patient-facing :is(.hero,.page-intro,.company-purpose,.contact)::before { display:none; } }
+
+/* KFMC reference: photographic hero, inset navigation, overlap and alternating sections.
+   Brilliant Healthcare branding, content and functional controls are retained. */
+:root { --radius:2px;--provider-radius:4px;--font-body:"Trebuchet MS",Arial,Helvetica,sans-serif; }
+h1,h2,h3,h4 { font-weight:600;letter-spacing:-.025em; }
+.topbar { background:#f5f7f6;border:0; }
+.topbar .container { min-height:42px; }
+.site-header { width:min(calc(100% - 48px),1200px);margin-inline:auto;background:var(--brand-ink);border:0; }
+.navbar .container { width:100%;padding-inline:24px;min-height:96px;gap:20px; }
+.logo-mark { background:#fff;width:54px;height:54px; }
+.logo-copy strong { color:#fff;font-size:17px; }
+.logo-copy small { color:#dbe9e8; }
+.nav-links { gap:0;align-self:stretch; }
+.nav-links li { display:flex; }
+.nav-links a { padding:16px 12px;color:#fff;border:0; }
+.nav-links a[aria-current],.nav-links a:hover { background:var(--brand-teal-dark);color:#fff; }
+.nav-cta { border-color:#b9d3d1;color:#fff;background:transparent;border-radius:0;padding:11px; }
+.nav-cta:hover { background:var(--brand-teal-dark); }
+.site-header.is-scrolled { box-shadow:0 3px 10px #173f4314; }
+.home-page .site-header { margin-bottom:-96px; }
+.home-page .hero { min-height:720px;position:relative;isolation:isolate;background:var(--brand-ink);border:0; }
+.home-page .hero .container { display:flex;align-items:center;min-height:720px;padding-block:156px 100px; }
+.home-page .hero-image { position:absolute;inset:0;z-index:-1;border-radius:0; }
+.home-page .hero-image img { width:100%;height:100%;aspect-ratio:auto;object-fit:cover;object-position:65% 50%;border-radius:0; }
+.home-page .hero::before { display:none; }
+.home-page .hero-content { max-width:565px;background:rgba(0,111,131,.94);padding:30px 34px;color:#fff; }
+.home-page .hero-content .eyebrow { color:#e2f1ef;font-size:14px; }
+.home-page h1 { color:#fff;font-size:clamp(34px,3.3vw,46px);line-height:1.18;letter-spacing:-.03em; }
+.home-page h1 span { color:#fff;font-size:.74em;font-weight:400;display:block;margin-top:14px; }
+.hero-buttons { margin-top:26px; }
+.hero-buttons .btn-primary { background:#fff;color:var(--brand-teal-dark);border-color:#fff; }
+.hero-buttons .btn-secondary { background:transparent;color:#fff;border-color:#fff; }
+.hero-buttons .btn:hover { background:var(--brand-ink);color:#fff; }
+.welcome-panel { position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;padding:40px 48px;margin-top:-62px;background:#f7f8f7;box-shadow:0 6px 12px #173f4312; }
+.welcome-panel > div+div { border-left:1px solid var(--line);padding-left:44px; }
+.welcome-panel p { color:var(--muted);font-size:17px; }
+.welcome-panel .eyebrow { color:var(--ink);font-size:18px; }
+.welcome-panel .text-link { display:inline-block;margin-top:16px; }
+.patient-actions { padding-block:28px;margin-top:24px; }
+.patient-actions a { min-height:110px; }.patient-actions span { display:none; }
+.core-services { padding-block:64px 88px; }
+.section-heading h2,.purpose-heading h2 { font-size:32px; }
+.category-links { gap:18px; }
+.category-links a { min-height:108px;padding:24px;background:var(--brand-teal-dark);color:#fff;border-top:4px solid var(--brand-green);font-size:17px;font-weight:400; }
+.category-links a:hover { background:var(--brand-ink); }
+.company-purpose { background:#f6f8f7;padding-block:80px; }
+.company-purpose > .container { display:grid;grid-template-columns:1fr 1fr;column-gap:56px; }
+.purpose-heading { grid-column:2;grid-row:1;align-self:center;margin:0;padding-block:20px; }
+.purpose-photo { grid-column:1;grid-row:1;margin:0; }
+.purpose-photo img { display:block;width:100%;height:340px;object-fit:cover;object-position:65% center; }
+.purpose-statements { grid-column:1/-1;margin-top:48px;border:0;gap:56px;border-radius:0; }
+.purpose-statements article { padding:0;background:transparent;color:var(--ink); }
+.purpose-statements h3 { max-width:24ch;font-size:27px; }
+.purpose-statements h3+p { color:var(--muted);font-size:17px; }
+.mission-statement .statement-label,.vision-statement .statement-label { color:var(--brand-teal-dark);border-bottom:2px solid var(--brand-green);padding-bottom:12px; }
+.values-layout { grid-column:1/-1;margin-top:56px; }
+.values-heading h3 { font-size:30px; }.values-list dt { font-size:18px; }
+.visit-preparation { padding-block:80px; }.visit-preparation h2 { font-size:30px; }
+.contact { padding-block:80px;background:#f6f8f7; }
+.appointment-banner { padding-block:54px;background:var(--brand-teal-dark);color:#fff;text-align:center; }
+.appointment-banner .container { max-width:900px; }.appointment-banner p { font-size:25px;line-height:1.4;margin-bottom:24px; }
+.page-intro { padding-block:58px;background:var(--page);border:0;margin-top:24px; }
+.page-intro h1 { font-size:40px; }.page-intro .container > p:last-child { max-width:68ch; }
+.service-card { border:0;border-top:4px solid var(--brand-green);background:var(--page);padding:30px; }
+.physician-profile { border-radius:2px; }.physician-details { border-top:3px solid var(--brand-teal); }
+.footer { background:var(--brand-ink);padding-block:56px 24px; }
+.footer h4 { color:#c6e9e1; }.footer-content { gap:40px; }
+@media(max-width:1100px) {
+ .site-header { width:calc(100% - 32px); }.navbar .container { min-height:84px;padding-inline:16px; }
+ .home-page .site-header { margin-bottom:-84px; }
+ .nav-links { left:0;right:0;padding:12px 16px;background:var(--brand-ink); }
+ .nav-links li,.nav-links a { width:100%; }.nav-links a { padding:12px; }
+ .hamburger { background:transparent;border-color:#9ebfbc; }.hamburger span { background:#fff; }
+ .category-links a { padding:18px; }
+ .company-purpose > .container { column-gap:32px; }.purpose-statements { gap:32px; }
+ .welcome-panel { gap:28px;padding:32px; }.welcome-panel > div+div { padding-left:28px; }
+}
+@media(max-width:768px) {
+ .site-header { width:100%; }.navbar .container { padding:12px 16px; }
+ .home-page .site-header { margin-bottom:0; }.nav-cta { background:var(--brand-teal-dark); }
+ .home-page .hero,.home-page .hero .container { min-height:560px; }
+ .home-page .hero .container { padding-block:64px 94px; }
+ .home-page .hero-content { max-width:520px;padding:26px; }
+ .home-page .hero-image img { object-position:60% center; }
+ .home-page h1 { font-size:36px; }.hero-buttons { flex-direction:row; }.hero-buttons .btn { font-size:14px;padding:10px 14px; }
+ .welcome-panel { width:calc(100% - 32px);grid-template-columns:1fr;gap:24px;padding:28px 24px;margin-top:-42px; }
+ .welcome-panel > div+div { border-left:0;border-top:1px solid var(--line);padding:24px 0 0; }
+ .patient-actions { margin-top:12px; }.patient-actions a { min-height:95px; }
+ .core-services,.company-purpose,.visit-preparation,.contact { padding-block:56px; }
+ .category-links { grid-template-columns:1fr 1fr;gap:12px; }.category-links a { font-size:16px;min-height:100px; }
+ .company-purpose > .container { grid-template-columns:1fr; }.purpose-heading { grid-column:1;grid-row:1;padding:0 0 28px; }
+ .purpose-photo { grid-column:1;grid-row:2; }.purpose-photo img { height:280px; }
+ .purpose-statements { grid-template-columns:1fr;margin-top:32px;gap:32px; }.purpose-statements article { padding:0; }
+ .values-layout { margin-top:40px; }.purpose-heading h2 { font-size:30px; }
+ .appointment-banner { padding-block:40px; }.appointment-banner p { font-size:22px; }
+ .page-intro { margin-top:0;padding-block:36px; }.page-intro h1 { font-size:34px; }
+ .footer-content { gap:32px; }
+}
+@media(max-width:375px) {
+ .home-page h1 { font-size:32px; }.home-page .hero-content { padding:24px 20px; }
+ .hero-buttons { flex-direction:column; }.logo-copy strong { font-size:16px; }.category-links a { padding:14px; }
+}
